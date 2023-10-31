@@ -1,0 +1,100 @@
+﻿<UserControl x:Class="DeviceHandler.Views.CanConnectView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:converter="clr-namespace:Converters;assembly=Converters"
+             xmlns:local="clr-namespace:DeviceHandler.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="900">
+
+    <UserControl.Resources>
+        <converter:TypeToNameConverter x:Key="ConnectionTypeStringConverter"/>
+    </UserControl.Resources>
+    
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="{Binding UdpRowHeight, Mode=TwoWay}"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        
+        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,5">
+
+            <TextBlock Text="Hardwar ID" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <ComboBox ItemsSource="{Binding HwIDsList}" SelectedItem="{Binding SelectedHwId}" Margin="0,0,10,0" Width="100">
+
+                <i:Interaction.Triggers>
+
+                    <i:EventTrigger EventName="DropDownOpened">
+                        <i:InvokeCommandAction Command="{Binding Path=DataContext.HWID_DropDownOpenedCommand, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="False"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+
+                        <TextBlock Text="{Binding}"/>
+
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+                
+                
+            </ComboBox>
+
+            
+
+            <TextBlock Text="Baudrate" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <ComboBox ItemsSource="{Binding BaudratesList}" SelectedItem="{Binding SelectedBaudrate}" Margin="0,0,10,0" Width="100" />
+
+
+
+            <TextBlock Text="Adapter" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <ComboBox ItemsSource="{Binding AdaptersList}" SelectedItem="{Binding SelectedAdapter}" Margin="0,0,50,0" Width="100" >
+                <i:Interaction.Triggers>
+
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding Path=DataContext.Addapter_SelectionChangedCommand, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ComboBox>
+
+            <TextBlock Text="Node ID" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox Text="{Binding NodeID}" Margin="0,0,50,0" Width="100" />
+
+           
+
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+            <TextBlock Text="RX port" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox Text="{Binding RxPort}" Margin="0,0,10,0" Width="75" VerticalAlignment="Center"/>
+
+            <TextBlock Text="TX port" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox Text="{Binding TxPort}" Margin="0,0,10,0" Width="75" VerticalAlignment="Center"/>
+
+            <TextBlock Text="Address" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox Text="{Binding Address}" Margin="0,0,10,0" Width="90" VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
+            <Button Content="Connect" Command="{Binding ConnectCommand}" IsEnabled="{Binding IsConnectButtonEnabled}" Margin="0,0,5,0" Width="75" />
+            <Button Content="Disconnect" Command="{Binding DisconnectCommand}" IsEnabled="{Binding IsDisconnectButtonEnabled}" Width="75"/>
+        </StackPanel>
+
+    </Grid>
+</UserControl>

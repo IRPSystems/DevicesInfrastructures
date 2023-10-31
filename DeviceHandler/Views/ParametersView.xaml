@@ -1,0 +1,260 @@
+﻿<UserControl x:Class="DeviceHandler.Views.ParametersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"   
+             xmlns:entity_models="clr-namespace:Entities.Models;assembly=Entities" 
+             xmlns:mcu_modles="clr-namespace:DeviceCommunicators.MCU;assembly=DeviceCommunicators"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" 
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" MinWidth="200">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Controls;component/Resources/ButtonWithIcon.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="2" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox mah:TextBoxHelper.ClearTextButton="True"
+                    mah:TextBoxHelper.UseFloatingWatermark="True"
+                    mah:TextBoxHelper.Watermark="Search..."
+                    mah:TextBoxHelper.WatermarkAlignment="Left"
+                    SpellCheck.IsEnabled="True"
+                    ToolTip="Search parameter"
+                    Grid.Column="0">
+
+                <i:Interaction.Triggers>
+
+                    <i:EventTrigger EventName="TextChanged">
+                        <i:InvokeCommandAction Command="{Binding Path=DataContext.DeviceParamSearch_TextChanged, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" 
+                                           PassEventArgsToCommand="True"/>
+                    </i:EventTrigger>
+
+                </i:Interaction.Triggers>
+
+            </TextBox>
+
+            <Button Grid.Column="2" Style="{StaticResource ButtonWithIconStyle}"
+                    Width="25"
+                    Height="25"
+                    Margin="0,1,0,1"
+                    ToolTip="Expand all"
+                    Command="{Binding ExpandAllCommand}">
+                <iconPacks:PackIconMaterial Kind="ArrowExpandAll" />
+            </Button>
+
+            <Button Grid.Column="4" Style="{StaticResource ButtonWithIconStyle}"
+                    Width="25"
+                    Height="25"
+                    Margin="0,1,0,1"
+                    ToolTip="collapse all"
+                    Command="{Binding CollapseAllCommand}">
+                <iconPacks:PackIconMaterial Kind="ArrowCollapseAll" />
+            </Button>
+
+        </Grid>
+
+        <TreeView Grid.Row="1" ItemsSource="{Binding DevicesList}"
+                          Background="Transparent"
+                          BorderBrush="{DynamicResource MahApps.Brushes.Accent2}"
+                          BorderThickness="1"
+                          FontSize="14">
+
+            <i:Interaction.Triggers>
+
+                <i:EventTrigger EventName="MouseEnter">
+                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ListSourceParam_MouseEnterCommand, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}" 
+                                           PassEventArgsToCommand="True"/>
+                </i:EventTrigger>
+
+                <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ListSourceParam_PreviewMouseLeftButtonDownCommant, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}" 
+                                           PassEventArgsToCommand="True"/>
+                </i:EventTrigger>
+
+                <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
+                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ListSourceParam_PreviewMouseLeftButtonUpCommant, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}" 
+                                           PassEventArgsToCommand="True"/>
+                </i:EventTrigger>
+
+                <i:EventTrigger EventName="MouseMove">
+                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ListSourceParam_MouseMoveCommand, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}" 
+                                           PassEventArgsToCommand="True"/>
+                </i:EventTrigger>
+
+            </i:Interaction.Triggers>
+
+            <TreeView.Resources>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="Visibility" Value="{Binding Visibility}" />
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded}" />
+                </Style>
+
+
+                <HierarchicalDataTemplate DataType="{x:Type mcu_modles:MCU_DeviceData}" ItemsSource="{Binding MCU_GroupList}" >
+                    <TextBlock Text="{Binding Path=Name}" Margin="0,2" />
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type entity_models:DeviceData}" ItemsSource="{Binding ParemetersList}">
+                    <TextBlock Text="{Binding Path=Name}" Margin="0,2"/>
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type mcu_modles:ParamGroup}" ItemsSource="{Binding ParamList}">
+                    <TextBlock Text="{Binding Path=GroupName}" Margin="0,2" />
+                </HierarchicalDataTemplate>
+                <DataTemplate DataType="{x:Type entity_models:DeviceParameterData}" >
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="5" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="{Binding Path=Name}" Margin="0,2"/>
+
+                        <TextBlock Grid.Column="2" Text="{Binding Path=Units, StringFormat={}{0}}" Margin="0,2"/>
+
+                    </Grid>
+                </DataTemplate>
+
+            </TreeView.Resources>
+        </TreeView>
+
+        <!--<syncfusion:SfTreeView Grid.Row="1" 
+                               ItemsSource="{Binding DevicesList}"
+                               Background="Transparent"
+                               BorderBrush="{DynamicResource MahApps.Brushes.Accent2}"
+                               BorderThickness="1"
+                               FontSize="14"
+                               SelectionMode="{Binding SourceSelectionMode}">
+
+            <i:Interaction.Triggers>
+
+                <i:EventTrigger EventName="MouseEnter">
+                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ListSourceParam_MouseEnterCommand, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=syncfusion:SfTreeView}}" 
+                                           PassEventArgsToCommand="True"/>
+                </i:EventTrigger>
+
+                <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ListSourceParam_PreviewMouseLeftButtonDownCommant, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=syncfusion:SfTreeView}}" 
+                                           PassEventArgsToCommand="True"/>
+                </i:EventTrigger>
+
+                <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
+                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ListSourceParam_PreviewMouseLeftButtonUpCommant, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=syncfusion:SfTreeView}}" 
+                                           PassEventArgsToCommand="True"/>
+                </i:EventTrigger>
+
+                <i:EventTrigger EventName="MouseMove">
+                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ListSourceParam_MouseMoveCommand, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=syncfusion:SfTreeView}}" 
+                                           PassEventArgsToCommand="True"/>
+                </i:EventTrigger>
+
+
+                <i:EventTrigger EventName="MouseDoubleClick">
+                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ListSourceParam_MouseDoubleClickCommand, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=syncfusion:SfTreeView}}" 
+                                           PassEventArgsToCommand="True"/>
+                </i:EventTrigger>
+
+            </i:Interaction.Triggers>
+
+            <syncfusion:SfTreeView.HierarchyPropertyDescriptors>
+
+                <treeViewEngine:HierarchyPropertyDescriptor TargetType="{x:Type mcu_modles:MCU_DeviceData}" 
+                                                            ChildPropertyName="MCU_GroupList"/>
+
+                <treeViewEngine:HierarchyPropertyDescriptor TargetType="{x:Type entity_models:DeviceData}" 
+                                                            ChildPropertyName="ParemetersList"/>
+
+                <treeViewEngine:HierarchyPropertyDescriptor TargetType="{x:Type mcu_modles:ParamGroup}" 
+                                                            ChildPropertyName="ParamList"/>
+
+            </syncfusion:SfTreeView.HierarchyPropertyDescriptors>
+
+            <syncfusion:SfTreeView.ItemTemplate>
+                <DataTemplate>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="5" Name="col1"/>
+                            <ColumnDefinition Width="Auto" Name="col2"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="{Binding Path=Name}" Margin="0,2"/>
+
+                        <TextBlock Grid.Column="2" Text="{Binding Path=Units, StringFormat={}[{0}]}" Margin="0,2"/>
+
+                    </Grid>
+
+                    <DataTemplate.Triggers>
+
+                        <DataTrigger Binding="{Binding Units}" Value="{x:Null}">
+
+                            <Setter Property="Width" Value="0" TargetName="col1"/>
+                            <Setter Property="Width" Value="0" TargetName="col2"/>
+
+                        </DataTrigger>
+
+                    </DataTemplate.Triggers>
+
+                </DataTemplate>
+            </syncfusion:SfTreeView.ItemTemplate>
+
+
+
+            <syncfusion:SfTreeView.Resources>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="Visibility" Value="{Binding Visibility}" />
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded}" />
+                </Style>
+
+
+
+
+            </syncfusion:SfTreeView.Resources>
+        </syncfusion:SfTreeView>-->
+
+    </Grid>
+</UserControl>
