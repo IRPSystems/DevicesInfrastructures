@@ -15,9 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Converters\Converters.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Communication\Communication.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Converters\Converters.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Services\Services.csproj" />
     <ProjectReference Include="..\DeviceCommunicators\DeviceCommunicators.csproj" />
-    <ProjectReference Include="..\Entities\Entities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

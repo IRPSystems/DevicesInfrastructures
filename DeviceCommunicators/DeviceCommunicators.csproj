@@ -18,20 +18,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Communication\Communication.csproj" />
-    <ProjectReference Include="..\Entities\Entities.csproj" />
-    <ProjectReference Include="..\Services\Services.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Communication\Communication.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Entities\Entities.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Services\Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="NationalInstruments.Common">
-      <HintPath>..\Lib\NationalInstruments.Common.dll</HintPath>
+      <HintPath>..\..\Infrastructure\Lib\NationalInstruments.Common.dll</HintPath>
     </Reference>
     <Reference Include="NationalInstruments.DAQmx">
-      <HintPath>..\Lib\NationalInstruments.DAQmx.dll</HintPath>
+      <HintPath>..\..\Infrastructure\Lib\NationalInstruments.DAQmx.dll</HintPath>
     </Reference>
     <Reference Include="TmctlAPINet64">
-      <HintPath>..\Lib\TmctlAPINet64.dll</HintPath>
+      <HintPath>..\..\Infrastructure\Lib\TmctlAPINet64.dll</HintPath>
     </Reference>
   </ItemGroup>
 
