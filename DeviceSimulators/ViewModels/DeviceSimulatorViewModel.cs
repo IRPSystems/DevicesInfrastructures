@@ -20,6 +20,9 @@ namespace DeviceSimulators.ViewModels
 
 		public DeviceSimulatorViewModel(DeviceData deviceData)
 		{
+			if (deviceData.ParemetersList == null)
+				return;
+
 			DeviceName = deviceData.Name;
 
 			ParametersList = new ObservableCollection<DeviceParameterData>();

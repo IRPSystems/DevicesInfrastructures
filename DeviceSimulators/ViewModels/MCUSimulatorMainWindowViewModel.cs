@@ -122,6 +122,9 @@ namespace DeviceSimulators.ViewModels
 
 		private void BuildLookupTable()
 		{
+			if (ParametersList == null || ParametersList.Count == 0)
+				return;
+
 			try
 			{
 				_md5ToParam = new Dictionary<byte[], MCU_ParamData>();
@@ -159,7 +162,9 @@ namespace DeviceSimulators.ViewModels
 		#region Set Values
 
 		private void SetValuesToParams()
-		{		
+		{
+			if (ParametersList == null)
+				return;
 
 			int value = _rand.Next(0, 1000);
 			foreach (DeviceParameterData data in ParametersList)
@@ -292,7 +297,8 @@ namespace DeviceSimulators.ViewModels
 						}
 
 
-
+						if (_md5ToParam == null)
+							continue;
 
 
 

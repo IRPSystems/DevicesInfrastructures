@@ -28,16 +28,23 @@ namespace DeviceCommunicators.MCU
 			MCU_DeviceData mcu_DeviceData = MemberwiseClone() as MCU_DeviceData;
 			mcu_DeviceData.MCU_GroupList = new ObservableCollection<ParamGroup>();
 
-			foreach (ParamGroup group in MCU_GroupList)
+			if (MCU_GroupList != null)
 			{
-				mcu_DeviceData.MCU_GroupList.Add(group.Clone() as ParamGroup);
+				foreach (ParamGroup group in MCU_GroupList)
+				{
+					mcu_DeviceData.MCU_GroupList.Add(group.Clone() as ParamGroup);
+				}
 			}
 
-			mcu_DeviceData.MCU_FullList = new ObservableCollection<DeviceParameterData>();
-			foreach (ParamGroup group in mcu_DeviceData.MCU_GroupList)
+
+			if (mcu_DeviceData.MCU_GroupList != null)
 			{
-				foreach (MCU_ParamData data in group.ParamList)
-					mcu_DeviceData.MCU_FullList.Add(data);
+				mcu_DeviceData.MCU_FullList = new ObservableCollection<DeviceParameterData>();
+				foreach (ParamGroup group in mcu_DeviceData.MCU_GroupList)
+				{
+					foreach (MCU_ParamData data in group.ParamList)
+						mcu_DeviceData.MCU_FullList.Add(data);
+				}
 			}
 			
 			return mcu_DeviceData;
