@@ -4,18 +4,19 @@ using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceCommunicators.Model;
 using DeviceCommunicators.Models;
+using DeviceCommunicators.Services;
+using Entities.Enums;
 using Entities.Models;
 using Services.Services;
 using System;
 using System.Collections.Concurrent;
-#if _SAVE_TIME
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+#if _SAVE_TIME
 using System.IO;
 #endif
-using System.Linq;
-using System.Threading.Tasks;
 using System.Timers;
-using System.Windows.Markup;
+using TmctlAPINet;
 
 namespace DeviceCommunicators.MCU
 {
@@ -44,13 +45,16 @@ namespace DeviceCommunicators.MCU
 		private bool _isTimeout;
 		private System.Timers.Timer _timeoutTimer;
 
+		private  ConcurrentDictionary<uint, byte[]> _messagesDict;
+
+
 #if _SAVE_TIME
 		private List<(TimeSpan, string)> _commTimeList;
 #endif
 
-#endregion Fields
+		#endregion Fields
 
-#region Properties
+		#region Properties
 
 		public CanService CanService
 		{
@@ -69,6 +73,7 @@ namespace DeviceCommunicators.MCU
 
 			_poolBuildTimer = new System.Timers.Timer(500);
 			_poolBuildTimer.Elapsed += PoolBuildTimerElapsed;
+
 
 #if _SAVE_TIME
 			_commTimeList = new List<(TimeSpan, string)>();
@@ -111,6 +116,8 @@ namespace DeviceCommunicators.MCU
 				CommService = new CanUdpSimulationService(baudrate, nodeId, rxPort, txPort, address);
 			}
 
+			CanService.CanMessageReceivedEvent += MessageReceivedEventHandler;
+
 
 			CommService.Init(false);
 			CommService.Name = "MCU_Communicator";
@@ -124,6 +131,27 @@ namespace DeviceCommunicators.MCU
 			FireConnectionEvent();
 
 			InitBase();
+		}
+
+		public void InitMessageDict(DeviceData device)
+		{
+			_messagesDict = new ConcurrentDictionary<uint, byte[]>();
+
+			foreach(DeviceParameterData param in device.ParemetersList)
+			{
+				if (!(param is MCU_ParamData mcuParam))
+					continue;
+
+				if (mcuParam.Cmd == null)
+					continue;
+
+				byte[] idBuff = new byte[3];
+				mcuParam.GetMessageID(ref idBuff);
+				
+				uint id = GetIdFromBuffer(idBuff);
+
+				_messagesDict[id] = null;
+			}
 		}
 
 		public override void Dispose()
@@ -140,6 +168,8 @@ namespace DeviceCommunicators.MCU
 
 
 			FireConnectionEvent();
+
+			CanService.CanMessageReceivedEvent -= MessageReceivedEventHandler;
 
 			base.Dispose();
 
@@ -292,13 +322,12 @@ namespace DeviceCommunicators.MCU
 				byte[] readBuffer = null;
 
 				readBuffer = null;
-				ReadBuffer(ref readBuffer);
+				GetBuffer(ref readBuffer, paramId);
 
 				
 				if (readBuffer != null)
 				{
 					isSuccess = HandleBuffer(
-						paramId,
 						readBuffer,
 						mcuParam,
 						isSet,
@@ -326,35 +355,27 @@ namespace DeviceCommunicators.MCU
 			
 		}
 
-		private void ReadBuffer(ref byte[] readBuffer)
+		private void GetBuffer(
+			ref byte[] readBuffer,
+			byte[] paramId)
 		{
-			uint readNode = 0;
+			uint id = GetIdFromBuffer(paramId);
 
 			while (readBuffer == null)
 			{
+				System.Threading.Thread.Sleep(1);
 				if (_isTimeout)
 					break;
 
-				CanService.Read(out readBuffer, out readNode);
+				if (_messagesDict.ContainsKey(id) == false)
+					continue;
 
-
-				if (readBuffer != null)
-				{
-					if (readNode != CanService.Node)
-					{
-						readBuffer = null;
-						continue;
-					}
-					break;
-				}
-
-				System.Threading.Thread.Sleep(1);
-
+				readBuffer = _messagesDict[id];
+				break;
 			}
 		}
 
 		private CommunicatorResultEnum HandleBuffer(
-			byte[] paramId,
 			byte[] readBuffer,
 			MCU_ParamData mcuParam,
 			bool isSet,
@@ -368,12 +389,11 @@ namespace DeviceCommunicators.MCU
 			try
 			{
 				
-				int isSuccess = IsErr(readBuffer, paramId);
+				int isSuccess = IsErr(readBuffer);
 
 
 				if (isSuccess == 0)
 				{
-					if (mcuParam.Name.Contains("Manual Throttle")) { }
 					value = readBuffer[4] << 24 | readBuffer[5] << 16 | readBuffer[6] << 8 | readBuffer[7];
 
 					var is_negative = ((readBuffer[3] & _negativeMask) >> _negativeShift == 0x01) ? -1 : 1;
@@ -476,19 +496,19 @@ namespace DeviceCommunicators.MCU
 		}
 
 		private int IsErr(
-			byte[] buffer,
-			byte[] out_id)
+			byte[] buffer/*,
+			byte[] out_id*/)
 		{
 
-			byte[] in_id = _idBuffersPool.Take(_cancellationToken);
+			//byte[] in_id = _idBuffersPool.Take(_cancellationToken);
 
-			Array.Copy(buffer, 0, in_id, 0, 3);
+			//Array.Copy(buffer, 0, in_id, 0, 3);
 
-			//! Check if id sent is id received
-			if (!Enumerable.SequenceEqual(in_id, out_id))
-			{
-				return 4;
-			}
+			////! Check if id sent is id received
+			//if (!Enumerable.SequenceEqual(in_id, out_id))
+			//{
+			//	return 4;
+			//}
 
 			//! err bits locates in H nibble in data byte[3]
 			var err = (buffer[3] & _errMask) >> _errShift;
@@ -568,9 +588,45 @@ namespace DeviceCommunicators.MCU
 			sendMessage.Callback?.Invoke(null, CommunicatorResultEnum.OK, null);
 		}
 
+
+
+		#endregion DBC
+
+
+
+		private void MessageReceivedEventHandler(uint node, byte[] buffer)
+		{
+			if (node != CanService.Node ||
+				_messagesDict == null)
+			{
+				return;
+			}
+
+			DateTime start = DateTime.Now;
+
+			byte[] idBuffer = _idBuffersPool.Take(_cancellationToken);
+			Array.Copy(buffer, idBuffer, 3);
+
+			uint id = GetIdFromBuffer(buffer);					
+
+			_messagesDict[id] = buffer;
+
+			TimeSpan diff = DateTime.Now - start;
+		}
+
+		private uint GetIdFromBuffer(byte[] buffer) 
+		{
+			uint id = 0;
+			for(int i = 0; i < 3; i++) 
+			{
+				id += (uint)(buffer[i] << (i * 8));
+			}
+
+			return id;
+		}
+
 		
 
-#endregion DBC
 
 #endregion Methods
 	}
