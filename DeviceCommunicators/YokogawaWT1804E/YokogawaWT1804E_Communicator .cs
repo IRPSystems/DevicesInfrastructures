@@ -305,7 +305,7 @@ namespace DeviceCommunicators.YokogawaWT1804E
 
                 TimeSpan diff = DateTime.Now - startTime;
             }
-            catch (Exception ex) 
+            catch (Exception ) 
             {
             }
 
