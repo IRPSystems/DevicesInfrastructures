@@ -91,7 +91,7 @@ namespace DeviceSimulators.ViewModels
 
 			_commService.Init(true);
 
-			_commService.MessageReceivedEvent += MessageReceivedEventHandler;
+			_commService.CanMessageReceivedEvent += MessageReceivedEventHandler;
 			_commService.ErrorEvent += ErrorEventHendler;
 
 			ConnectVM.IsConnectButtonEnabled = false;
@@ -113,7 +113,7 @@ namespace DeviceSimulators.ViewModels
 			ConnectVM.IsDisconnectButtonEnabled = false;
 		}
 
-		private void MessageReceivedEventHandler(byte[] buffer)
+		private void MessageReceivedEventHandler(uint node, byte[] buffer)
 		{
 			int uniqueId = (int)Dyno_Communicator.GetDataFromBuffer(buffer, 1, 2);
 
