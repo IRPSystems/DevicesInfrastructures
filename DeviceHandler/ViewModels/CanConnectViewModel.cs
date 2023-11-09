@@ -127,30 +127,7 @@ namespace DeviceHandler.ViewModels
 				}
 			}
 		}
-
-		public ushort GetSelectedHWId(string selectedHwId)
-		{
-			if (string.IsNullOrEmpty(selectedHwId))
-				return 0;
-
-			int index = selectedHwId.IndexOf("(");
-			if (index < 0)
-				return 0;
-
-			selectedHwId = selectedHwId.Substring(index + 1);
-
-			index = selectedHwId.IndexOf(")");
-			if (index < 0)
-				return 0;
-
-			selectedHwId = selectedHwId.Substring(0, index);
-			selectedHwId = selectedHwId.Trim('h');
-
-			ushort hwId;
-			bool ret = ushort.TryParse(selectedHwId, NumberStyles.HexNumber, null, out hwId);
-
-			return hwId;
-		}
+			
 
 		private void HWID_DropDownOpened()
 		{

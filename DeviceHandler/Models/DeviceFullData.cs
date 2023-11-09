@@ -1,4 +1,5 @@
 ﻿
+using Communication.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.BTMTempLogger;
 using DeviceCommunicators.Dyno;
@@ -361,7 +362,7 @@ namespace DeviceHandler.Models
 						(ConnectionViewModel as CanConnectViewModel).SelectedAdapter,
 						(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 						(ConnectionViewModel as CanConnectViewModel).NodeID,
-						(ConnectionViewModel as CanConnectViewModel).GetSelectedHWId((ConnectionViewModel as CanConnectViewModel).SelectedHwId));
+						CanPCanService.GetHWId((ConnectionViewModel as CanConnectViewModel).SelectedHwId));
 				}
 				else if (DeviceCommunicator is MCU_Communicator)
 				{
@@ -369,7 +370,7 @@ namespace DeviceHandler.Models
 						(ConnectionViewModel as CanConnectViewModel).SelectedAdapter,
 						(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 						(ConnectionViewModel as CanConnectViewModel).NodeID,
-						(ConnectionViewModel as CanConnectViewModel).GetSelectedHWId((ConnectionViewModel as CanConnectViewModel).SelectedHwId));
+						CanPCanService.GetHWId((ConnectionViewModel as CanConnectViewModel).SelectedHwId));
 				}
 				else if (DeviceCommunicator is PowerSupplayBK_Communicator)
 				{

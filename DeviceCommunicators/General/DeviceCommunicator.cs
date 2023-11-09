@@ -184,7 +184,7 @@ namespace DeviceCommunicators.General
 
 		protected void FireConnectionEvent()
 		{
-			ConnectionEvent?.Invoke();
+			ConnectionEvent?.Invoke(this, new EventArgs());
 		}
 
 		public virtual void SendMessage(bool isExtended, uint id, byte[] buffer, Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
@@ -196,7 +196,7 @@ namespace DeviceCommunicators.General
 
 		#region Events
 
-		public event Action ConnectionEvent;
+		public event EventHandler ConnectionEvent;
 
 		#endregion Events
 	}
