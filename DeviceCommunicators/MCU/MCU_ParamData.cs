@@ -6,6 +6,7 @@ using System.Windows;
 using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace DeviceCommunicators.MCU
 {
@@ -72,6 +73,9 @@ namespace DeviceCommunicators.MCU
 		/// 
 		/// </summary>
 		public List<DropDownParamData> DropDown { get; set; }
+
+		[JsonIgnore]
+		public object Data { get; set; }
 
 		
 	}

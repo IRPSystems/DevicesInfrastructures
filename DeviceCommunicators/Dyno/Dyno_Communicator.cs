@@ -124,7 +124,8 @@ namespace DeviceCommunicators.Dyno
 
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, 0x600 + _nodeId, hwId);
+				CommService = new CanPCanService(baudrate, 0x600 + _nodeId, hwId, 0x580 + _nodeId, 0x600 + _nodeId);
+				CanService.RegisterId(0x580 + _nodeId, MessageReceivedEventHandler);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
@@ -133,8 +134,6 @@ namespace DeviceCommunicators.Dyno
 
 			CommService.Init(false);
 			CommService.Name = "Dyno_Communicator";
-
-			CanService.CanMessageReceivedEvent += MessageReceivedEventHandler;
 
 			_timeoutTimer = new System.Timers.Timer(2000);
 			_timeoutTimer.Elapsed += TimoutElapsedEventHandler;
@@ -164,8 +163,6 @@ namespace DeviceCommunicators.Dyno
 		public override void Dispose()
 		{
 			LoggerService.Inforamtion(this, "Disposing");
-
-			CanService.CanMessageReceivedEvent -= MessageReceivedEventHandler;
 
 			_isTimeout = true;
 
@@ -518,10 +515,9 @@ namespace DeviceCommunicators.Dyno
 
 
 
-		private void MessageReceivedEventHandler(uint node, byte[] buffer)
+		private void MessageReceivedEventHandler(byte[] buffer)
 		{
-			if (node != (_nodeId + 0x580) ||
-				_messagesDict == null)
+			if (_messagesDict == null)
 			{
 				return;
 			}

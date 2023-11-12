@@ -439,6 +439,8 @@ namespace DeviceHandler.Models
 						(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 						(ConnectionViewModel as CanConnectViewModel).NodeID,
 						0,
+						0xAB,
+						0xAA,
 						(ConnectionViewModel as CanConnectViewModel).RxPort,
 						(ConnectionViewModel as CanConnectViewModel).TxPort,
 						(ConnectionViewModel as CanConnectViewModel).Address);

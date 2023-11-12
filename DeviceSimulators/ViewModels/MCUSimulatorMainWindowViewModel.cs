@@ -193,7 +193,7 @@ namespace DeviceSimulators.ViewModels
 			if (_canConnectViewModel.SelectedAdapter == "PCAN")
 			{
 				_commService = new CanPCanService(_canConnectViewModel.SelectedBaudrate, _canConnectViewModel.NodeID, 
-					CanPCanService.GetHWId(_canConnectViewModel.SelectedHwId));
+					CanPCanService.GetHWId(_canConnectViewModel.SelectedHwId), 0xAA, 0xAB);
 			}
 			else if (_canConnectViewModel.SelectedAdapter == "UDP Simulator")
 			{

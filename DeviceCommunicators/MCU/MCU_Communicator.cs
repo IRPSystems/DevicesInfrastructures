@@ -99,6 +99,8 @@ namespace DeviceCommunicators.MCU
 			int baudrate,
 			uint nodeId,
 			ushort hwId = 0,
+			uint syncId = 0xAB, 
+			uint asyncId = 0xAA,
 			int rxPort = 0,
 			int txPort = 0,
 			string address = "")
@@ -109,14 +111,14 @@ namespace DeviceCommunicators.MCU
 
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, nodeId, hwId);
+				CommService = new CanPCanService(baudrate, nodeId, hwId, asyncId, syncId);
+				CanService.RegisterId(syncId, SyncMessageHandler);
+				CanService.RegisterId(asyncId, AsyncMessageHandler);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
 				CommService = new CanUdpSimulationService(baudrate, nodeId, rxPort, txPort, address);
 			}
-
-			CanService.CanMessageReceivedEvent += MessageReceivedEventHandler;
 
 
 			CommService.Init(false);
@@ -168,8 +170,6 @@ namespace DeviceCommunicators.MCU
 
 
 			FireConnectionEvent();
-
-			CanService.CanMessageReceivedEvent -= MessageReceivedEventHandler;
 
 			base.Dispose();
 
@@ -594,10 +594,9 @@ namespace DeviceCommunicators.MCU
 
 
 
-		private void MessageReceivedEventHandler(uint node, byte[] buffer)
+		private void SyncMessageHandler(byte[] buffer)
 		{
-			if (node != CanService.Node ||
-				_messagesDict == null)
+			if (_messagesDict == null)
 			{
 				return;
 			}
@@ -614,6 +613,11 @@ namespace DeviceCommunicators.MCU
 			TimeSpan diff = DateTime.Now - start;
 		}
 
+		private void AsyncMessageHandler(byte[] buffer)
+		{
+			AsyncIdMessageReceived?.Invoke(buffer);
+		}
+
 		private uint GetIdFromBuffer(byte[] buffer) 
 		{
 			uint id = 0;
@@ -625,10 +629,13 @@ namespace DeviceCommunicators.MCU
 			return id;
 		}
 
-		
+		#endregion Methods
 
+		#region Events
 
-#endregion Methods
+		public event Action<byte[]> AsyncIdMessageReceived;
+
+		#endregion Events
 	}
 
 
