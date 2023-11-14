@@ -112,13 +112,15 @@ namespace DeviceCommunicators.MCU
 			if (canAdapterType == "PCAN")
 			{
 				CommService = new CanPCanService(baudrate, nodeId, hwId, asyncId, syncId);
-				CanService.RegisterId(syncId, SyncMessageHandler);
-				CanService.RegisterId(asyncId, AsyncMessageHandler);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
-				CommService = new CanUdpSimulationService(baudrate, nodeId, rxPort, txPort, address);
+				CommService = new CanUdpSimulationService(baudrate, nodeId, rxPort, txPort, address, asyncId, syncId);
 			}
+
+
+			CanService.RegisterId(syncId, SyncMessageHandler);
+			CanService.RegisterId(asyncId, AsyncMessageHandler);
 
 
 			CommService.Init(false);

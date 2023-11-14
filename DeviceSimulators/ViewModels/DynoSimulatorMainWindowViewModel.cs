@@ -82,16 +82,17 @@ namespace DeviceSimulators.ViewModels
 			}
 			else if (_canConnectViewModel.SelectedAdapter == "UDP Simulator")
 			{
-				_commService = new CanUdpSimulationService(_canConnectViewModel.SelectedBaudrate, canID, _canConnectViewModel.RxPort, _canConnectViewModel.TxPort, _canConnectViewModel.Address);
+				_commService = new CanUdpSimulationService(_canConnectViewModel.SelectedBaudrate, canID, _canConnectViewModel.RxPort, 
+					_canConnectViewModel.TxPort, _canConnectViewModel.Address, 0x580 + _canConnectViewModel.NodeID, 0x600 + _canConnectViewModel.NodeID);
 			}
 
 
+			_commService.RegisterId(0x600 + _canConnectViewModel.NodeID, MessageReceivedEventHandler);
 
 			_commService.Name = "DynoSimulator";
 
 			_commService.Init(true);
 
-			_commService.CanMessageReceivedEvent += MessageReceivedEventHandler;
 			_commService.ErrorEvent += ErrorEventHendler;
 
 			ConnectVM.IsConnectButtonEnabled = false;
@@ -113,7 +114,7 @@ namespace DeviceSimulators.ViewModels
 			ConnectVM.IsDisconnectButtonEnabled = false;
 		}
 
-		private void MessageReceivedEventHandler(uint node, byte[] buffer)
+		private void MessageReceivedEventHandler(byte[] buffer)
 		{
 			int uniqueId = (int)Dyno_Communicator.GetDataFromBuffer(buffer, 1, 2);
 

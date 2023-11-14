@@ -125,12 +125,14 @@ namespace DeviceCommunicators.Dyno
 			if (canAdapterType == "PCAN")
 			{
 				CommService = new CanPCanService(baudrate, 0x600 + _nodeId, hwId, 0x580 + _nodeId, 0x600 + _nodeId);
-				CanService.RegisterId(0x580 + _nodeId, MessageReceivedEventHandler);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
-				CommService = new CanUdpSimulationService(baudrate, 0x600 + _nodeId, rxPort, txPort, address);
+				CommService = new CanUdpSimulationService(baudrate, 0x600 + _nodeId, rxPort, txPort, address, 0x580 + _nodeId, 0x600 + _nodeId);
 			}
+
+
+			CanService.RegisterId(0x580 + _nodeId, MessageReceivedEventHandler);
 
 			CommService.Init(false);
 			CommService.Name = "Dyno_Communicator";

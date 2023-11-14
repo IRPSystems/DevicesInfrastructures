@@ -197,17 +197,17 @@ namespace DeviceSimulators.ViewModels
 			}
 			else if (_canConnectViewModel.SelectedAdapter == "UDP Simulator")
 			{
-				_commService = new CanUdpSimulationService(_canConnectViewModel.SelectedBaudrate, _canConnectViewModel.NodeID, _canConnectViewModel.RxPort, _canConnectViewModel.TxPort, _canConnectViewModel.Address);
+				_commService = new CanUdpSimulationService(_canConnectViewModel.SelectedBaudrate, _canConnectViewModel.NodeID, 
+					_canConnectViewModel.RxPort, _canConnectViewModel.TxPort, _canConnectViewModel.Address, 0xAA, 0xAB);
 			}
 
 
+			_commService.RegisterId(0xAB, MessageReceivedEventHandler);
 
 
 			_commService.Init(true);
 			_commService.Name = "MCUSimulator";
 
-			_commService.CanMessageReceivedEvent += MessageReceivedEventHandler;
-			_commService.ErrorEvent += ErrorEventHendler;
 
 			ConnectVM.IsConnectButtonEnabled = false;
 			ConnectVM.IsDisconnectButtonEnabled = true;
@@ -220,8 +220,7 @@ namespace DeviceSimulators.ViewModels
 
 			_commService.Dispose();
 
-			_commService.CanMessageReceivedEvent -= MessageReceivedEventHandler;
-			_commService.ErrorEvent -= ErrorEventHendler;
+			
 
 			ConnectVM.IsConnectButtonEnabled = true;
 			ConnectVM.IsDisconnectButtonEnabled = false;
@@ -231,11 +230,11 @@ namespace DeviceSimulators.ViewModels
 
 		#region Receive
 
-		private void MessageReceivedEventHandler(uint node, byte[] buffer)
+		private void MessageReceivedEventHandler(byte[] buffer)
 		{
 			try
 			{
-				_recievedMessagesQueue.Add((node,buffer), _cancellationToken);
+				_recievedMessagesQueue.Add((0xAB,buffer), _cancellationToken);
 			}
 			catch (OperationCanceledException)
 			{
