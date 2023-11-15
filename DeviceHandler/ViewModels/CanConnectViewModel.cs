@@ -12,6 +12,8 @@ using Services.Services;
 using DeviceHandler.Interfaces;
 using Communication.Services;
 using System.Globalization;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DeviceHandler.ViewModels
 {
@@ -111,6 +113,7 @@ namespace DeviceHandler.ViewModels
 			AdaptersList = new ObservableCollection<string>()
 			{
 				"PCAN",
+				"Ixxat",
 				"UDP Simulator",
 			};
 		}
@@ -131,7 +134,16 @@ namespace DeviceHandler.ViewModels
 
 		private void HWID_DropDownOpened()
 		{
-			HwIDsList = CanPCanService.GetHwIDs();
+			List<string> hwIDsList_pcan = CanPCanService.GetHwIDs().ToList();
+
+			string str;
+			List<string> hwIDsList_ixxat = CanIxxatService.GetDevicesList(out str).ToList();
+
+			List<string> list = new List<string>();
+			list.AddRange(hwIDsList_pcan);
+			list.AddRange(hwIDsList_ixxat);
+
+			HwIDsList = new ObservableCollection<string>(list);
 		}
 
 		private void Addapter_SelectionChanged(SelectionChangedEventArgs e)

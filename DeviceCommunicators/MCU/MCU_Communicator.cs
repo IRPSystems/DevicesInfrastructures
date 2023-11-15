@@ -98,7 +98,7 @@ namespace DeviceCommunicators.MCU
 			string canAdapterType,
 			int baudrate,
 			uint nodeId,
-			ushort hwId = 0,
+			string hwId = "",
 			uint syncId = 0xAB, 
 			uint asyncId = 0xAA,
 			int rxPort = 0,
@@ -111,7 +111,11 @@ namespace DeviceCommunicators.MCU
 
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, nodeId, hwId, asyncId, syncId);
+				CommService = new CanPCanService(baudrate, nodeId, CanPCanService.GetHWId(hwId), asyncId, syncId);
+			}
+			if (canAdapterType == "Ixxat")
+			{
+				CommService = new CanIxxatService(baudrate, nodeId, CanIxxatService.GetDeviceId(hwId), asyncId, syncId);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{

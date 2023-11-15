@@ -370,7 +370,7 @@ namespace DeviceHandler.Models
 						(ConnectionViewModel as CanConnectViewModel).SelectedAdapter,
 						(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 						(ConnectionViewModel as CanConnectViewModel).NodeID,
-						CanPCanService.GetHWId((ConnectionViewModel as CanConnectViewModel).SelectedHwId));
+						(ConnectionViewModel as CanConnectViewModel).SelectedHwId);
 				}
 				else if (DeviceCommunicator is PowerSupplayBK_Communicator)
 				{
@@ -438,7 +438,7 @@ namespace DeviceHandler.Models
 						(ConnectionViewModel as CanConnectViewModel).SelectedAdapter,
 						(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 						(ConnectionViewModel as CanConnectViewModel).NodeID,
-						0,
+						"",
 						0xAB,
 						0xAA,
 						(ConnectionViewModel as CanConnectViewModel).RxPort,
