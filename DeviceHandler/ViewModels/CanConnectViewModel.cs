@@ -84,6 +84,8 @@ namespace DeviceHandler.ViewModels
 			HWID_DropDownOpenedCommand = new RelayCommand(HWID_DropDownOpened);
 
 			LoggerService.Inforamtion(this, "Ending Init of CanConnctViewModel");
+
+			HWID_DropDownOpened();
 		}
 
 		#endregion Constructor
