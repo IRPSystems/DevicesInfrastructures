@@ -113,7 +113,7 @@ namespace DeviceCommunicators.MCU
 			{
 				CommService = new CanPCanService(baudrate, nodeId, CanPCanService.GetHWId(hwId), asyncId, syncId);
 			}
-			if (canAdapterType == "Ixxat")
+			if (canAdapterType.ToUpper() == "IXXAT")
 			{
 				CommService = new CanIxxatService(baudrate, nodeId, CanIxxatService.GetDeviceId(hwId), asyncId, syncId);
 			}
