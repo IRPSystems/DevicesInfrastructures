@@ -136,14 +136,19 @@ namespace DeviceHandler.ViewModels
 
 		private void HWID_DropDownOpened()
 		{
-			List<string> hwIDsList_pcan = CanPCanService.GetHwIDs().ToList();
-
-			string str;
-			List<string> hwIDsList_ixxat = CanIxxatService.GetDevicesList(out str).ToList();
 
 			List<string> list = new List<string>();
+
+			List<string> hwIDsList_pcan = CanPCanService.GetHwIDs().ToList();
 			list.AddRange(hwIDsList_pcan);
-			list.AddRange(hwIDsList_ixxat);
+
+			string str;
+			ObservableCollection<string> ixxatList = CanIxxatService.GetDevicesList(out str);
+			if (ixxatList != null)
+			{
+				List<string> hwIDsList_ixxat = ixxatList.ToList();
+				list.AddRange(hwIDsList_ixxat);
+			}
 
 			HwIDsList = new ObservableCollection<string>(list);
 		}
