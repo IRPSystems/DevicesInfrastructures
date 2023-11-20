@@ -2,6 +2,7 @@
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceHandler.Enums;
+using DeviceHandler.Interfaces;
 using DeviceHandler.Models;
 using Entities.Models;
 using Services.Services;
@@ -220,6 +221,12 @@ namespace DeviceHandler.Services
 
 					if (_isDisposed)
 						return;
+
+					if(param.Parameter is ICalculatedParamete calculated)
+					{
+						calculated.Calculate();
+						continue;
+					}
 
 					param.IsReceived = CommunicatorResultEnum.None;
 					_communicator.GetParamValue(param.Parameter, GetValueCallback);
