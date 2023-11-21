@@ -373,7 +373,7 @@ namespace DeviceCommunicators.MCU
 				if (_isTimeout)
 					break;
 
-				if (_messagesDict.ContainsKey(id) == false)
+				if (_messagesDict == null || _messagesDict.ContainsKey(id) == false)
 					continue;
 
 				readBuffer = _messagesDict[id];
