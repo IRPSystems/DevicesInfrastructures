@@ -44,6 +44,7 @@ namespace DeviceCommunicators.MCU
 
 		private bool _isTimeout;
 		private System.Timers.Timer _timeoutTimer;
+		private System.Timers.Timer _generalCommTimeoutTimer;
 
 		private  ConcurrentDictionary<uint, byte[]> _messagesDict;
 
@@ -160,6 +161,14 @@ namespace DeviceCommunicators.MCU
 
 				_messagesDict[id] = null;
 			}
+
+			if(_generalCommTimeoutTimer == null)
+			{
+				_generalCommTimeoutTimer = new System.Timers.Timer(1000);
+				_generalCommTimeoutTimer.Elapsed += GeneralCommTimoutElapsedEventHandler;
+			}
+
+			_generalCommTimeoutTimer.Start();
 		}
 
 		public override void Dispose()
@@ -170,6 +179,9 @@ namespace DeviceCommunicators.MCU
 
 			if (_timeoutTimer != null)
 				_timeoutTimer.Stop();
+
+			if(_generalCommTimeoutTimer != null)
+				_generalCommTimeoutTimer.Stop();
 
 			_poolBuildTimer.Stop();
 
@@ -267,6 +279,8 @@ namespace DeviceCommunicators.MCU
 					LoggerService.Error(this, errorDescription, ex);
 					result = CommunicatorResultEnum.Error;
 				}
+
+				if(mcuParam.Name.Contains("Manual Throttle")) { }
 
 				if (result == CommunicatorResultEnum.OK)
 					break;
@@ -373,10 +387,14 @@ namespace DeviceCommunicators.MCU
 				if (_isTimeout)
 					break;
 
-				if (_messagesDict.ContainsKey(id) == false)
-					continue;
+				lock (_messagesDict)
+				{
+					if (_messagesDict.ContainsKey(id) == false)
+						continue;
 
-				readBuffer = _messagesDict[id];
+					readBuffer = _messagesDict[id];
+				}
+
 				break;
 			}
 		}
@@ -538,7 +556,18 @@ namespace DeviceCommunicators.MCU
 			_isTimeout = true;
 		}
 
-        private void PoolBuildTimerElapsed(object sender, ElapsedEventArgs e)
+		private void GeneralCommTimoutElapsedEventHandler(object sender, ElapsedEventArgs e)
+		{
+			lock (_messagesDict)
+			{
+				foreach (uint key in _messagesDict.Keys)
+				{
+					_messagesDict[key] = null;
+				}
+			}
+		}
+
+		private void PoolBuildTimerElapsed(object sender, ElapsedEventArgs e)
         {
             while (_buffersPool.Count < _maxNumOfBuffers)
             {
@@ -607,16 +636,19 @@ namespace DeviceCommunicators.MCU
 				return;
 			}
 
-			DateTime start = DateTime.Now;
+			lock (_messagesDict)
+			{
+				DateTime start = DateTime.Now;
 
-			byte[] idBuffer = _idBuffersPool.Take(_cancellationToken);
-			Array.Copy(buffer, idBuffer, 3);
+				byte[] idBuffer = _idBuffersPool.Take(_cancellationToken);
+				Array.Copy(buffer, idBuffer, 3);
 
-			uint id = GetIdFromBuffer(buffer);					
+				uint id = GetIdFromBuffer(buffer);
 
-			_messagesDict[id] = buffer;
+				_messagesDict[id] = buffer;
 
-			TimeSpan diff = DateTime.Now - start;
+				TimeSpan diff = DateTime.Now - start;
+			}
 		}
 
 		private void AsyncMessageHandler(byte[] buffer)
