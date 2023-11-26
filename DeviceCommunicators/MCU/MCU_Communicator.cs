@@ -44,7 +44,7 @@ namespace DeviceCommunicators.MCU
 
 		private bool _isTimeout;
 		private System.Timers.Timer _timeoutTimer;
-		private System.Timers.Timer _generalCommTimeoutTimer;
+		//private System.Timers.Timer _generalCommTimeoutTimer;
 
 		private  ConcurrentDictionary<uint, byte[]> _messagesDict;
 
@@ -162,13 +162,13 @@ namespace DeviceCommunicators.MCU
 				_messagesDict[id] = null;
 			}
 
-			if(_generalCommTimeoutTimer == null)
-			{
-				_generalCommTimeoutTimer = new System.Timers.Timer(1000);
-				_generalCommTimeoutTimer.Elapsed += GeneralCommTimoutElapsedEventHandler;
-			}
+			//if(_generalCommTimeoutTimer == null)
+			//{
+			//	_generalCommTimeoutTimer = new System.Timers.Timer(1000);
+			//	_generalCommTimeoutTimer.Elapsed += GeneralCommTimoutElapsedEventHandler;
+			//}
 
-			_generalCommTimeoutTimer.Start();
+			//_generalCommTimeoutTimer.Start();
 		}
 
 		public override void Dispose()
@@ -180,8 +180,8 @@ namespace DeviceCommunicators.MCU
 			if (_timeoutTimer != null)
 				_timeoutTimer.Stop();
 
-			if(_generalCommTimeoutTimer != null)
-				_generalCommTimeoutTimer.Stop();
+			//if(_generalCommTimeoutTimer != null)
+			//	_generalCommTimeoutTimer.Stop();
 
 			_poolBuildTimer.Stop();
 
@@ -393,6 +393,7 @@ namespace DeviceCommunicators.MCU
 						continue;
 
 					readBuffer = _messagesDict[id];
+					_messagesDict[id] = null;
 				}
 
 				break;
@@ -556,16 +557,16 @@ namespace DeviceCommunicators.MCU
 			_isTimeout = true;
 		}
 
-		private void GeneralCommTimoutElapsedEventHandler(object sender, ElapsedEventArgs e)
-		{
-			lock (_messagesDict)
-			{
-				foreach (uint key in _messagesDict.Keys)
-				{
-					_messagesDict[key] = null;
-				}
-			}
-		}
+		//private void GeneralCommTimoutElapsedEventHandler(object sender, ElapsedEventArgs e)
+		//{
+		//	lock (_messagesDict)
+		//	{
+		//		foreach (uint key in _messagesDict.Keys)
+		//		{
+		//			_messagesDict[key] = null;
+		//		}
+		//	}
+		//}
 
 		private void PoolBuildTimerElapsed(object sender, ElapsedEventArgs e)
         {
