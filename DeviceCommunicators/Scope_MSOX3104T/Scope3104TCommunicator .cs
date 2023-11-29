@@ -7,13 +7,20 @@ using System.Threading;
 using DeviceCommunicators.Enums;
 using Entities.Models;
 using DeviceCommunicators.Model;
+using DeviceCommunicators.NI_6002;
+using Entities.Enums;
+using Newtonsoft.Json;
+using System.Collections.ObjectModel;
+using System.Diagnostics.Metrics;
+using System.IO;
+
 
 namespace DeviceCommunicators.Scop_MSOX3104T
 {
     public  class Scope3104TCommunicator:DeviceCommunicator, IDisposable
     {
 
-		#region Fields
+		 #region Fields
 
 		public int channel = 1; // channel of scope
 		private string file_name = "Scope";
@@ -27,6 +34,66 @@ namespace DeviceCommunicators.Scop_MSOX3104T
         private int _port;
 
 
+
+
+        public void AddJson()
+        {
+            DeviceData device = new DeviceData()
+            {
+                Name = "Scop_MSOX3104T",
+                DeviceType = DeviceTypesEnum.KeySight
+            };
+
+            device.ParemetersList = new ObservableCollection<DeviceParameterData>()
+             {
+                new Scop_MSOX3104T_ParamData() { User_command = "channel to config",        Command = "Choose channel" ,      DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                
+                
+                
+                new Scop_MSOX3104T_ParamData() { User_command = "Channel Turn on ",         Command = "channel ON\\OFF" ,       data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R", DropDown = new List<DropDownParamData>() { new DropDownParamData() {Name = "Channel OFF", Value = "0" }, new DropDownParamData() {Name = "Channel ON", Value = "1" } } },
+                new Scop_MSOX3104T_ParamData() { User_command = "Channel to measurement",   Command = "Set signal" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scop_MSOX3104T_ParamData() { User_command = "Volte\\Ampere",            Command = "Probe  Volte\\Ampere",   data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scop_MSOX3104T_ParamData() { User_command = "Clear all ",               Command = "Clear all mesure" ,      data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scop_MSOX3104T_ParamData() { User_command = "Run\\Stop",                Command = "Run Control" ,           data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scop_MSOX3104T_ParamData() { User_command = "Acquire",                  Command = "Acquire" ,               data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},                      
+                new Scop_MSOX3104T_ParamData() { User_command = "Time scaling",             Command = "Time scaling" ,          data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scop_MSOX3104T_ParamData() { User_command = "Measurement Scaling",      Command = "Measurement Scaling" ,   data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scop_MSOX3104T_ParamData() { User_command = "Scaling prob ",            Command = "Scaling prob" ,          data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scop_MSOX3104T_ParamData() { User_command = "Triger mode",              Command = "Triger mode" ,           data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scop_MSOX3104T_ParamData() { User_command = "Triger slope parameter",   Command = "Triger slope" ,          data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scop_MSOX3104T_ParamData() { User_command = "File_name",                Command = "file_name" ,             data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scop_MSOX3104T_ParamData() { User_command = "Save ",                    Command = "Save" ,                  data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+               
+                new Scop_MSOX3104T_ParamData() { User_command = "CYCLe DC",                 Command = "CYCLe,DC" ,              data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="Rw"},
+                new Scop_MSOX3104T_ParamData() { User_command = "DISPlay DC",               Command = "DISPlay,DC" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="Rw "},
+                new Scop_MSOX3104T_ParamData() { User_command = "CYCLe AC",                 Command = "CYCLe,AC" ,              data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
+                new Scop_MSOX3104T_ParamData() { User_command = "DISPlay AC",               Command = "DISPlay,AC" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="Rw"},
+                new Scop_MSOX3104T_ParamData() { User_command = "Peak to peak",             Command = "VPP" ,                   data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="Rw "},
+                new Scop_MSOX3104T_ParamData() { User_command = "VAMPlitude",               Command = "VAMPlitude" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
+                new Scop_MSOX3104T_ParamData() { User_command = "VTOP",                     Command = "VTOP" ,                  data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
+                new Scop_MSOX3104T_ParamData() { User_command = "Average CYCLe",            Command = "VAVerage CYCLe" ,        data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
+                new Scop_MSOX3104T_ParamData() { User_command = "Average DISPlay",          Command = "VAVerage DISPlay" ,      data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
+            };
+
+
+
+
+
+
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.Formatting = Formatting.Indented;
+            settings.TypeNameHandling = TypeNameHandling.All;
+            var sz = JsonConvert.SerializeObject(device, settings);
+            File.WriteAllText(@"C:\dev\Infrastructure_Evva\Evva\Data\Device Communications\Scop_MSOX3104T.json", sz);
+
+        }
+
+
+
+
+
+
+
         #endregion Fields
 
 
@@ -34,7 +101,10 @@ namespace DeviceCommunicators.Scop_MSOX3104T
 
         #region Properties
 
-        
+
+
+
+
 
         private List<string[]> Measurement = new List<string[]>
         { 
@@ -116,10 +186,10 @@ namespace DeviceCommunicators.Scop_MSOX3104T
         {
             try
             {
-                if (!(param is WT1804E_ParamData scopeMSOX3104T))
+                if (!(param is Scop_MSOX3104T_ParamData scopeMSOX3104T))
                     return;
 
-                Send_command(scopeMSOX3104T.Command, scopeMSOX3104T.data);
+                Send_command(scopeMSOX3104T);
 
                 callback?.Invoke(param, CommunicatorResultEnum.OK, null);
             }
@@ -135,12 +205,12 @@ namespace DeviceCommunicators.Scop_MSOX3104T
         {
             try
             {
-                if (!(param is WT1804E_ParamData scopeMSOX3104T))
+                if (!(param is Scop_MSOX3104T_ParamData scopeMSOX3104T))
                     return;
 
                 string data_from_scop;
 
-                data_from_scop= Read_command(scopeMSOX3104T.Command,scopeMSOX3104T.data);
+                data_from_scop= Read_command(scopeMSOX3104T);
 
                 Thread.Sleep(10);
 
@@ -202,88 +272,100 @@ namespace DeviceCommunicators.Scop_MSOX3104T
 
         //public void Send_command(String command, string data, int channel, string interval, string type, double number)
 
-        private void Send_command(String command, string data)
+        public void Send_command(Scop_MSOX3104T_ParamData parameter)
         {
-            if (command.ToLower() == ("Choose channel").ToLower())
+            double Value = 0;
+            Value= Convert .ToDouble(parameter.Value);
+
+            if (parameter.Command.ToLower() == ("Choose channel").ToLower())
             {
-                if (data.ToLower() == ("channel1").ToLower() || data.ToLower() == ("channel2").ToLower() || data.ToLower() == ("channel3").ToLower() || data.ToLower() == ("channel4").ToLower())
-                    channel = Convert.ToInt32(data);
+                if (parameter.data.ToLower() == ("channel1").ToLower() || parameter.data.ToLower() == ("channel2").ToLower() || parameter.data.ToLower() == ("channel3").ToLower() || parameter.data.ToLower() == ("channel4").ToLower())
+                    channel = Convert.ToInt32(parameter.data);
             }
-            else if (command.ToLower() == ("channel ON\\OFF").ToLower())// channel ON\OFF
+            else if (parameter.Command.ToLower() == ("channel ON\\OFF").ToLower())// channel ON\OFF
             {
-                send(":" + "channel" + channel + ":DISPlay " + data);
+
+                if (Value == 0)
+                {
+                    send(":" + "channel" + channel + ":DISPlay " + "ON");
+                }
+                if (Value == 1)
+                {
+                    send(":" + "channel" + channel + ":DISPlay " + "OFF");
+                }
+                //send(":" + "channel" + channel + ":DISPlay " + parameter.data);
             }
-            else if (command.ToLower() == ("Set signal").ToLower())
+            else if (parameter.Command.ToLower() == ("Set signal").ToLower())
             {
-                send(Measurement[Convert.ToInt32(data) - 1][1] + "channel" + channel);
+                send(Measurement[Convert.ToInt32(parameter.data) - 1][1] + "channel" + channel);
 
                 //send(":MEASure:" + data + " " + interval + "," + type + "," + channel);
             }
-            else if (command.ToLower() == ("Probe  Volte\\Ampere").ToLower())// volt\amp  <units> ::= {VOLT | AMPere}
+            else if (parameter.Command.ToLower() == ("Probe  Volte\\Ampere").ToLower())// volt\amp  <units> ::= {VOLT | AMPere}
             {
-                send(":CHANnel" + channel + ":UNITs " + data);
+                send(":CHANnel" + channel + ":UNITs " + parameter.data);
             }
-            else if (command.ToLower() == ("Clear all mesure").ToLower())
+            else if (parameter.Command.ToLower() == ("Clear all mesure").ToLower())
             {
                 send(":MEASure:CLEar");
             }
-            else if (command.ToLower() == ("Run Control").ToLower())
+            else if (parameter.Command.ToLower() == ("Run Control").ToLower())
             {
-                if (data.ToLower() == ("Run").ToLower())
+                if (parameter.data.ToLower() == ("Run").ToLower())
                 {
                     send(":RUN");
                 }
-                else if (data.ToLower() == ("Stop").ToLower())
+                else if (parameter.data.ToLower() == ("Stop").ToLower())
                 {
                     send(":STOP ");
                 }
-                else if (data.ToLower() == ("SINGle").ToLower())
+                else if (parameter.data.ToLower() == ("SINGle").ToLower())
                 {
                     send(":SINGle ");
                 }
             }
-            else if (command.ToLower() == ("Acquire").ToLower())
+            else if (parameter.Command.ToLower() == ("Acquire").ToLower())
             {
                 send(":ACQuire:TYPE HRESolution");
             }
-            else if (command.ToLower() == ("Time scaling").ToLower())
+            else if (parameter.Command.ToLower() == ("Time scaling").ToLower())
             {
-                send(":TIMebase:SCALe " + data);
+                send(":TIMebase:SCALe " + parameter.data);
             }
-            else if (command.ToLower() == ("Measurement Scaling").ToLower())
+            else if (parameter.Command.ToLower() == ("Measurement Scaling").ToLower())
             {
-                send(":CHANnel" + channel + ":SCALe " + data);
+                send(":CHANnel" + channel + ":SCALe " + parameter.data);
             }
-            else if (command.ToLower() == ("Scaling prob").ToLower())
+            else if (parameter.Command.ToLower() == ("Scaling prob").ToLower())
             {
-                send(":CHANnel" + channel + ":PROBe " + data);
+                send(":CHANnel" + channel + ":PROBe " + parameter.data);
             }
-            else if (command.ToLower() == ("Triger mode").ToLower())
+            else if (parameter.Command.ToLower() == ("Triger mode").ToLower())
             {
                 send(":TRIGger:MODE EDGE");
             }
-            else if (command.ToLower() == ("Triger slope").ToLower()) //(NEGative | POSitive | EITHer | ALTernate)
+            else if (parameter.Command.ToLower() == ("Triger slope").ToLower()) //(NEGative | POSitive | EITHer | ALTernate)
             {
-                send(":TRIGger:EDGE:SLOPe "+data);
+                send(":TRIGger:EDGE:SLOPe "+parameter.data);
             }
-            else if (command.ToLower() == ("Triger value").ToLower())
+            else if (parameter.Command.ToLower() == ("Triger value").ToLower())
             {
-                send(":TRIGger:GLITch:LEVel "+data+",CHANnel"+channel);
+                send(":TRIGger:GLITch:LEVel "+parameter.data +",CHANnel"+channel);
             }          
-            else if (command.ToLower() == ("file_name").ToLower())
+            else if (parameter.Command.ToLower() == ("file_name").ToLower())
             {
-               file_name= data;
+               file_name= parameter.data;
             }
-            else if (command.ToLower() == ("Save").ToLower())
+            else if (parameter.Command.ToLower() == ("Save").ToLower())
             {
 
-             if (data.ToLower() == ("PNG").ToLower())
+             if (parameter.data.ToLower() == ("PNG").ToLower())
                 {
                     send(":SAVE:IMAGe:FORMat PNG");
                     send(":SAVE:IMAGe:STARt \"" + file_name + "\"");
                     Thread.Sleep(500);
                 }
-                else if (data.ToLower() == ("CSV").ToLower())
+                else if (parameter.data.ToLower() == ("CSV").ToLower())
                 {
                     send(":SAVE:WAVeform:FORMat CSV");
                     send(":SAVE:WAVeform:STAR \"" + file_name + "\"");
@@ -298,17 +380,74 @@ namespace DeviceCommunicators.Scop_MSOX3104T
 
         //public string Read_command(string command, string data, int channel, string interval, string type)
 
-        private  string Read_command(string command, string data)
+        private  string Read_command(Scop_MSOX3104T_ParamData parameter)
         {
-            if (command.ToLower() == ("Read Measurement").ToLower())
+            if (parameter.Command.ToLower() == ("Read Measurement").ToLower())
             {
                 //send(":MEASure:" + data + "? " + interval + "," + type + "," + "CHANnel" + channel);
-                send(Measurement[Convert.ToInt32(data) - 1][2] + "channel" + channel);
+                send(Measurement[Convert.ToInt32(parameter.data) - 1][2] + "channel" + channel);
 
                 return Read_data();
 
             }
-            else if (command.ToLower() == ("Reasd signal").ToLower())
+            else if (parameter.Command.ToLower() == ("CYCLe,DC").ToLower())
+            {
+                send(":MEASure:VRMS? CYCLe,DC," + "channel" + channel);
+
+                return Read_data();
+            }
+            else if (parameter.Command.ToLower() == ("DISPlay,DC").ToLower())
+            {
+                send(":MEASure:VRMS? DISPlay,DC," + "channel" + channel);
+
+                return Read_data();
+            }
+            else if (parameter.Command.ToLower() == ("CYCLe,AC").ToLower())
+            {
+                send(":MEASure:VRMS? CYCLe,AC," + "channel" + channel);
+
+                return Read_data();
+            }
+            else if (parameter.Command.ToLower() == ("DISPlay,AC").ToLower())
+            {
+                send(":MEASure:VRMS? DISPlay,AC," + "channel" + channel);
+
+                return Read_data();
+            }
+
+            else if (parameter.Command.ToLower() == ("VPP").ToLower())
+            {
+                send(":MEASure:VPP?" + "channel" + channel);
+
+                return Read_data();
+            }
+            else if (parameter.Command.ToLower() == ("VAMPlitude").ToLower())
+            {
+                send(":MEASure:VAMPlitude?" + "channel" + channel);
+
+                return Read_data();
+            }
+            else if (parameter.Command.ToLower() == ("VTOP").ToLower())
+            {
+                send(":MEASure:VTOP ?" + "channel" + channel);
+
+                return Read_data();
+            }
+            else if (parameter.Command.ToLower() == ("VAVerage CYCLe").ToLower())
+            {
+                send(":MEASure:VAVerage? CYCLe," + "channel" + channel);
+
+                return Read_data();
+            }
+            else if (parameter.Command.ToLower() == ("VAVerage DISPlay").ToLower())
+            {
+                send(":MEASure: VAVerage ? DISPlay," + "channel" + channel);
+
+                return Read_data();
+            }
+
+
+            else if (parameter.Command.ToLower() == ("Read signal").ToLower())
             {
                 return "";
             }
