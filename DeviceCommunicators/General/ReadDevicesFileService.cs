@@ -39,10 +39,17 @@ namespace DeviceCommunicators.Services
 			{
 				
 				string extension = System.IO.Path.GetExtension(file);
-				if (extension.ToLower().EndsWith("xlsx") == false)
-					continue;
+				if (extension.ToLower().EndsWith("xlsx"))
+				{
+					Read(file, devicesList);
+				}
+				else if(extension.ToLower().EndsWith("json"))
+				{
+					if (Path.GetFileName(file) == "param_defaults.json")
+						continue;
 
-				Read(file, devicesList);
+					ReadFromJson(file, devicesList);
+				}
 			}
 
 			ReadFromMCUJson(
@@ -56,35 +63,35 @@ namespace DeviceCommunicators.Services
 				"MCU - B2B",
 				DeviceTypesEnum.MCU_B2B);
 
-			ReadFromDynoJson(
-				dynoFilePath,
-				devicesList);
+			//ReadFromDynoJson(
+			//	dynoFilePath,
+			//	devicesList);
 
-			ReadFromBKJson(
-				dir,
-				devicesList);
+			//ReadFromBKJson(
+			//	dir,
+			//	devicesList);
 
-			ReadFromEAJson(
-				dir,
-				devicesList);
+			//ReadFromEAJson(
+			//	dir,
+			//	devicesList);
 
-			ReadFromTKJson(
-				dir,
-				devicesList);
+			//ReadFromTKJson(
+			//	dir,
+			//	devicesList);
 
-			ReadFromSwitchRelay32Json(
-				dir,
-				devicesList);
+			//ReadFromSwitchRelay32Json(
+			//	dir,
+			//	devicesList);
 
-			InitBTMTempLogger(devicesList);
+			//InitBTMTempLogger(devicesList);
 
-			ReadFromWT1804EJson(
-				dir,
-				devicesList);
+			//ReadFromWT1804EJson(
+			//	dir,
+			//	devicesList);
 
-			ReadFromNI6002Json(
-				ni6002FilePath,
-				devicesList);
+			//ReadFromNI6002Json(
+			//	ni6002FilePath,
+			//	devicesList);
 
 
 
@@ -113,11 +120,11 @@ namespace DeviceCommunicators.Services
 			mcu_ListHandler.ReadMCUDeviceData(path, deviceData);
 		}
 
-		public void ReadFromBKJson(
-			string dir,
+		public void ReadFromJson(
+			string path,
 			ObservableCollection<DeviceBase> devicesList)
 		{
-			string path = Path.Combine(dir, "Power Supply BK.json");
+			//string path = Path.Combine(dir, "Power Supply BK.json");
 
 			// Remove previouse PSBK
 			int index = -1;
