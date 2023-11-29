@@ -157,6 +157,7 @@ namespace DeviceCommunicators.General
 						if (result == CommunicatorResultEnum.NoResponse &&
 							_parameterQueue.Count >= 100)
 						{
+							LoggerService.Error(this, "Overload");
 							while (_parameterQueue.Count > 50)
 							{
 								CommunicatorIOData item;
