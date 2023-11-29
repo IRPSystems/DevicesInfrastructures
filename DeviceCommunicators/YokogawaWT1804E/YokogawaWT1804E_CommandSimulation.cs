@@ -33,9 +33,9 @@ namespace DeviceCommunicators.YokogawaWT1804E
             ObservableCollection<DeviceBase> list = new ObservableCollection<DeviceBase>();
 
             string path = Directory.GetCurrentDirectory();
-            path = Path.Combine(path, @"Data\Device Communications");
+            path = Path.Combine(path, @"Data\Device Communications\YOKOGAWA WT1804E.json");
 
-            readDevicesFileService.ReadFromWT1804EJson(path, list);
+            readDevicesFileService.ReadFromJson(path, list);
             _deviceData = list[0] as DeviceData;
 
             _nameToParam = new Dictionary<string, DeviceParameterData>();
