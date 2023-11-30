@@ -335,11 +335,19 @@ namespace DeviceCommunicators.Dyno
 					if (_isTimeout)
 						break;
 
+					lock (_messagesDict)
+					{
+						if (_messagesDict.ContainsKey((dynoParam.Index, dynoParam.SubIndex)) == false)
+							continue;
 
-					if (_messagesDict.ContainsKey((dynoParam.Index, dynoParam.SubIndex)) == false)
-						continue;
+						readBuffer = _messagesDict[(dynoParam.Index, dynoParam.SubIndex)];
+						_messagesDict[(dynoParam.Index, dynoParam.SubIndex)] = null;
+					}
 
-					readBuffer = _messagesDict[(dynoParam.Index, dynoParam.SubIndex)];
+					//if (_messagesDict.ContainsKey((dynoParam.Index, dynoParam.SubIndex)) == false)
+					//	continue;
+
+					//readBuffer = _messagesDict[(dynoParam.Index, dynoParam.SubIndex)];
 
 					System.Threading.Thread.Sleep(1);
 
@@ -524,27 +532,31 @@ namespace DeviceCommunicators.Dyno
 				return;
 			}
 
-			DateTime start = DateTime.Now;
-
-			int index = 1;
-			int uniqueParamID = (int)GetDataFromBuffer(buffer, index, 2);
-			index += 2;
-
-			int subIndex = (byte)GetDataFromBuffer(buffer, index, 1);
-
-
-			int uniqueId = Dyno_ParamData.BaseUniqueParamID - uniqueParamID;
-
-			byte commandByte = buffer[0];
-			commandByte = (byte)(commandByte >> 4);
-			if (commandByte == 0x8)
+			lock (_messagesDict)
 			{
-				uniqueId = Math.Abs(uniqueId);
+
+				DateTime start = DateTime.Now;
+
+				int index = 1;
+				int uniqueParamID = (int)GetDataFromBuffer(buffer, index, 2);
+				index += 2;
+
+				int subIndex = (byte)GetDataFromBuffer(buffer, index, 1);
+
+
+				int uniqueId = Dyno_ParamData.BaseUniqueParamID - uniqueParamID;
+
+				byte commandByte = buffer[0];
+				commandByte = (byte)(commandByte >> 4);
+				if (commandByte == 0x8)
+				{
+					uniqueId = Math.Abs(uniqueId);
+				}
+
+				_messagesDict[(uniqueId, (byte)subIndex)] = buffer;
+
+				TimeSpan diff = DateTime.Now - start;
 			}
-
-			_messagesDict[(uniqueId, (byte)subIndex)] = buffer;
-
-			TimeSpan diff = DateTime.Now - start;
 		}
 
 
