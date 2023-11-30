@@ -7,6 +7,7 @@ using DeviceCommunicators.Models;
 using DeviceCommunicators.Dyno;
 using DeviceHandler.ViewModels;
 using Entities.Models;
+using System.Timers;
 
 namespace DeviceSimulators.ViewModels
 {
@@ -18,6 +19,7 @@ namespace DeviceSimulators.ViewModels
 		private CanService _commService;
 
 		private ConcurrentDictionary<int, Dyno_ParamData> _uniqueIdToParam;
+		private System.Timers.Timer _timerChangeValue;
 
 		private CanConnectViewModel _canConnectViewModel
 		{
@@ -36,6 +38,10 @@ namespace DeviceSimulators.ViewModels
 			ConnectVM.ConnectEvent += Connect;
 			ConnectVM.DisconnectEvent += Disconnect;
 
+			_timerChangeValue = new System.Timers.Timer(500);
+			_timerChangeValue.Elapsed += TimerChangeValueElapsedEventHandler;
+			_timerChangeValue.Start();
+
 			BuildUniqueIdDict();
 			SetValuesToParams();
 		}
@@ -43,6 +49,12 @@ namespace DeviceSimulators.ViewModels
 		#endregion Constructor
 
 		#region Methods
+
+		private void TimerChangeValueElapsedEventHandler(object sender, ElapsedEventArgs e)
+		{
+			SetValuesToParams();
+		}
+
 
 		private void BuildUniqueIdDict()
 		{
