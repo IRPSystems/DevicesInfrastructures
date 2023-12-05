@@ -392,7 +392,7 @@ namespace DeviceCommunicators.MCU
 			byte[] readBuffer,
 			MCU_ParamData mcuParam,
 			bool isSet,
-			int setValue,
+			double setValue,
 			out string errDescription)
 		{
 			int? value = null;
