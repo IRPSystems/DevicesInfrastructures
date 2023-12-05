@@ -256,7 +256,7 @@ namespace DeviceCommunicators.MCU
 						out errorDescription,
 						data.IsSet,
 						id,
-						intVal);
+						data.Value);
 
 				}
 				catch (Exception ex)
@@ -315,7 +315,7 @@ namespace DeviceCommunicators.MCU
 			out string errorDescription,
 			bool isSet,
 			byte[] paramId,
-			int setValue = 0)
+			double setValue = 0)
 		{
 			
 
