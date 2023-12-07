@@ -63,177 +63,184 @@ namespace DeviceHandler.Models
 
 		public void Init()
 		{
-			LoggerService.Inforamtion(this, "Device type=" + Device.Name);
-
-			string fileName = "";
-			switch(Device.DeviceType)
+			try
 			{
-				case DeviceTypesEnum.Dyno:
-					fileName = "DynoCanConnect.json";
-					DeviceCommunicator = new Dyno_Communicator();
-					break;
-				case DeviceTypesEnum.MCU:
-					fileName = "MCUCanConnect.json";
-					DeviceCommunicator = new MCU_Communicator();
-					break;
-				case DeviceTypesEnum.MCU_B2B:
-					fileName = "MCU-B2BCanConnect.json";
-					DeviceCommunicator = new MCU_Communicator();
-					break;
-				case DeviceTypesEnum.PowerSupplyBK:
-					fileName = "PSBKSerialConnect.json";
-					DeviceCommunicator = new PowerSupplayBK_Communicator();
-					break;
-				case DeviceTypesEnum.PowerSupplyEA:
-					fileName = "PSEASerialConnect.json";
-					DeviceCommunicator = new PowerSupplayEA_Communicator();
-					break;
-				case DeviceTypesEnum.BTMTempLogger:
-					fileName = "BTMTempLoggerSerialConnect.json";
-					DeviceCommunicator = new BTMTempLogger_Communicator();
-					break;
-				case DeviceTypesEnum.SwitchRelay32:
-					fileName = "SwitchRelay32Connect.json";
-					DeviceCommunicator = new SwitchCommunicator();
-					break;
-				case DeviceTypesEnum.NI_6002:
-					fileName = "NI_6002Connect.json";
-					DeviceCommunicator = new NI6002_Communicator();
-					break;
-				case DeviceTypesEnum.TorqueKistler:
-					fileName = "TorqueKistlerConnect.json";
-					DeviceCommunicator = new TorqueKistler_Communicator();
-					break;
+				LoggerService.Inforamtion(this, "Device type=" + Device.Name);
 
-				case DeviceTypesEnum.Yokogawa_WT1804E:
-					fileName = "Yokogawa_WT1804EConnect.json";
-					DeviceCommunicator = new YokogawaWT1804E_Communicator();
-					break;
+				string fileName = "";
+				switch (Device.DeviceType)
+				{
+					case DeviceTypesEnum.Dyno:
+						fileName = "DynoCanConnect.json";
+						DeviceCommunicator = new Dyno_Communicator();
+						break;
+					case DeviceTypesEnum.MCU:
+						fileName = "MCUCanConnect.json";
+						DeviceCommunicator = new MCU_Communicator();
+						break;
+					case DeviceTypesEnum.MCU_B2B:
+						fileName = "MCU-B2BCanConnect.json";
+						DeviceCommunicator = new MCU_Communicator();
+						break;
+					case DeviceTypesEnum.PowerSupplyBK:
+						fileName = "PSBKSerialConnect.json";
+						DeviceCommunicator = new PowerSupplayBK_Communicator();
+						break;
+					case DeviceTypesEnum.PowerSupplyEA:
+						fileName = "PSEASerialConnect.json";
+						DeviceCommunicator = new PowerSupplayEA_Communicator();
+						break;
+					case DeviceTypesEnum.BTMTempLogger:
+						fileName = "BTMTempLoggerSerialConnect.json";
+						DeviceCommunicator = new BTMTempLogger_Communicator();
+						break;
+					case DeviceTypesEnum.SwitchRelay32:
+						fileName = "SwitchRelay32Connect.json";
+						DeviceCommunicator = new SwitchCommunicator();
+						break;
+					case DeviceTypesEnum.NI_6002:
+						fileName = "NI_6002Connect.json";
+						DeviceCommunicator = new NI6002_Communicator();
+						break;
+					case DeviceTypesEnum.TorqueKistler:
+						fileName = "TorqueKistlerConnect.json";
+						DeviceCommunicator = new TorqueKistler_Communicator();
+						break;
 
-				case DeviceTypesEnum.KeySight:
-					break;
-			}
+					case DeviceTypesEnum.Yokogawa_WT1804E:
+						fileName = "Yokogawa_WT1804EConnect.json";
+						DeviceCommunicator = new YokogawaWT1804E_Communicator();
+						break;
 
-			string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-			path = Path.Combine(path, "Evva");
-			if (Directory.Exists(path) == false)
-				return;
-			path = Path.Combine(path, fileName);
+					case DeviceTypesEnum.KeySight:
+						break;
+				}
 
-			if (File.Exists(path))
-			{
+				string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+				path = Path.Combine(path, "Evva");
+				if (Directory.Exists(path) == false)
+					return;
+				path = Path.Combine(path, fileName);
 
-				string jsonString = File.ReadAllText(path);
+				if (File.Exists(path))
+				{
 
-				JsonSerializerSettings settings = new JsonSerializerSettings();
-				settings.Formatting = Formatting.Indented;
-				settings.TypeNameHandling = TypeNameHandling.All;
-				//ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as IConnectionViewModel;
+					string jsonString = File.ReadAllText(path);
 
-				try
+					JsonSerializerSettings settings = new JsonSerializerSettings();
+					settings.Formatting = Formatting.Indented;
+					settings.TypeNameHandling = TypeNameHandling.All;
+					//ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as IConnectionViewModel;
+
+					try
+					{
+						switch (Device.DeviceType)
+						{
+							case DeviceTypesEnum.Dyno:
+								ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as CanConnectViewModel;
+								break;
+							case DeviceTypesEnum.MCU:
+								ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as CanConnectViewModel;
+								if (!(ConnectionViewModel is CanConnectViewModel))
+									ConnectionViewModel = new CanConnectViewModel(500000, 171, 12223, 12220);
+								break;
+							case DeviceTypesEnum.MCU_B2B:
+								ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as CanConnectViewModel;
+								if (!(ConnectionViewModel is CanConnectViewModel))
+									ConnectionViewModel = new CanConnectViewModel(500000, 171, 19223, 19220);
+								break;
+							case DeviceTypesEnum.PowerSupplyBK:
+								ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
+								break;
+							case DeviceTypesEnum.PowerSupplyEA:
+								ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
+								break;
+							case DeviceTypesEnum.BTMTempLogger:
+								ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
+								break;
+							case DeviceTypesEnum.SwitchRelay32:
+								ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as TcpConncetViewModel;
+								break;
+							case DeviceTypesEnum.NI_6002:
+								ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as NI6002ConncetViewModel;
+								break;
+							case DeviceTypesEnum.TorqueKistler:
+								ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
+								break;
+							case DeviceTypesEnum.Yokogawa_WT1804E:
+								ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as YokogawaWT1804EConncetViewModel;
+								break;
+
+							case DeviceTypesEnum.KeySight:
+								break;
+						}
+					}
+					catch
+					{
+
+					}
+				}
+
+				if (ConnectionViewModel == null)
 				{
 					switch (Device.DeviceType)
 					{
 						case DeviceTypesEnum.Dyno:
-							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as CanConnectViewModel;
+							ConnectionViewModel = new CanConnectViewModel(250000, 1, 11223, 11220);
 							break;
 						case DeviceTypesEnum.MCU:
-							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as CanConnectViewModel;
-							if (!(ConnectionViewModel is CanConnectViewModel))
-								ConnectionViewModel = new CanConnectViewModel(500000, 171, 12223, 12220);
+							ConnectionViewModel = new CanConnectViewModel(500000, 171, 12223, 12220);
 							break;
 						case DeviceTypesEnum.MCU_B2B:
-							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as CanConnectViewModel;
-							if(!(ConnectionViewModel is CanConnectViewModel))
-								ConnectionViewModel = new CanConnectViewModel(500000, 171, 19223, 19220);
+							ConnectionViewModel = new CanConnectViewModel(500000, 171, 19223, 19220);
 							break;
 						case DeviceTypesEnum.PowerSupplyBK:
-							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
+							ConnectionViewModel = new SerialConncetViewModel(115200, "COM1", 13323, 13320);
 							break;
 						case DeviceTypesEnum.PowerSupplyEA:
-							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
+							ConnectionViewModel = new SerialConncetViewModel(115200, "COM1", 14323, 14320);
 							break;
 						case DeviceTypesEnum.BTMTempLogger:
-							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
+							ConnectionViewModel = new SerialConncetViewModel(9600, "COM1", 15323, 15320);
 							break;
-						case DeviceTypesEnum.SwitchRelay32: 
-							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as TcpConncetViewModel;
+						case DeviceTypesEnum.SwitchRelay32:
+							ConnectionViewModel = new TcpConncetViewModel(4196, 16323, 16320);
 							break;
 						case DeviceTypesEnum.NI_6002:
-							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as NI6002ConncetViewModel;
+							ConnectionViewModel = new NI6002ConncetViewModel();
 							break;
 						case DeviceTypesEnum.TorqueKistler:
-							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
+							ConnectionViewModel = new SerialConncetViewModel(57600, "COM1", 17323, 17320);
 							break;
 						case DeviceTypesEnum.Yokogawa_WT1804E:
-							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as YokogawaWT1804EConncetViewModel;
+							ConnectionViewModel = new YokogawaWT1804EConncetViewModel();
 							break;
-
 						case DeviceTypesEnum.KeySight:
 							break;
 					}
 				}
-				catch 
-				{ 
-					
-				}
-			}
 
-			if(ConnectionViewModel == null)
-			{
-				switch (Device.DeviceType)
+				if (ConnectionViewModel == null)
 				{
-					case DeviceTypesEnum.Dyno:
-						ConnectionViewModel = new CanConnectViewModel(250000, 1, 11223, 11220);
-						break;
-					case DeviceTypesEnum.MCU:
-						ConnectionViewModel = new CanConnectViewModel(500000, 171, 12223, 12220);
-						break;
-					case DeviceTypesEnum.MCU_B2B:
-						ConnectionViewModel = new CanConnectViewModel(500000, 171, 19223, 19220);
-						break;
-					case DeviceTypesEnum.PowerSupplyBK:
-						ConnectionViewModel = new SerialConncetViewModel(115200, "COM1", 13323, 13320);
-						break;
-					case DeviceTypesEnum.PowerSupplyEA:
-						ConnectionViewModel = new SerialConncetViewModel(115200, "COM1", 14323, 14320);
-						break;
-					case DeviceTypesEnum.BTMTempLogger:
-						ConnectionViewModel = new SerialConncetViewModel(9600, "COM1", 15323, 15320);
-						break;
-					case DeviceTypesEnum.SwitchRelay32:
-						ConnectionViewModel = new TcpConncetViewModel(4196, 16323, 16320);
-						break;
-					case DeviceTypesEnum.NI_6002:
-						ConnectionViewModel = new NI6002ConncetViewModel();
-						break;
-					case DeviceTypesEnum.TorqueKistler:
-						ConnectionViewModel = new SerialConncetViewModel(57600, "COM1", 17323, 17320);
-						break;
-					case DeviceTypesEnum.Yokogawa_WT1804E:
-						ConnectionViewModel = new YokogawaWT1804EConncetViewModel();
-						break;
-					case DeviceTypesEnum.KeySight:
-						break;
+					LoggerService.Inforamtion(this, "ConnectionViewModel = null");
+					return;
 				}
-			}
 
-			if (ConnectionViewModel == null)
+				ConnectionViewModel.ConnectEvent += Connect;
+				ConnectionViewModel.DisconnectEvent += Disconnect;
+
+				ConnectionViewModel.RefreshProperties();
+				//	Connect();
+
+				ParametersRepository = new ParametersRepositoryService(DeviceCommunicator);
+				ParametersRepository.Name = Device.DeviceType.ToString();
+
+				BuildCheckConnection();
+			}
+			catch(Exception ex) 
 			{
-				LoggerService.Inforamtion(this, "ConnectionViewModel = null");
-				return;
+				LoggerService.Error(this, "Failed to init the DeviceFullData for type " + Device.DeviceType, ex);
 			}
-
-			ConnectionViewModel.ConnectEvent += Connect;
-			ConnectionViewModel.DisconnectEvent += Disconnect;
-
-			ConnectionViewModel.RefreshProperties();
-		//	Connect();
-
-			ParametersRepository = new ParametersRepositoryService(DeviceCommunicator);
-			ParametersRepository.Name = Device.DeviceType.ToString();
-
-			BuildCheckConnection();
 		}
 
 		private void BuildCheckConnection()
