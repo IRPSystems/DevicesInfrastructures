@@ -268,8 +268,6 @@ namespace DeviceCommunicators.MCU
 					result = CommunicatorResultEnum.Error;
 				}
 
-				if(mcuParam.Name.Contains("Manual Throttle")) { }
-
 				if (result == CommunicatorResultEnum.OK)
 					break;
 
