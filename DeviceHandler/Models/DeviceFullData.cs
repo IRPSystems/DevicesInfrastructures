@@ -63,6 +63,8 @@ namespace DeviceHandler.Models
 
 		public void Init()
 		{
+			LoggerService.Inforamtion(this, "Device type=" + Device.Name);
+
 			string fileName = "";
 			switch(Device.DeviceType)
 			{
@@ -217,7 +219,10 @@ namespace DeviceHandler.Models
 			}
 
 			if (ConnectionViewModel == null)
+			{
+				LoggerService.Inforamtion(this, "ConnectionViewModel = null");
 				return;
+			}
 
 			ConnectionViewModel.ConnectEvent += Connect;
 			ConnectionViewModel.DisconnectEvent += Disconnect;
