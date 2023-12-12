@@ -124,6 +124,7 @@ namespace DeviceHandler.Models
 
 				if (File.Exists(path))
 				{
+					LoggerService.Inforamtion(this, "Communication file \"" + path + "\" exist");
 
 					string jsonString = File.ReadAllText(path);
 
@@ -183,6 +184,8 @@ namespace DeviceHandler.Models
 
 				if (ConnectionViewModel == null)
 				{
+					LoggerService.Inforamtion(this, "Communication file \"" + path + "\" don't exist");
+
 					switch (Device.DeviceType)
 					{
 						case DeviceTypesEnum.Dyno:
@@ -226,6 +229,8 @@ namespace DeviceHandler.Models
 					return;
 				}
 
+				LoggerService.Inforamtion(this, "ConnectionViewModel initiated");
+
 				ConnectionViewModel.ConnectEvent += Connect;
 				ConnectionViewModel.DisconnectEvent += Disconnect;
 
@@ -239,7 +244,7 @@ namespace DeviceHandler.Models
 			}
 			catch(Exception ex) 
 			{
-				LoggerService.Error(this, "Failed to init the DeviceFullData for type " + Device.DeviceType, ex);
+				LoggerService.Error(this, "Failed to init the DeviceFullData for type " + Device.DeviceType, "Full Device Error", ex);
 			}
 		}
 
