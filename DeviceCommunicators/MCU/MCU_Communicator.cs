@@ -375,7 +375,6 @@ namespace DeviceCommunicators.MCU
 
 				if (isSuccess == 0)
 				{
-					if (mcuParam.Name.Contains("Manual Throttle")) { }
 					value = readBuffer[4] << 24 | readBuffer[5] << 16 | readBuffer[6] << 8 | readBuffer[7];
 
 					var is_negative = ((readBuffer[3] & _negativeMask) >> _negativeShift == 0x01) ? -1 : 1;
