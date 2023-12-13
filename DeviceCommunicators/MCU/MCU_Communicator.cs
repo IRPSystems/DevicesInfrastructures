@@ -1,5 +1,6 @@
 ﻿
 //#define _SAVE_TIME
+using Communication.Interfaces;
 using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
@@ -120,6 +121,7 @@ namespace DeviceCommunicators.MCU
 
 			CommService.Init(false);
 			CommService.Name = "MCU_Communicator";
+			CanService.CanMessageReceivedEvent += AsyncMessageWasReceived;
 
 
 			_timeoutTimer = new System.Timers.Timer(50);
@@ -546,6 +548,13 @@ namespace DeviceCommunicators.MCU
 			}
 		}
 
+
+		private void AsyncMessageWasReceived(uint node, byte[] buffer)
+		{
+			AsyncMessageReceivedEvent?.Invoke(node, buffer);
+		}
+
+
 		#region CAN Message
 
 		public override void SendMessage(bool isExtended, uint id, byte[] buffer, Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
@@ -578,6 +587,12 @@ namespace DeviceCommunicators.MCU
 		#endregion DBC
 
 		#endregion Methods
+
+		#region Events
+
+		public event Action<uint, byte[]> AsyncMessageReceivedEvent;
+
+		#endregion Events
 	}
 
 
