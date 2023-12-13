@@ -248,7 +248,7 @@ namespace DeviceSimulators.ViewModels
 			base(deviceData)
 		{
 			
-			ConnectVM = new CanConnectViewModel(500000, 1, 11220, 11223);
+			ConnectVM = new CanConnectViewModel(500000, 1, 1, 11220, 11223);
 			ConnectVM.ConnectEvent += Connect;
 			ConnectVM.DisconnectEvent += Disconnect;
 
@@ -300,20 +300,21 @@ namespace DeviceSimulators.ViewModels
 
 		private void Connect()
 		{
-			uint canID = 0x580 + _canConnectViewModel.NodeID /*(0x600 + _canConnectViewModel.NodeID) - 0x80*/;
+			uint canID = 0x580 + _canConnectViewModel.SyncNodeID;
 			if (_canConnectViewModel.SelectedAdapter == "PCAN")
 			{
-				_commService = new CanPCanService(_canConnectViewModel.SelectedBaudrate, canID,
-					CanPCanService.GetHWId(_canConnectViewModel.SelectedHwId), 0x580 + _canConnectViewModel.NodeID, 0x600 + _canConnectViewModel.NodeID);
+				_commService = new CanPCanService(_canConnectViewModel.SelectedBaudrate, 
+					CanPCanService.GetHWId(_canConnectViewModel.SelectedHwId), 0x580 + _canConnectViewModel.SyncNodeID, 0x600 + _canConnectViewModel.SyncNodeID);
 			}
 			else if (_canConnectViewModel.SelectedAdapter == "UDP Simulator")
 			{
-				_commService = new CanUdpSimulationService(_canConnectViewModel.SelectedBaudrate, canID, _canConnectViewModel.RxPort, 
-					_canConnectViewModel.TxPort, _canConnectViewModel.Address, 0x580 + _canConnectViewModel.NodeID, 0x600 + _canConnectViewModel.NodeID);
+				_commService = new CanUdpSimulationService(_canConnectViewModel.SelectedBaudrate, 
+					0x580 + _canConnectViewModel.SyncNodeID, 0x600 + _canConnectViewModel.SyncNodeID,
+					_canConnectViewModel.RxPort, 
+					_canConnectViewModel.TxPort, _canConnectViewModel.Address);
 			}
 
 
-			_commService.RegisterId(0x600 + _canConnectViewModel.NodeID, MessageReceivedEventHandler);
 
 			_commService.Name = "DynoSimulator";
 

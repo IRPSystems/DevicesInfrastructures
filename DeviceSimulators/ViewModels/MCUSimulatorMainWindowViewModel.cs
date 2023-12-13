@@ -528,9 +528,9 @@ namespace DeviceSimulators.ViewModels
 			base(deviceData)
 		{
 			if (deviceData.DeviceType == Entities.Enums.DeviceTypesEnum.MCU)
-				ConnectVM = new CanConnectViewModel(250000, 171, 12220, 12223);
+				ConnectVM = new CanConnectViewModel(250000, 0xAB, 0xAA, 12220, 12223);
 			else if (deviceData.DeviceType == Entities.Enums.DeviceTypesEnum.MCU_B2B)
-				ConnectVM = new CanConnectViewModel(250000, 171, 19220, 19223);
+				ConnectVM = new CanConnectViewModel(250000, 0xAB, 0xAA, 19220, 19223);
 			ConnectVM.ConnectEvent += Connect;
 			ConnectVM.DisconnectEvent += Disconnect;
 
@@ -646,17 +646,16 @@ namespace DeviceSimulators.ViewModels
 		{
 			if (_canConnectViewModel.SelectedAdapter == "PCAN")
 			{
-				_commService = new CanPCanService(_canConnectViewModel.SelectedBaudrate, _canConnectViewModel.NodeID, 
-					CanPCanService.GetHWId(_canConnectViewModel.SelectedHwId), 0xAA, 0xAB);
+				_commService = new CanPCanService(_canConnectViewModel.SelectedBaudrate, 
+					CanPCanService.GetHWId(_canConnectViewModel.SelectedHwId), _canConnectViewModel.SyncNodeID, _canConnectViewModel.AsyncNodeID);
 			}
 			else if (_canConnectViewModel.SelectedAdapter == "UDP Simulator")
 			{
-				_commService = new CanUdpSimulationService(_canConnectViewModel.SelectedBaudrate, _canConnectViewModel.NodeID, 
-					_canConnectViewModel.RxPort, _canConnectViewModel.TxPort, _canConnectViewModel.Address, 0xAA, 0xAB);
+				_commService = new CanUdpSimulationService(_canConnectViewModel.SelectedBaudrate,
+					_canConnectViewModel.SyncNodeID, _canConnectViewModel.AsyncNodeID,
+					_canConnectViewModel.RxPort, _canConnectViewModel.TxPort, _canConnectViewModel.Address);
 			}
 
-
-			_commService.RegisterId(0xAB, MessageReceivedEventHandler);
 
 
 			_commService.Init(true);
