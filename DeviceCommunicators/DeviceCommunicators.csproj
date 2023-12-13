@@ -6,6 +6,14 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants)TRACE;_SYNC_COMM</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants)TRACE;_SYNC_COMM</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="SwitchRelay32\SwitchBuildJson.cs" />
     <Compile Remove="SwitchRelay32\SwitchRelayCommand.cs" />
