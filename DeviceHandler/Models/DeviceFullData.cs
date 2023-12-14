@@ -62,6 +62,7 @@ namespace DeviceHandler.Models
 
 		public void Init()
 		{
+			LoggerService.Inforamtion(this, "Initiating " + Device.DeviceType);
 			string fileName = "";
 			switch (Device.DeviceType)
 			{
@@ -111,14 +112,17 @@ namespace DeviceHandler.Models
 					break;
 			}
 
+			LoggerService.Inforamtion(this, "Communicator constructed");
+
 			string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 			path = Path.Combine(path, "Evva");
 			if (Directory.Exists(path) == false)
-				return;
+				Directory.CreateDirectory(path);
 			path = Path.Combine(path, fileName);
 
 			if (File.Exists(path))
 			{
+				LoggerService.Inforamtion(this, "Communication file exit");
 
 				string jsonString = File.ReadAllText(path);
 
@@ -184,6 +188,8 @@ namespace DeviceHandler.Models
 
 			if (ConnectionViewModel == null)
 			{
+				LoggerService.Inforamtion(this, "Communication file DON'T exit");
+
 				switch (Device.DeviceType)
 				{
 					case DeviceTypesEnum.Dyno:
@@ -222,7 +228,12 @@ namespace DeviceHandler.Models
 			}
 
 			if (ConnectionViewModel == null)
+			{
+				LoggerService.Inforamtion(this, "ConnectionViewModel = null");
 				return;
+			}
+
+			LoggerService.Inforamtion(this, "ConnectionViewModel initiated");
 
 			ConnectionViewModel.ConnectEvent += Connect;
 			ConnectionViewModel.DisconnectEvent += Disconnect;
