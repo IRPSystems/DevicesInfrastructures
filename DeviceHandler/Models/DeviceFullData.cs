@@ -133,16 +133,22 @@ namespace DeviceHandler.Models
 					{
 						case DeviceTypesEnum.Dyno:
 							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as CanConnectViewModel;
+							if ((ConnectionViewModel as CanConnectViewModel).SyncNodeID == 0)
+								(ConnectionViewModel as CanConnectViewModel).SyncNodeID = 1;
 							break;
 						case DeviceTypesEnum.MCU:
 							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as CanConnectViewModel;
 							if (!(ConnectionViewModel is CanConnectViewModel))
 								ConnectionViewModel = new CanConnectViewModel(500000, 0xAB, 0xAA, 12223, 12220);
+							if ((ConnectionViewModel as CanConnectViewModel).SyncNodeID == 0)
+								(ConnectionViewModel as CanConnectViewModel).SyncNodeID = 0xAB;
 							break;
 						case DeviceTypesEnum.MCU_B2B:
 							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as CanConnectViewModel;
 							if (!(ConnectionViewModel is CanConnectViewModel))
 								ConnectionViewModel = new CanConnectViewModel(500000, 0xAB, 0xAA, 19223, 19220);
+							if ((ConnectionViewModel as CanConnectViewModel).SyncNodeID == 0)
+								(ConnectionViewModel as CanConnectViewModel).SyncNodeID = 0xAB;
 							break;
 						case DeviceTypesEnum.PowerSupplyBK:
 							ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
