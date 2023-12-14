@@ -193,8 +193,14 @@ namespace DeviceCommunicators.MCU
 			for (; i < _getResponseRepeats; i++)
 			{
 
-
-				byte[] id = _idBuffersPool.Take(_cancellationToken);
+				try
+				{
+					byte[] id = _idBuffersPool.Take(_cancellationToken);
+				}
+				catch (OperationCanceledException)
+				{
+					break;
+				}
 
 
 				var buffer = ConvertToData(mcuParam, data.Value, ref id, data.IsSet);
