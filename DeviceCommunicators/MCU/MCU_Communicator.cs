@@ -192,10 +192,10 @@ namespace DeviceCommunicators.MCU
 			int i = 0;
 			for (; i < _getResponseRepeats; i++)
 			{
-
+				byte[] id = null;
 				try
 				{
-					byte[] id = _idBuffersPool.Take(_cancellationToken);
+					id = _idBuffersPool.Take(_cancellationToken);
 				}
 				catch (OperationCanceledException)
 				{
