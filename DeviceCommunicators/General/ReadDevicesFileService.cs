@@ -62,6 +62,7 @@ namespace DeviceCommunicators.Services
 				devicesList,
 				"MCU - B2B",
 				DeviceTypesEnum.MCU_B2B);
+			InitBTMTempLogger(devicesList);
 
 
 			return devicesList;
@@ -86,6 +87,32 @@ namespace DeviceCommunicators.Services
 			
 
 			mcu_ListHandler.ReadMCUDeviceData(path, deviceData);
+		}
+
+		public void InitBTMTempLogger(ObservableCollection<DeviceBase> devicesList)
+		{
+			DeviceData btmTempLogger = new DeviceData()
+			{
+				Name = "BTM Temp Logger",
+				DeviceType = DeviceTypesEnum.BTMTempLogger,
+			};
+
+			btmTempLogger.ParemetersList = new ObservableCollection<DeviceParameterData>();
+			for (int i = 1; i <= 12; i++)
+			{
+				DeviceParameterData param = new BTMTempLogger_ParamData()
+				{
+					Channel = i,
+					Name = "Channel " + i,
+					Units = "°C",
+					DeviceType = DeviceTypesEnum.BTMTempLogger,
+					Device = btmTempLogger,
+				};
+
+				btmTempLogger.ParemetersList.Add(param);
+			}
+
+			devicesList.Add(btmTempLogger);
 		}
 
 		public void ReadFromJson(
