@@ -10,6 +10,7 @@ using Entities.Models;
 using Services.Services;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 #if _SAVE_TIME
 using System.Collections.Generic;
 using System.IO;
@@ -35,6 +36,7 @@ namespace DeviceCommunicators.MCU
 		private const byte _errShift = 4;
 
 		private const int _getResponseRepeats = 5;
+		private const int _getResponsesTime = 20;
 
 		public ConcurrentDictionary<int, string> _mcuErrorToDescription;
 
@@ -43,8 +45,6 @@ namespace DeviceCommunicators.MCU
 
 		private System.Timers.Timer _poolBuildTimer;
 
-		private bool _isTimeout;
-		private System.Timers.Timer _timeoutTimer;
 
 		private uint _syncID;
 
@@ -124,8 +124,6 @@ namespace DeviceCommunicators.MCU
 			CanService.CanMessageReceivedEvent += AsyncMessageWasReceived;
 
 
-			_timeoutTimer = new System.Timers.Timer(50);
-			_timeoutTimer.Elapsed += TimoutElapsedEventHandler;
 
 			_poolBuildTimer.Start();
 
@@ -138,10 +136,6 @@ namespace DeviceCommunicators.MCU
 		{
 			LoggerService.Inforamtion(this, "Disposing");
 
-			_isTimeout = true;
-
-			if (_timeoutTimer != null)
-				_timeoutTimer.Stop();
 
 			_poolBuildTimer.Stop();
 
@@ -300,8 +294,6 @@ namespace DeviceCommunicators.MCU
 				CommunicatorResultEnum isSuccess = CommunicatorResultEnum.None;
 				errorDescription = null;
 
-				_isTimeout = false;
-				_timeoutTimer.Start();
 
 				byte[] readBuffer = null;
 
@@ -326,13 +318,10 @@ namespace DeviceCommunicators.MCU
 				System.Threading.Thread.Sleep(1);
 
 
-				if ((readBuffer == null || _isTimeout) && isSuccess == CommunicatorResultEnum.None)
+				if (readBuffer == null && isSuccess == CommunicatorResultEnum.None)
 				{
 					isSuccess = CommunicatorResultEnum.NoResponse;
 				}
-
-				_timeoutTimer.Stop();
-				_isTimeout = false;
 
 				return isSuccess;
 			}
@@ -344,10 +333,10 @@ namespace DeviceCommunicators.MCU
 		{
 			uint readNode = 0;
 
-			while (readBuffer == null)
+			Stopwatch timeout = new Stopwatch();
+			timeout.Start();
+			while (readBuffer == null && (timeout.ElapsedMilliseconds < _getResponsesTime))
 			{
-				if (_isTimeout)
-					break;
 
 				CanService.Read(out readBuffer, out readNode);
 
@@ -517,12 +506,6 @@ namespace DeviceCommunicators.MCU
 		private void ErrorEventHandler(string errorMessage)
 		{
 
-		}
-
-
-		private void TimoutElapsedEventHandler(object sender, ElapsedEventArgs e)
-		{
-			_isTimeout = true;
 		}
 
 		private void PoolBuildTimerElapsed(object sender, ElapsedEventArgs e)
