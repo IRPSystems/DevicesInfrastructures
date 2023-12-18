@@ -119,18 +119,16 @@ namespace DeviceCommunicators.Services
 			string path,
 			ObservableCollection<DeviceBase> devicesList)
 		{
-			//string path = Path.Combine(dir, "Power Supply BK.json");
-
-			// Remove previouse PSBK
-			int index = -1;
-			DeviceBase dynoDevice = devicesList.ToList().Find(
-				(d) => (d as DeviceData).DeviceType == DeviceTypesEnum.PowerSupplyBK);
-			if (dynoDevice != null)
-			{
-				index = devicesList.IndexOf(dynoDevice);
-				if (dynoDevice != null)
-					devicesList.Remove(dynoDevice);
-			}
+			
+			//int index = -1;
+			//DeviceBase dynoDevice = devicesList.ToList().Find(
+			//	(d) => (d as DeviceData).DeviceType == DeviceTypesEnum.PowerSupplyBK);
+			//if (dynoDevice != null)
+			//{
+			//	index = devicesList.IndexOf(dynoDevice);
+			//	if (dynoDevice != null)
+			//		devicesList.Remove(dynoDevice);
+			//}
 
 
 			string jsonString = File.ReadAllText(path);
@@ -141,9 +139,9 @@ namespace DeviceCommunicators.Services
 			DeviceBase device = JsonConvert.DeserializeObject(jsonString, settings) as DeviceBase;
 			if (device != null)
 			{
-				if (index >= 0)
-					devicesList.Insert(index, device);
-				else
+				//if (index >= 0)
+				//	devicesList.Insert(index, device);
+				//else
 					devicesList.Add(device);
 			}
 
