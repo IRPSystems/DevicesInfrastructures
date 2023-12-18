@@ -7,11 +7,21 @@ using Services.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
 
 namespace DeviceCommunicators.BTMTempLogger
 {
     public class BTMTempLogger_Communicator: DeviceCommunicator
 	{
+		private enum WorkState 
+		{ 
+			StartNotFound,
+			StartFound,
+			EndFound
+		}
+
 		#region Fields
 
 		private const string _startOfText = "\u0002";
@@ -22,6 +32,17 @@ namespace DeviceCommunicators.BTMTempLogger
 		private int _boud_rate;
 
         public string Name;
+
+		//private WorkState _workState;
+		private string _totalMessage;
+
+
+		//private CancellationTokenSource _cancellationTokenSource;
+		//private CancellationToken _cancellationToken;
+
+		private System.Timers.Timer _timer;
+
+		//private string _message;
 
 		#endregion Fields
 
@@ -37,7 +58,15 @@ namespace DeviceCommunicators.BTMTempLogger
         {
 			_channelTemp = new ConcurrentDictionary<int, double>();
 
+
+			_timer = new System.Timers.Timer(1000);
+			_timer.Elapsed += _timer_Elapsed;
+			//_workState = WorkState.StartNotFound;
+			_totalMessage = string.Empty;
+
 		}
+
+		
 
 		#endregion Constructor
 
@@ -66,7 +95,17 @@ namespace DeviceCommunicators.BTMTempLogger
 
 			InitBase();
 
+			_cancellationTokenSource = new CancellationTokenSource();
+			_cancellationToken = _cancellationTokenSource.Token;
+			//_message = string.Empty;
+			_timer.Start();
+			HandleTotalMessage();
 
+		}
+
+		public override void Dispose()
+		{
+			_cancellationTokenSource.Cancel();
 		}
 
 		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
@@ -128,10 +167,68 @@ namespace DeviceCommunicators.BTMTempLogger
 
 		private void MessageReceived(byte[] buffer)
 		{
+			var str = System.Text.Encoding.Default.GetString(buffer);
+			lock(_totalMessage)
+				_totalMessage += str.Replace("\0", string.Empty);
+		}
+
+		private void HandleTotalMessage()
+		{
+
+			
+			//Task.Run(() =>
+			//{
+			//	while (!_cancellationToken.IsCancellationRequested)
+			//	{
+			//		lock (_totalMessage)
+			//		{
+			//			switch (_workState)
+			//			{
+			//				case WorkState.StartNotFound:
+			//					if (_totalMessage.Contains(_startOfText + "4"))
+			//					{
+			//						int index = _totalMessage.IndexOf(_startOfText + "4");
+			//						_totalMessage = _totalMessage.Substring(index);
+			//						_totalMessage += _totalMessage;
+			//						_workState = WorkState.StartFound;
+			//					}
+			//					break;
+			//				case WorkState.StartFound:
+			//					if (_totalMessage.Contains("\r"))
+			//					{
+			//						int index = _totalMessage.IndexOf("\r");
+			//						_message = _totalMessage.Substring(0, index + 1);
+			//						_totalMessage = _totalMessage.Substring(index);
+			//						_workState = WorkState.EndFound;
+			//					}
+			//					break;
+			//				case WorkState.EndFound:
+			//					HandleMessage();
+			//					_workState = WorkState.StartNotFound;
+			//					break;
+			//			}
+			//		}
+
+			//		System.Threading.Thread.Sleep(1);
+			//	}
+			//}, _cancellationToken);
+		}
+
+		private void _timer_Elapsed(object sender, ElapsedEventArgs e)
+		{
+			HandleMessage();
+		}
+
+		private void HandleMessage()
+		{
 			try
 			{
-				
-				var str = System.Text.Encoding.Default.GetString(buffer);
+				string str = string.Empty;
+				lock (_totalMessage)
+				{
+					str = _totalMessage;
+					_totalMessage = string.Empty;
+				}
 
 				string[] channelsList = str.Split(_startOfText);
 
@@ -170,7 +267,7 @@ namespace DeviceCommunicators.BTMTempLogger
 					_channelTemp[nch] = dVal;
 				}
 			}
-			catch(Exception ex) 
+			catch (Exception ex)
 			{
 				LoggerService.Error(this, "Error on parssing channel temperature", ex);
 			}
