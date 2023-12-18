@@ -120,11 +120,11 @@ namespace DeviceCommunicators.Dyno
 
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, hwId, 0x600 + _nodeId, 0x600 + _nodeId);
+				CommService = new CanPCanService(baudrate, hwId, 0x580 + _nodeId, 0x600 + _nodeId);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
-				CommService = new CanUdpSimulationService(baudrate, 0x600 + _nodeId, 0x600 + _nodeId, rxPort, txPort, address);
+				CommService = new CanUdpSimulationService(baudrate, 0x580 + _nodeId, 0x600 + _nodeId, rxPort, txPort, address);
 			}
 
 			CommService.Init(false);
@@ -222,7 +222,7 @@ namespace DeviceCommunicators.Dyno
 			value = (value - value % 256) / 256;
 			buffer[index++] = Convert.ToByte(value);
 
-			CanService.Send(buffer);
+			CanService.Send(buffer, 0x600 + _nodeId, false);
 
 
 
