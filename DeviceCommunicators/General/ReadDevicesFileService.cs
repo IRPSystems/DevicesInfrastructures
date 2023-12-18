@@ -119,17 +119,6 @@ namespace DeviceCommunicators.Services
 			string path,
 			ObservableCollection<DeviceBase> devicesList)
 		{
-			
-			//int index = -1;
-			//DeviceBase dynoDevice = devicesList.ToList().Find(
-			//	(d) => (d as DeviceData).DeviceType == DeviceTypesEnum.PowerSupplyBK);
-			//if (dynoDevice != null)
-			//{
-			//	index = devicesList.IndexOf(dynoDevice);
-			//	if (dynoDevice != null)
-			//		devicesList.Remove(dynoDevice);
-			//}
-
 
 			string jsonString = File.ReadAllText(path);
 
@@ -137,13 +126,26 @@ namespace DeviceCommunicators.Services
 			settings.Formatting = Formatting.Indented;
 			settings.TypeNameHandling = TypeNameHandling.All;
 			DeviceBase device = JsonConvert.DeserializeObject(jsonString, settings) as DeviceBase;
-			if (device != null)
+			if (device == null)
+				return;
+
+
+			int index = -1;
+			DeviceBase existingDevice = devicesList.ToList().Find(
+				(d) => (d as DeviceData).DeviceType == device.DeviceType);
+			if (existingDevice != null)
 			{
-				//if (index >= 0)
-				//	devicesList.Insert(index, device);
-				//else
-					devicesList.Add(device);
+				index = devicesList.IndexOf(existingDevice);
+				if (existingDevice != null)
+					devicesList.Remove(existingDevice);
 			}
+
+			if (index >= 0)
+				devicesList.Insert(index, device);
+			else
+				devicesList.Add(device);
+			
+
 
 			if (device is DeviceData deviceData)
 			{
