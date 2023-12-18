@@ -264,7 +264,7 @@ namespace DeviceCommunicators.Dyno
 			index++;
 
 
-			CommService.Send(buffer);
+			CanService.Send(buffer, 0x600 + _nodeId, false);
 
 
 
