@@ -85,7 +85,7 @@ namespace DeviceHandler.ViewModel
 		{
 			LoggerService.Inforamtion(this, "Expanding all the devices");
 
-			foreach (DeviceBase deviceBase in DevicesList)
+			foreach (DeviceData deviceBase in DevicesList)
 				deviceBase.IsExpanded = true;
 		}
 
@@ -93,7 +93,7 @@ namespace DeviceHandler.ViewModel
 		{
 			LoggerService.Inforamtion(this, "Collapsing all the devices");
 
-			foreach (DeviceBase deviceBase in DevicesList)
+			foreach (DeviceData deviceBase in DevicesList)
 				deviceBase.IsExpanded = false;
 		}
 
@@ -203,7 +203,7 @@ namespace DeviceHandler.ViewModel
 
 		private void SetSearchedTest(string text)
 		{
-			foreach (DeviceBase deviceBase in DevicesList)
+			foreach (DeviceData deviceBase in DevicesList)
 			{
 				if(!(deviceBase is DeviceData deviceData))
 					continue;
@@ -285,7 +285,7 @@ namespace DeviceHandler.ViewModel
 				AddEvvaDevice();
 
 
-			foreach (DeviceBase deviceBase in _devicesContainer.DevicesList)
+			foreach (DeviceData deviceBase in _devicesContainer.DevicesList)
 			{
 				if (_isHideEvvaDevice && deviceBase.Name == DeviceTypesEnum.EVVA.ToString())
 					continue;

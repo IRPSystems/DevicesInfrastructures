@@ -21,7 +21,7 @@ namespace DeviceCommunicators.Services
 	{
 
 
-		public ObservableCollection<DeviceBase> ReadAllFiles(
+		public ObservableCollection<DeviceData> ReadAllFiles(
 			string dir,
 			string mcuFilePath,
 			string mcuB2BFilePath,
@@ -31,7 +31,7 @@ namespace DeviceCommunicators.Services
 			if (!Directory.Exists(dir))
 				return null;
 
-			ObservableCollection<DeviceBase> devicesList = new ObservableCollection<DeviceBase>();
+			ObservableCollection<DeviceData> devicesList = new ObservableCollection<DeviceData>();
 
 			List<string> filesList = Directory.GetFiles(dir).ToList();
 
@@ -86,7 +86,7 @@ namespace DeviceCommunicators.Services
 
 		public void ReadFromMCUJson(
 			string path,
-			ObservableCollection<DeviceBase> devicesList,
+			ObservableCollection<DeviceData> devicesList,
 			string name, 
 			DeviceTypesEnum deviceTypes)
 		{
@@ -104,7 +104,7 @@ namespace DeviceCommunicators.Services
 			mcu_ListHandler.ReadMCUDeviceData(path, deviceData);
 		}
 
-		public void InitBTMTempLogger(ObservableCollection<DeviceBase> devicesList)
+		public void InitBTMTempLogger(ObservableCollection<DeviceData> devicesList)
 		{
 			DeviceData btmTempLogger = new DeviceData()
 			{
@@ -132,7 +132,7 @@ namespace DeviceCommunicators.Services
 
 		public void ReadFromJson(
 			string path,
-			ObservableCollection<DeviceBase> devicesList)
+			ObservableCollection<DeviceData> devicesList)
 		{
 
 			string jsonString = File.ReadAllText(path);
@@ -140,13 +140,13 @@ namespace DeviceCommunicators.Services
 			JsonSerializerSettings settings = new JsonSerializerSettings();
 			settings.Formatting = Formatting.Indented;
 			settings.TypeNameHandling = TypeNameHandling.All;
-			DeviceBase device = JsonConvert.DeserializeObject(jsonString, settings) as DeviceBase;
+			DeviceData device = JsonConvert.DeserializeObject(jsonString, settings) as DeviceData;
 			if (device == null)
 				return;
 
 
 			int index = -1;
-			DeviceBase existingDevice = devicesList.ToList().Find(
+			DeviceData existingDevice = devicesList.ToList().Find(
 				(d) => (d as DeviceData).DeviceType == device.DeviceType);
 			if (existingDevice != null)
 			{
@@ -174,7 +174,7 @@ namespace DeviceCommunicators.Services
 
 		public void ReadFromExcel(
 			string path,
-			ObservableCollection<DeviceBase> devicesList)
+			ObservableCollection<DeviceData> devicesList)
 		{
 
 			IExcelDataReader reader;
