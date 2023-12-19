@@ -8,6 +8,7 @@ using Communication.Interfaces;
 using Communication.Services;
 using DeviceHandler.ViewModels;
 using System.Windows;
+using DeviceCommunicators.Models;
 
 namespace DeviceSimulators.ViewModels
 {

@@ -470,6 +470,7 @@ using DeviceCommunicators.MCU;
 using DeviceHandler.ViewModels;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using DeviceCommunicators.Models;
 
 namespace DeviceSimulators.ViewModels
 {

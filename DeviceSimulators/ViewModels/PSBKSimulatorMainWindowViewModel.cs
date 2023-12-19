@@ -11,6 +11,7 @@ using Communication.Services;
 using System.Linq;
 using DeviceCommunicators.PowerSupplayBK;
 using DeviceHandler.ViewModels;
+using DeviceCommunicators.Models;
 
 namespace DeviceSimulators.ViewModels
 {

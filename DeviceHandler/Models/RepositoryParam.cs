@@ -1,5 +1,6 @@
 ﻿
 using DeviceCommunicators.Enums;
+using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
 using Entities.Models;
 using System;

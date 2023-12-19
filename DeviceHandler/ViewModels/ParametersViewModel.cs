@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DeviceCommunicators.EvvaDevice;
 using DeviceCommunicators.MCU;
+using DeviceCommunicators.Models;
 using DeviceHandler.Models;
 using Entities.Enums;
 using Entities.Models;

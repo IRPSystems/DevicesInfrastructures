@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using ControlzEx.Standard;
 using DeviceCommunicators.Enums;
+using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
 using DeviceHandler.Models;
 using Entities.Models;

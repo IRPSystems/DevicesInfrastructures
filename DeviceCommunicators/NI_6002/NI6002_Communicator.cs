@@ -1,6 +1,5 @@
 ﻿ using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
-using DeviceCommunicators.Model;
 using Entities.Models;
 using Services.Services;
 using System;
@@ -11,8 +10,7 @@ using Entities.Enums;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using System.IO;
-
-
+using DeviceCommunicators.Models;
 
 namespace DeviceCommunicators.NI_6002
 {

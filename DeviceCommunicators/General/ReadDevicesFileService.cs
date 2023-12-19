@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.BTMTempLogger;
 using DeviceCommunicators.EvvaDevice;
 using DeviceCommunicators.MCU;
+using DeviceCommunicators.Models;
 using Entities.Enums;
 using Entities.Models;
 using ExcelDataReader;

@@ -6,6 +6,7 @@ using Entities.Models;
 using Communication.Interfaces;
 using Communication.Services;
 using DeviceHandler.ViewModels;
+using DeviceCommunicators.Models;
 
 namespace DeviceSimulators.ViewModels
 {

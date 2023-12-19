@@ -1,13 +1,12 @@
 ﻿
 using DeviceCommunicators.Enums;
-using DeviceCommunicators.Model;
-using Entities.Models;
 using Services.Services;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
 using Communication.Interfaces;
+using DeviceCommunicators.Models;
 
 namespace DeviceCommunicators.General
 {

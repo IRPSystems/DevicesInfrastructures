@@ -1,5 +1,6 @@
 ﻿
 using CommunityToolkit.Mvvm.ComponentModel;
+using DeviceCommunicators.Models;
 using DeviceHandler.Interfaces;
 using Entities.Models;
 using System.Collections.ObjectModel;

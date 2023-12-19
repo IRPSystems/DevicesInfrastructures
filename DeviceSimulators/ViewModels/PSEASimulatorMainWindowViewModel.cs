@@ -12,6 +12,7 @@ using DeviceCommunicators.PowerSupplayBK;
 using DeviceHandler.ViewModels;
 using DeviceCommunicators.PowerSupplayEA;
 using System.Text.RegularExpressions;
+using DeviceCommunicators.Models;
 
 namespace DeviceSimulators.ViewModels
 {

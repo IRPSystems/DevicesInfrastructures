@@ -4,7 +4,6 @@ using Communication.Interfaces;
 using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
-using DeviceCommunicators.Model;
 using DeviceCommunicators.Models;
 using Entities.Models;
 using Services.Services;

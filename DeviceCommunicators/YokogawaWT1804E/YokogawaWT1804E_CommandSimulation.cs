@@ -1,4 +1,5 @@
 ﻿using DeviceCommunicators.Interfaces;
+using DeviceCommunicators.Models;
 using DeviceCommunicators.Services;
 using Entities.Models;
 using NationalInstruments.Restricted;

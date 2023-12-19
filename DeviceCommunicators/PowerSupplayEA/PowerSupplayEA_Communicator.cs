@@ -2,8 +2,7 @@
 using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
-using DeviceCommunicators.Model;
-using Entities.Models;
+using DeviceCommunicators.Models;
 using Services.Services;
 using System;
 using System.Collections.Generic;

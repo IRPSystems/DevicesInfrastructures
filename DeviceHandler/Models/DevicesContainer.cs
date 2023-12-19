@@ -1,5 +1,6 @@
 ﻿
 using CommunityToolkit.Mvvm.ComponentModel;
+using DeviceCommunicators.Models;
 using Entities.Enums;
 using Entities.Models;
 using System.Collections.Generic;

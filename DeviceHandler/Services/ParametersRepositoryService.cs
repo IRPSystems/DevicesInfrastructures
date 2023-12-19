@@ -1,6 +1,7 @@
 ﻿
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
+using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
 using DeviceHandler.Interfaces;
 using DeviceHandler.Models;

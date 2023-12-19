@@ -5,14 +5,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using DeviceCommunicators.Enums;
 using Entities.Models;
-using DeviceCommunicators.Model;
 using DeviceCommunicators.Interfaces;
 using TmctlAPINet;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Markup;
-
+using DeviceCommunicators.Models;
 
 namespace DeviceCommunicators.YokogawaWT1804E
 {

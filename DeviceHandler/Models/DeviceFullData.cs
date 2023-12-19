@@ -4,6 +4,7 @@ using DeviceCommunicators.BTMTempLogger;
 using DeviceCommunicators.Dyno;
 using DeviceCommunicators.General;
 using DeviceCommunicators.MCU;
+using DeviceCommunicators.Models;
 using DeviceCommunicators.NI_6002;
 using DeviceCommunicators.PowerSupplayBK;
 using DeviceCommunicators.PowerSupplayEA;
