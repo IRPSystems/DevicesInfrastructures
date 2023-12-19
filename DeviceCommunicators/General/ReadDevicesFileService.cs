@@ -45,23 +45,38 @@ namespace DeviceCommunicators.Services
 				}
 				else if(extension.ToLower().EndsWith("json"))
 				{
+					string path = file;
 					if (Path.GetFileName(file) == "param_defaults.json")
 						continue;
 
-					ReadFromJson(file, devicesList);
+					else if (Path.GetFileName(file) == "Dyno Communication.json" && dynoFilePath != null)
+						path = dynoFilePath;
+
+					else if (Path.GetFileName(file) == "NI_6002.json" && ni6002FilePath != null)
+						path = ni6002FilePath;
+
+					ReadFromJson(path, devicesList);
 				}
 			}
 
-			ReadFromMCUJson(
-				mcuFilePath,
-				devicesList,
-				"MCU",
-				DeviceTypesEnum.MCU);
-			ReadFromMCUJson(
-				mcuB2BFilePath,
-				devicesList,
-				"MCU - B2B",
-				DeviceTypesEnum.MCU_B2B);
+			if (mcuFilePath != null)
+			{
+				ReadFromMCUJson(
+					mcuFilePath,
+					devicesList,
+					"MCU",
+					DeviceTypesEnum.MCU);
+			}
+
+			if (mcuB2BFilePath != null)
+			{
+				ReadFromMCUJson(
+					mcuB2BFilePath,
+					devicesList,
+					"MCU - B2B",
+					DeviceTypesEnum.MCU_B2B);
+			}
+
 			InitBTMTempLogger(devicesList);
 
 
