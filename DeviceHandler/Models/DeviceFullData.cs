@@ -297,7 +297,7 @@ namespace DeviceHandler.Models
 			else if (DeviceCommunicator is BTMTempLogger_Communicator)
 			{
 
-				DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as BTMTempLogger_ParamData).Channel == 1);
+				BTMTempLogger_ParamData data = new BTMTempLogger_ParamData() { Name = "Check Communication" };
 
 				CheckCommunication = new CheckCommunicationService(
 					this,
