@@ -10,7 +10,7 @@ using DeviceCommunicators.Models;
 
 namespace DeviceCommunicators.General
 {
-	public class DeviceCommunicator
+	public abstract class DeviceCommunicator
 	{
 		#region Fields
 
@@ -176,10 +176,7 @@ namespace DeviceCommunicators.General
 			}, _cancellationToken);
 		}
 
-		protected virtual CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
-		{
-			return CommunicatorResultEnum.OK;
-		}
+		protected abstract CommunicatorResultEnum HandleRequests(CommunicatorIOData data);
 
 		protected void FireConnectionEvent()
 		{
