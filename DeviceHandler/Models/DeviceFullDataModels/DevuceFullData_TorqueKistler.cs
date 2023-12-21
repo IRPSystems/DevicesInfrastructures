@@ -3,16 +3,18 @@ using DeviceCommunicators.Dyno;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using DeviceCommunicators.PowerSupplayEA;
+using DeviceCommunicators.SwitchRelay32;
+using DeviceCommunicators.TorqueKistler;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
 using System.Linq;
 
-namespace DeviceHandler.Models.DeviceFullData
+namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DevuceFullData_PowerSupplyEA : DeviceFullData
+	public class DevuceFullData_TorqueKistler : DeviceFullData
 	{
-		public DevuceFullData_PowerSupplyEA(DeviceData deviceData) :
+		public DevuceFullData_TorqueKistler(DeviceData deviceData) :
 			base(deviceData)
 		{
 
@@ -20,11 +22,11 @@ namespace DeviceHandler.Models.DeviceFullData
 
 		protected override string GetConnectionFileName()
 		{
-			return "PSEASerialConnect.json";
+			return "TorqueKistlerConnect.json";
 		}
 		protected override void ConstructCommunicator()
 		{
-			DeviceCommunicator = new PowerSupplayEA_Communicator();
+			DeviceCommunicator = new TorqueKistler_Communicator();
 		}
 
 		protected override void DeserializeConnectionViewModel(
@@ -36,23 +38,23 @@ namespace DeviceHandler.Models.DeviceFullData
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new SerialConncetViewModel(115200, "COM1", 14323, 14320);
+			ConnectionViewModel = new SerialConncetViewModel(57600, "COM1", 17323, 17320);
 		}
 
 		protected override void ConstructCheckConnection()
 		{
-			PowerSupplayEA_ParamData data = new PowerSupplayEA_ParamData() { Name = "Identity", Cmd = "*IDN?" };
+			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => p.Name == "Torque");
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
 				data,
-				"PSEA");
+				"TorqueKistler");
 		}
 
 
 		protected override void InitRealCommunicator()
 		{
-			(DeviceCommunicator as PowerSupplayEA_Communicator).Init(
+			(DeviceCommunicator as TorqueKistler_Communicator).Init(
 				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate);
@@ -60,7 +62,7 @@ namespace DeviceHandler.Models.DeviceFullData
 
 		protected override void InitSimulationCommunicator()
 		{
-			(DeviceCommunicator as PowerSupplayEA_Communicator).Init(
+			(DeviceCommunicator as TorqueKistler_Communicator).Init(
 				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate,

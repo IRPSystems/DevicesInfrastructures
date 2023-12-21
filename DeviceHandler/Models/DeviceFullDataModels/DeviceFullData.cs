@@ -11,7 +11,7 @@ using Services.Services;
 using System;
 using System.IO;
 
-namespace DeviceHandler.Models.DeviceFullData
+namespace DeviceHandler.Models.DeviceFullDataModels
 {
     public abstract class DeviceFullData : ObservableObject
     {
@@ -265,6 +265,27 @@ namespace DeviceHandler.Models.DeviceFullData
             catch (Exception ex)
             {
                 LoggerService.Error(this, "Failed to set the Dyno communication state", ex);
+            }
+        }
+
+
+        public static DeviceFullData Factory(DeviceData deviceData)
+        {
+            switch(deviceData.DeviceType)
+            {
+
+				case DeviceTypesEnum.Dyno: return new DevuceFullData_Dyno(deviceData);
+		        case DeviceTypesEnum.MCU: return new DevuceFullData_MCU(deviceData);
+				case DeviceTypesEnum.PowerSupplyBK: return new DevuceFullData_PowerSupplyBK(deviceData);
+				case DeviceTypesEnum.PowerSupplyEA: return new DevuceFullData_PowerSupplyEA(deviceData);
+				//case DeviceTypesEnum.KeySight: return new DevuceFullData_KeySight(deviceData);
+				case DeviceTypesEnum.TorqueKistler: return new DevuceFullData_TorqueKistler(deviceData);
+				case DeviceTypesEnum.MCU_B2B: return new DevuceFullData_MCU_B2B(deviceData);
+				case DeviceTypesEnum.BTMTempLogger: return new DevuceFullData_BTMTempLogger(deviceData);
+				case DeviceTypesEnum.SwitchRelay32: return new DevuceFullData_SwitchRelay32(deviceData);
+				case DeviceTypesEnum.NI_6002: return new DevuceFullData_NI_6002(deviceData);
+				case DeviceTypesEnum.Yokogawa_WT1804E: return new DevuceFullData_Yokogawa_WT1804E(deviceData);
+				default: return null;
             }
         }
 

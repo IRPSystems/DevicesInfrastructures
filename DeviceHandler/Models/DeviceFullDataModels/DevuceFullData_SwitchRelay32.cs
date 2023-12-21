@@ -9,11 +9,11 @@ using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
 using System.Linq;
 
-namespace DeviceHandler.Models.DeviceFullData
+namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DevuceFullData_TorqueKistler : DeviceFullData
+	public class DevuceFullData_SwitchRelay32 : DeviceFullData
 	{
-		public DevuceFullData_TorqueKistler(DeviceData deviceData) :
+		public DevuceFullData_SwitchRelay32(DeviceData deviceData) :
 			base(deviceData)
 		{
 
@@ -62,9 +62,9 @@ namespace DeviceHandler.Models.DeviceFullData
 		protected override void InitSimulationCommunicator()
 		{
 			(DeviceCommunicator as SwitchCommunicator).Init(
-						(ConnectionViewModel as TcpConncetViewModel).IsUdpSimulation,
-						(ConnectionViewModel as TcpConncetViewModel).Address,
-						(ConnectionViewModel as TcpConncetViewModel).Port);
+				(ConnectionViewModel as TcpConncetViewModel).IsUdpSimulation,
+				(ConnectionViewModel as TcpConncetViewModel).Address,
+				(ConnectionViewModel as TcpConncetViewModel).Port);
 		}
 
 		protected override bool IsSumulation()

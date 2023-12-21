@@ -10,7 +10,7 @@ using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
 using System.Linq;
 
-namespace DeviceHandler.Models.DeviceFullData
+namespace DeviceHandler.Models.DeviceFullDataModels
 {
 	public class DevuceFullData_NI_6002 : DeviceFullData
 	{

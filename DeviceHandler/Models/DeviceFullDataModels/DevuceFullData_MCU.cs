@@ -5,7 +5,7 @@ using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
 
-namespace DeviceHandler.Models.DeviceFullData
+namespace DeviceHandler.Models.DeviceFullDataModels
 {
 	public class DevuceFullData_MCU: DeviceFullData
 	{

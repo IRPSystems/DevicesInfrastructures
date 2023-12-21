@@ -11,7 +11,7 @@ using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
 using System.Linq;
 
-namespace DeviceHandler.Models.DeviceFullData
+namespace DeviceHandler.Models.DeviceFullDataModels
 {
 	public class DevuceFullData_Yokogawa_WT1804E : DeviceFullData
 	{
