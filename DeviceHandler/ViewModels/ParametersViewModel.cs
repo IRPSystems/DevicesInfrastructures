@@ -6,6 +6,7 @@ using DeviceCommunicators.EvvaDevice;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using DeviceHandler.Models;
+using DeviceHandler.Models.DeviceFullData;
 using Entities.Enums;
 using Entities.Models;
 using Services.Services;
@@ -19,7 +20,7 @@ using System.Windows.Input;
 
 namespace DeviceHandler.ViewModel
 {
-	public class ParametersViewModel : ObservableObject
+    public class ParametersViewModel : ObservableObject
 	{
 		#region Properties
 
