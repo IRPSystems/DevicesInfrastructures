@@ -1,4 +1,4 @@
-﻿using DeviceHandler.Models.DeviceFullData;
+﻿using DeviceHandler.Models.DeviceFullDataModels;
 using System.Collections.ObjectModel;
 
 namespace DeviceHandler.Interfaces

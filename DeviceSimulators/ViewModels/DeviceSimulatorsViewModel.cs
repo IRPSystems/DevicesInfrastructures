@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DeviceCommunicators.Models;
 using DeviceHandler.Models;
-using DeviceHandler.Models.DeviceFullData;
+using DeviceHandler.Models.DeviceFullDataModels;
 using Entities.Enums;
 using Entities.Models;
 using System.Collections.ObjectModel;

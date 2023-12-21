@@ -4,7 +4,7 @@ using ControlzEx.Standard;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
-using DeviceHandler.Models.DeviceFullData;
+using DeviceHandler.Models.DeviceFullDataModels;
 using Entities.Models;
 using Services.Services;
 using System;

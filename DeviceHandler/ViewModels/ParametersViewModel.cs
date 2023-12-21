@@ -6,7 +6,7 @@ using DeviceCommunicators.EvvaDevice;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using DeviceHandler.Models;
-using DeviceHandler.Models.DeviceFullData;
+using DeviceHandler.Models.DeviceFullDataModels;
 using Entities.Enums;
 using Entities.Models;
 using Services.Services;

@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.Models;
 using Entities.Enums;
-using Entities.Models;
+using DeviceHandler.Models.DeviceFullDataModels;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
