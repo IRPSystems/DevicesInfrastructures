@@ -138,7 +138,7 @@ namespace DeviceHandler.ViewModel
 
 		private void DragObject(MouseEventArgs e)
 		{
-			LoggerService.Inforamtion(this, "Object is draged");
+			//LoggerService.Inforamtion(this, "Object is draged");
 
 			Point mousePos = e.GetPosition(null);
 			Vector diff = _designDragDropData.StartPoint - mousePos;
@@ -279,6 +279,14 @@ namespace DeviceHandler.ViewModel
 			ParamDoubleClickedEvent?.Invoke(paramData);
 		}
 
+		private void ListSourceParam_TreeView_SelectedItemChanged(RoutedPropertyChangedEventArgs<object> e)
+		{
+			if (!(e.NewValue is DeviceParameterData paramData))
+				return;
+
+			LoggerService.Inforamtion(this, "Selected parameter \"" + paramData.Name + "\"");
+		}
+
 
 		private void BuildDevicesList()
 		{
@@ -396,6 +404,16 @@ namespace DeviceHandler.ViewModel
 			{
 				return _ListSourceParam_MouseDoubleClickCommand ?? (_ListSourceParam_MouseDoubleClickCommand =
 					new RelayCommand<MouseEventArgs>(ListSourceParam_MouseDoubleClick));
+			}
+		}
+
+		private RelayCommand<RoutedPropertyChangedEventArgs<object>> _ListSourceParam_TreeView_SelectedItemChangedCommand;
+		public RelayCommand<RoutedPropertyChangedEventArgs<object>> ListSourceParam_TreeView_SelectedItemChangedCommand
+		{
+			get
+			{
+				return _ListSourceParam_TreeView_SelectedItemChangedCommand ?? (_ListSourceParam_TreeView_SelectedItemChangedCommand =
+					new RelayCommand<RoutedPropertyChangedEventArgs<object>>(ListSourceParam_TreeView_SelectedItemChanged));
 			}
 		}
 

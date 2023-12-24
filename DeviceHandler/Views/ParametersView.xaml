@@ -115,6 +115,14 @@
                                            PassEventArgsToCommand="True"/>
                 </i:EventTrigger>
 
+
+                <i:EventTrigger EventName="SelectedItemChanged">
+                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ListSourceParam_TreeView_SelectedItemChangedCommand, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}" 
+                                           PassEventArgsToCommand="True"/>
+                </i:EventTrigger>
+
             </i:Interaction.Triggers>
 
             <TreeView.Resources>
