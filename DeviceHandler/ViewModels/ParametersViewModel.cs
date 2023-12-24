@@ -184,6 +184,8 @@ namespace DeviceHandler.ViewModel
 				else
 					actualParam = param;
 
+				LoggerService.Inforamtion(this, "Dragging parameter \"" + actualParam.Name + "\"");
+
 				DataObject dragData = new DataObject(DragDropFormat, actualParam);
 				DragDrop.DoDragDrop(sourceObject, dragData, DragDropEffects.Move);
 			}
