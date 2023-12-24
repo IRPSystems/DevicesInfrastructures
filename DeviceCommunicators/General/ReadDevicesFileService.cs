@@ -132,10 +132,14 @@ namespace DeviceCommunicators.Services
 		}
 
 		public void ReadFromJson(
+			string originalDir,
 			string path,
 			ObservableCollection<DeviceData> devicesList)
 		{
-			FixJson(path);
+
+			if(path.Contains(originalDir) == false)
+				FixJson(path);
+
 			string jsonString = File.ReadAllText(path);
 
 			JsonSerializerSettings settings = new JsonSerializerSettings();
@@ -274,6 +278,7 @@ namespace DeviceCommunicators.Services
 
 		private void FixJson(string filePath)
 		{
+
 			string fileData = null;
 			using (StreamReader sr = new StreamReader(filePath))
 			{
