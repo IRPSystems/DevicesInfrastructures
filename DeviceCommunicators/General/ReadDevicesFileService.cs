@@ -56,7 +56,7 @@ namespace DeviceCommunicators.Services
 					else if (Path.GetFileName(file) == "NI_6002.json" && ni6002FilePath != null)
 						path = ni6002FilePath;
 
-					ReadFromJson(path, devicesList);
+					ReadFromJson(dir, path, devicesList);
 				}
 			}
 
