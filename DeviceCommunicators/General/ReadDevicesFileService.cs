@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.BTMTempLogger;
 using DeviceCommunicators.EvvaDevice;
+using DeviceCommunicators.FieldLogger;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using Entities.Enums;
@@ -79,6 +80,7 @@ namespace DeviceCommunicators.Services
 			}
 
 			InitBTMTempLogger(devicesList);
+			InitFieldLogger(devicesList);
 
 
 			return devicesList;
@@ -129,6 +131,32 @@ namespace DeviceCommunicators.Services
 			}
 
 			devicesList.Add(btmTempLogger);
+		}
+
+		public void InitFieldLogger(ObservableCollection<DeviceData> devicesList)
+		{
+			DeviceData fieldLogger = new DeviceData()
+			{
+				Name = "Field Logger",
+				DeviceType = DeviceTypesEnum.FieldLogger,
+			};
+
+			fieldLogger.ParemetersList = new ObservableCollection<DeviceParameterData>();
+			for (int i = 1; i <= 8; i++)
+			{
+				DeviceParameterData param = new FieldLogger_ParamData()
+				{
+					Channel = i,
+					Name = "Channel " + i,
+					//Units = "°C",
+					DeviceType = DeviceTypesEnum.FieldLogger,
+					Device = fieldLogger,
+				};
+
+				fieldLogger.ParemetersList.Add(param);
+			}
+
+			devicesList.Add(fieldLogger);
 		}
 
 		public void ReadFromJson(
