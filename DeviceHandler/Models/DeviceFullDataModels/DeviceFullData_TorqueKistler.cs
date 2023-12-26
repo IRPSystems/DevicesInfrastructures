@@ -2,7 +2,9 @@
 using DeviceCommunicators.Dyno;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
-using DeviceCommunicators.PowerSupplayBK;
+using DeviceCommunicators.PowerSupplayEA;
+using DeviceCommunicators.SwitchRelay32;
+using DeviceCommunicators.TorqueKistler;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
@@ -10,9 +12,9 @@ using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DevuceFullData_PowerSupplyBK : DeviceFullData
+	public class DeviceFullData_TorqueKistler : DeviceFullData
 	{
-		public DevuceFullData_PowerSupplyBK(DeviceData deviceData) :
+		public DeviceFullData_TorqueKistler(DeviceData deviceData) :
 			base(deviceData)
 		{
 
@@ -20,11 +22,11 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override string GetConnectionFileName()
 		{
-			return "PSBKSerialConnect.json";
+			return "TorqueKistlerConnect.json";
 		}
 		protected override void ConstructCommunicator()
 		{
-			DeviceCommunicator = new PowerSupplayBK_Communicator();
+			DeviceCommunicator = new TorqueKistler_Communicator();
 		}
 
 		protected override void DeserializeConnectionViewModel(
@@ -36,23 +38,23 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new SerialConncetViewModel(115200, "COM1", 13323, 13320);
+			ConnectionViewModel = new SerialConncetViewModel(57600, "COM1", 17323, 17320);
 		}
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as DeviceParameterData).Name == "MEASure voltage in supply");
+			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => p.Name == "Torque");
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
 				data,
-				"PSBK");
+				"TorqueKistler");
 		}
 
 
 		protected override void InitRealCommunicator()
 		{
-			(DeviceCommunicator as PowerSupplayBK_Communicator).Init(
+			(DeviceCommunicator as TorqueKistler_Communicator).Init(
 				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate);
@@ -60,13 +62,13 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void InitSimulationCommunicator()
 		{
-			(DeviceCommunicator as PowerSupplayBK_Communicator).Init(
-						(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
-						(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
-						(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate,
-						(ConnectionViewModel as SerialConncetViewModel).RxPort,
-						(ConnectionViewModel as SerialConncetViewModel).TxPort,
-						(ConnectionViewModel as SerialConncetViewModel).Address);
+			(DeviceCommunicator as TorqueKistler_Communicator).Init(
+				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
+				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
+				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate,
+				(ConnectionViewModel as SerialConncetViewModel).RxPort,
+				(ConnectionViewModel as SerialConncetViewModel).TxPort,
+				(ConnectionViewModel as SerialConncetViewModel).Address);
 		}
 
 		protected override bool IsSumulation()

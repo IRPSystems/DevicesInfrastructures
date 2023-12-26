@@ -1,15 +1,17 @@
 ﻿
+using DeviceCommunicators.Dyno;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DevuceFullData_MCU: DeviceFullData
+	public class DeviceFullData_Dyno : DeviceFullData
 	{
-		public DevuceFullData_MCU(DeviceData deviceData) :
+		public DeviceFullData_Dyno(DeviceData deviceData) :
 			base(deviceData)
 		{
 
@@ -17,11 +19,11 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override string GetConnectionFileName()
 		{
-			return "MCUCanConnect.json";
+			return "DynoCanConnect.json";
 		}
 		protected override void ConstructCommunicator()
 		{
-			DeviceCommunicator = new MCU_Communicator();
+			DeviceCommunicator = new Dyno_Communicator();
 		}
 
 		protected override void DeserializeConnectionViewModel(
@@ -29,48 +31,41 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			JsonSerializerSettings settings)
 		{
 			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as CanConnectViewModel;
-			if (!(ConnectionViewModel is CanConnectViewModel))
-				ConnectionViewModel = new CanConnectViewModel(500000, 0xAB, 0xAA, 12223, 12220);
 			if ((ConnectionViewModel as CanConnectViewModel).SyncNodeID == 0)
-				(ConnectionViewModel as CanConnectViewModel).SyncNodeID = 0xAB;
+				(ConnectionViewModel as CanConnectViewModel).SyncNodeID = 1;
 		}
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new CanConnectViewModel(500000, 0xAB, 0xAA, 12223, 12220);
+			ConnectionViewModel = new CanConnectViewModel(250000, 1, 1, 11223, 11220);
 		}
 
 		protected override void ConstructCheckConnection()
 		{
+			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as DeviceParameterData).Name == "Enable");
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
-				new MCU_ParamData()
-				{
-					Cmd = "",
-					Name = "Check MCU Comm",
-				},
-				"MCU");
+				data,
+				"Dyno");
 		}
 
 
 		protected override void InitRealCommunicator()
 		{
-			(DeviceCommunicator as MCU_Communicator).Init(
+			(DeviceCommunicator as Dyno_Communicator).Init(
 				(ConnectionViewModel as CanConnectViewModel).SelectedAdapter,
 				(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID,
-				(ConnectionViewModel as CanConnectViewModel).AsyncNodeID,
 				(ConnectionViewModel as CanConnectViewModel).GetSelectedHWId((ConnectionViewModel as CanConnectViewModel).SelectedHwId));
 		}
 
 		protected override void InitSimulationCommunicator()
 		{
-			(DeviceCommunicator as MCU_Communicator).Init(
+			(DeviceCommunicator as Dyno_Communicator).Init(
 				(ConnectionViewModel as CanConnectViewModel).SelectedAdapter,
 				(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID,
-				(ConnectionViewModel as CanConnectViewModel).AsyncNodeID,
 				0,
 				(ConnectionViewModel as CanConnectViewModel).RxPort,
 				(ConnectionViewModel as CanConnectViewModel).TxPort,

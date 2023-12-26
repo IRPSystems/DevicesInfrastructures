@@ -13,9 +13,9 @@ using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DevuceFullData_Yokogawa_WT1804E : DeviceFullData
+	public class DeviceFullData_Yokogawa_WT1804E : DeviceFullData
 	{
-		public DevuceFullData_Yokogawa_WT1804E(DeviceData deviceData) :
+		public DeviceFullData_Yokogawa_WT1804E(DeviceData deviceData) :
 			base(deviceData)
 		{
 

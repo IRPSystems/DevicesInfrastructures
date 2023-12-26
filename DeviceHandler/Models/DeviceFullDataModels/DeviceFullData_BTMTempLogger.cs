@@ -1,10 +1,9 @@
 ﻿
+using DeviceCommunicators.BTMTempLogger;
 using DeviceCommunicators.Dyno;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using DeviceCommunicators.PowerSupplayEA;
-using DeviceCommunicators.SwitchRelay32;
-using DeviceCommunicators.TorqueKistler;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
@@ -12,9 +11,9 @@ using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DevuceFullData_TorqueKistler : DeviceFullData
+	public class DeviceFullData_BTMTempLogger : DeviceFullData
 	{
-		public DevuceFullData_TorqueKistler(DeviceData deviceData) :
+		public DeviceFullData_BTMTempLogger(DeviceData deviceData) :
 			base(deviceData)
 		{
 
@@ -22,11 +21,11 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override string GetConnectionFileName()
 		{
-			return "TorqueKistlerConnect.json";
+			return "BTMTempLoggerSerialConnect.json";
 		}
 		protected override void ConstructCommunicator()
 		{
-			DeviceCommunicator = new TorqueKistler_Communicator();
+			DeviceCommunicator = new BTMTempLogger_Communicator();
 		}
 
 		protected override void DeserializeConnectionViewModel(
@@ -38,23 +37,23 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new SerialConncetViewModel(57600, "COM1", 17323, 17320);
+			ConnectionViewModel = new SerialConncetViewModel(9600, "COM1", 15323, 15320);
 		}
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => p.Name == "Torque");
+			BTMTempLogger_ParamData data = new BTMTempLogger_ParamData() { Name = "Check Communication" };
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
 				data,
-				"TorqueKistler");
+				"BTMTempLogger");
 		}
 
 
 		protected override void InitRealCommunicator()
 		{
-			(DeviceCommunicator as TorqueKistler_Communicator).Init(
+			(DeviceCommunicator as BTMTempLogger_Communicator).Init(
 				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate);
@@ -62,7 +61,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void InitSimulationCommunicator()
 		{
-			(DeviceCommunicator as TorqueKistler_Communicator).Init(
+			(DeviceCommunicator as BTMTempLogger_Communicator).Init(
 				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate,

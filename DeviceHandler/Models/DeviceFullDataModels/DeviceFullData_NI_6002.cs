@@ -12,9 +12,9 @@ using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DevuceFullData_NI_6002 : DeviceFullData
+	public class DeviceFullData_NI_6002 : DeviceFullData
 	{
-		public DevuceFullData_NI_6002(DeviceData deviceData) :
+		public DeviceFullData_NI_6002(DeviceData deviceData) :
 			base(deviceData)
 		{
 

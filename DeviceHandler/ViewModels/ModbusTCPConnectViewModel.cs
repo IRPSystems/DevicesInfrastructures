@@ -19,6 +19,8 @@ namespace DeviceHandler.ViewModels
 		public ushort NoOfItems { get; set; }
 		public ushort SizeOfItems { get; set; }
 
+		public bool IsUdpSimulation { get; set; }
+
 
 		[JsonIgnore]
 		public bool IsConnectButtonEnabled { get; set; }

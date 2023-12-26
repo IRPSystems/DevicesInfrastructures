@@ -274,18 +274,18 @@ namespace DeviceHandler.Models.DeviceFullDataModels
             switch(deviceData.DeviceType)
             {
 
-				case DeviceTypesEnum.Dyno: return new DevuceFullData_Dyno(deviceData);
-		        case DeviceTypesEnum.MCU: return new DevuceFullData_MCU(deviceData);
-				case DeviceTypesEnum.PowerSupplyBK: return new DevuceFullData_PowerSupplyBK(deviceData);
-				case DeviceTypesEnum.PowerSupplyEA: return new DevuceFullData_PowerSupplyEA(deviceData);
+				case DeviceTypesEnum.Dyno: return new DeviceFullData_Dyno(deviceData);
+		        case DeviceTypesEnum.MCU: return new DeviceFullData_MCU(deviceData);
+				case DeviceTypesEnum.PowerSupplyBK: return new DeviceFullData_PowerSupplyBK(deviceData);
+				case DeviceTypesEnum.PowerSupplyEA: return new DeviceFullData_PowerSupplyEA(deviceData);
 				//case DeviceTypesEnum.KeySight: return new DevuceFullData_KeySight(deviceData);
-				case DeviceTypesEnum.TorqueKistler: return new DevuceFullData_TorqueKistler(deviceData);
-				case DeviceTypesEnum.MCU_B2B: return new DevuceFullData_MCU_B2B(deviceData);
-				case DeviceTypesEnum.BTMTempLogger: return new DevuceFullData_BTMTempLogger(deviceData);
-				case DeviceTypesEnum.SwitchRelay32: return new DevuceFullData_SwitchRelay32(deviceData);
-				case DeviceTypesEnum.NI_6002: return new DevuceFullData_NI_6002(deviceData);
-				case DeviceTypesEnum.Yokogawa_WT1804E: return new DevuceFullData_Yokogawa_WT1804E(deviceData);
-				case DeviceTypesEnum.FieldLogger: return new DevuceFullData_FieldLogger(deviceData);
+				case DeviceTypesEnum.TorqueKistler: return new DeviceFullData_TorqueKistler(deviceData);
+				case DeviceTypesEnum.MCU_B2B: return new DeviceFullData_MCU_B2B(deviceData);
+				case DeviceTypesEnum.BTMTempLogger: return new DeviceFullData_BTMTempLogger(deviceData);
+				case DeviceTypesEnum.SwitchRelay32: return new DeviceFullData_SwitchRelay32(deviceData);
+				case DeviceTypesEnum.NI_6002: return new DeviceFullData_NI_6002(deviceData);
+				case DeviceTypesEnum.Yokogawa_WT1804E: return new DeviceFullData_Yokogawa_WT1804E(deviceData);
+				case DeviceTypesEnum.FieldLogger: return new DeviceFullData_FieldLogger(deviceData);
 				default: return null;
             }
         }

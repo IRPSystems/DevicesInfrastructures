@@ -11,9 +11,9 @@ using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DevuceFullData_SwitchRelay32 : DeviceFullData
+	public class DeviceFullData_SwitchRelay32 : DeviceFullData
 	{
-		public DevuceFullData_SwitchRelay32(DeviceData deviceData) :
+		public DeviceFullData_SwitchRelay32(DeviceData deviceData) :
 			base(deviceData)
 		{
 

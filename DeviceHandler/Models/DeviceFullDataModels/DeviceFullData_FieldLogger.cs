@@ -8,9 +8,9 @@ using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DevuceFullData_FieldLogger : DeviceFullData
+	public class DeviceFullData_FieldLogger : DeviceFullData
 	{
-		public DevuceFullData_FieldLogger(DeviceData deviceData) :
+		public DeviceFullData_FieldLogger(DeviceData deviceData) :
 			base(deviceData)
 		{
 
@@ -29,12 +29,12 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			string jsonString,
 			JsonSerializerSettings settings)
 		{
-			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
+			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as ModbusTCPConnectViewModel;
 		}
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new SerialConncetViewModel(9600, "COM1", 15323, 15320);
+			ConnectionViewModel = new ModbusTCPConnectViewModel("192.168.20.1", 502, 255, 3, 8, 2);
 		}
 
 		protected override void ConstructCheckConnection()
@@ -50,10 +50,14 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void InitRealCommunicator()
 		{
-			//(DeviceCommunicator as FieldLogger_Communicator).Init(
-			//	(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
-			//	(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
-			//	(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate);
+			(DeviceCommunicator as FieldLogger_Communicator).Init(
+				(ConnectionViewModel as ModbusTCPConnectViewModel).IsUdpSimulation,
+				(ConnectionViewModel as ModbusTCPConnectViewModel).IPAddress,
+				(ConnectionViewModel as ModbusTCPConnectViewModel).Port,
+				(ConnectionViewModel as ModbusTCPConnectViewModel).ModbusAddress,
+				(ConnectionViewModel as ModbusTCPConnectViewModel).StartAddress,
+				(ConnectionViewModel as ModbusTCPConnectViewModel).NoOfItems,
+				(ConnectionViewModel as ModbusTCPConnectViewModel).SizeOfItems);
 		}
 
 		protected override void InitSimulationCommunicator()
@@ -69,10 +73,10 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override bool IsSumulation()
 		{
-			if (!(ConnectionViewModel is SerialConncetViewModel serialConncet))
+			if (!(ConnectionViewModel is ModbusTCPConnectViewModel modbusTcpConncet))
 				return true;
 
-			return serialConncet.IsUdpSimulation;
+			return modbusTcpConncet.IsUdpSimulation;
 		}
 	}
 }

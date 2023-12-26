@@ -7,9 +7,9 @@ using Newtonsoft.Json;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DevuceFullData_MCU_B2B : DevuceFullData_MCU
+	public class DeviceFullData_MCU_B2B : DeviceFullData_MCU
 	{
-		public DevuceFullData_MCU_B2B(DeviceData deviceData) :
+		public DeviceFullData_MCU_B2B(DeviceData deviceData) :
 			base(deviceData)
 		{
 
