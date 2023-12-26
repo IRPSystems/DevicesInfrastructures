@@ -285,6 +285,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				case DeviceTypesEnum.SwitchRelay32: return new DevuceFullData_SwitchRelay32(deviceData);
 				case DeviceTypesEnum.NI_6002: return new DevuceFullData_NI_6002(deviceData);
 				case DeviceTypesEnum.Yokogawa_WT1804E: return new DevuceFullData_Yokogawa_WT1804E(deviceData);
+				case DeviceTypesEnum.FieldLogger: return new DevuceFullData_FieldLogger(deviceData);
 				default: return null;
             }
         }

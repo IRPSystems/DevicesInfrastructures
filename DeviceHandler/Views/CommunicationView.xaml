@@ -31,6 +31,10 @@
             <local:NI6002ConncetView DataContext="{Binding }"/>
         </DataTemplate>
 
+        <DataTemplate x:Key="ModbusTCPConnectTemplate">
+            <local:ModbusTCPConnectView DataContext="{Binding }"/>
+        </DataTemplate>
+
         <converter:TypeToNameConverter x:Key="ConnectionTypeStringConverter"/>
         <selectors:ConnectTemplateSelector x:Key="ConnectTemplateSelector"/>
 
@@ -83,60 +87,6 @@
             
         </ListView>
         
-        
-        
-        <!--<Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="5" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="5" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="5" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="120" />
-            <ColumnDefinition Width="5" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-
-        <Line Grid.RowSpan="10" Grid.Column="1" Y1="1" Stretch="Fill" Stroke="{DynamicResource MahApps.Brushes.Accent2}"/>
-
-
-        <TextBlock Grid.Row="0" Grid.Column="0" 
-                   Text="DYNO"
-                   VerticalAlignment="Center"
-                   Margin="5,0,0,0"
-                   FontWeight="DemiBold"/>
-
-        <local:CanConnectView Grid.Row="0" Grid.Column="2"
-                              DataContext="{Binding DynoCanConnect}"
-                              Margin="5,5,10,5"/>
-
-        <Line Grid.Row="1" Grid.ColumnSpan="10" X1="1" Stretch="Fill" Stroke="{DynamicResource MahApps.Brushes.Accent2}"/>
-
-        <TextBlock Grid.Row="2" Grid.Column="0" 
-                   Text="MCU"
-                   VerticalAlignment="Center"
-                   Margin="5,0,0,0"
-                   FontWeight="DemiBold"/>
-
-        <local:CanConnectView Grid.Row="2" Grid.Column="2"
-                              DataContext="{Binding MCUCanConnect}"
-                              Margin="5,5,10,5"/>
-
-        <Line Grid.Row="3" Grid.ColumnSpan="10" X1="1" Stretch="Fill" Stroke="{DynamicResource MahApps.Brushes.Accent2}"/>
-
-        <TextBlock Grid.Row="4" Grid.Column="0" 
-                   Text="Power Supply BK"
-                   VerticalAlignment="Center"
-                   Margin="5,0,0,0"
-                   FontWeight="DemiBold"/>
-
-        <local:SerialConncetView Grid.Row="4" Grid.Column="2"
-                              DataContext="{Binding PowerSupplyBK}"
-                              Margin="5,5,10,5"/>-->
 
     </Grid>
 </UserControl>
