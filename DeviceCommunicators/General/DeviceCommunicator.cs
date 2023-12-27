@@ -1,17 +1,16 @@
 ﻿
 using DeviceCommunicators.Enums;
-using DeviceCommunicators.Model;
-using Entities.Models;
 using Services.Services;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
 using Communication.Interfaces;
+using DeviceCommunicators.Models;
 
 namespace DeviceCommunicators.General
 {
-	public class DeviceCommunicator
+	public abstract class DeviceCommunicator
 	{
 		#region Fields
 
@@ -51,7 +50,7 @@ namespace DeviceCommunicators.General
 			_parameterQueue = new BlockingCollection<CommunicatorIOData>();
 
 			InitErrorsDictionary();
-			
+
 		}
 
 		#endregion Constructor
@@ -68,7 +67,7 @@ namespace DeviceCommunicators.General
 
 		protected virtual void InitErrorsDictionary()
 		{
-			
+
 		}
 
 		public virtual void Dispose()
@@ -78,11 +77,11 @@ namespace DeviceCommunicators.General
 				CommService.Dispose();
 			}
 
-			if(_cancellationTokenSource != null ) 
+			if (_cancellationTokenSource != null)
 				_cancellationTokenSource.Cancel();
 		}
 
-		
+
 
 
 		public void SetParamValue(DeviceParameterData param, double value, Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
@@ -157,7 +156,6 @@ namespace DeviceCommunicators.General
 						if (result == CommunicatorResultEnum.NoResponse &&
 							_parameterQueue.Count >= 100)
 						{
-							LoggerService.Error(this, "Overload");
 							while (_parameterQueue.Count > 50)
 							{
 								CommunicatorIOData item;
@@ -178,14 +176,11 @@ namespace DeviceCommunicators.General
 			}, _cancellationToken);
 		}
 
-		protected virtual CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
-		{
-			return CommunicatorResultEnum.OK;
-		}
+		protected abstract CommunicatorResultEnum HandleRequests(CommunicatorIOData data);
 
 		protected void FireConnectionEvent()
 		{
-			ConnectionEvent?.Invoke(this, new EventArgs());
+			ConnectionEvent?.Invoke();
 		}
 
 		public virtual void SendMessage(bool isExtended, uint id, byte[] buffer, Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
@@ -197,7 +192,7 @@ namespace DeviceCommunicators.General
 
 		#region Events
 
-		public event EventHandler ConnectionEvent;
+		public event Action ConnectionEvent;
 
 		#endregion Events
 	}

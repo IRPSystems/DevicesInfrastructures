@@ -12,12 +12,10 @@ using Services.Services;
 using DeviceHandler.Interfaces;
 using Communication.Services;
 using System.Globalization;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace DeviceHandler.ViewModels
 {
-	public class CanConnectViewModel: ObservableObject, IConnectionViewModel
+	public class CanConnectViewModel : ObservableObject, IConnectionViewModel
 	{
 		#region Properties
 
@@ -37,7 +35,8 @@ namespace DeviceHandler.ViewModels
 		[JsonIgnore]
 		public bool IsDisconnectButtonEnabled { get; set; }
 
-		public uint NodeID { get; set; }
+		public uint SyncNodeID { get; set; }
+		public uint AsyncNodeID { get; set; }
 
 		public int RxPort { get; set; }
 		public int TxPort { get; set; }
@@ -51,9 +50,10 @@ namespace DeviceHandler.ViewModels
 		#region Constructor
 
 		public CanConnectViewModel(
-			int baudRate, 
-			uint nodeId, 
-			int rxPort, 
+			int baudRate,
+			uint syncId,
+			uint asyncId,
+			int rxPort,
 			int txPort)
 		{
 			LoggerService.Inforamtion(this, "Starting CanConnctViewModel");
@@ -63,7 +63,7 @@ namespace DeviceHandler.ViewModels
 			IsConnectButtonEnabled = true;
 			IsDisconnectButtonEnabled = false;
 
-			
+
 			BuildBuatrateList();
 			BuildAdaptersList();
 			GetIpAddress();
@@ -75,7 +75,8 @@ namespace DeviceHandler.ViewModels
 			SelectedBaudrate = baudRate;
 			SelectedAdapter = "PCAN";
 
-			NodeID = nodeId;
+			SyncNodeID = syncId;
+			AsyncNodeID = asyncId;
 
 			RxPort = rxPort;
 			TxPort = txPort;
@@ -84,8 +85,6 @@ namespace DeviceHandler.ViewModels
 			HWID_DropDownOpenedCommand = new RelayCommand(HWID_DropDownOpened);
 
 			LoggerService.Inforamtion(this, "Ending Init of CanConnctViewModel");
-
-			HWID_DropDownOpened();
 		}
 
 		#endregion Constructor
@@ -115,7 +114,6 @@ namespace DeviceHandler.ViewModels
 			AdaptersList = new ObservableCollection<string>()
 			{
 				"PCAN",
-				"Ixxat",
 				"UDP Simulator",
 			};
 		}
@@ -132,25 +130,34 @@ namespace DeviceHandler.ViewModels
 				}
 			}
 		}
-			
+
+		public ushort GetSelectedHWId(string selectedHwId)
+		{
+			if (string.IsNullOrEmpty(selectedHwId))
+				return 0;
+
+			int index = selectedHwId.IndexOf("(");
+			if (index < 0)
+				return 0;
+
+			selectedHwId = selectedHwId.Substring(index + 1);
+
+			index = selectedHwId.IndexOf(")");
+			if (index < 0)
+				return 0;
+
+			selectedHwId = selectedHwId.Substring(0, index);
+			selectedHwId = selectedHwId.Trim('h');
+
+			ushort hwId;
+			bool ret = ushort.TryParse(selectedHwId, NumberStyles.HexNumber, null, out hwId);
+
+			return hwId;
+		}
 
 		private void HWID_DropDownOpened()
 		{
-
-			List<string> list = new List<string>();
-
-			List<string> hwIDsList_pcan = CanPCanService.GetHwIDs().ToList();
-			list.AddRange(hwIDsList_pcan);
-
-			string str;
-			ObservableCollection<string> ixxatList = CanIxxatService.GetDevicesList(out str);
-			if (ixxatList != null)
-			{
-				List<string> hwIDsList_ixxat = ixxatList.ToList();
-				list.AddRange(hwIDsList_ixxat);
-			}
-
-			HwIDsList = new ObservableCollection<string>(list);
+			HwIDsList = CanPCanService.GetHwIDs();
 		}
 
 		private void Addapter_SelectionChanged(SelectionChangedEventArgs e)
@@ -159,7 +166,7 @@ namespace DeviceHandler.ViewModels
 		}
 
 		private void HandleSelectedAddapter()
-		{ 
+		{
 			if (SelectedAdapter.StartsWith("UDP"))
 				UdpRowHeight = new GridLength(40);
 			else

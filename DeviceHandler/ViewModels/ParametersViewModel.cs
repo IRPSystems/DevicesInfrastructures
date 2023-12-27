@@ -4,7 +4,9 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DeviceCommunicators.EvvaDevice;
 using DeviceCommunicators.MCU;
+using DeviceCommunicators.Models;
 using DeviceHandler.Models;
+using DeviceHandler.Models.DeviceFullDataModels;
 using Entities.Enums;
 using Entities.Models;
 using Services.Services;
@@ -18,7 +20,7 @@ using System.Windows.Input;
 
 namespace DeviceHandler.ViewModel
 {
-	public class ParametersViewModel : ObservableObject
+    public class ParametersViewModel : ObservableObject
 	{
 		#region Properties
 
@@ -85,7 +87,7 @@ namespace DeviceHandler.ViewModel
 		{
 			LoggerService.Inforamtion(this, "Expanding all the devices");
 
-			foreach (DeviceBase deviceBase in DevicesList)
+			foreach (DeviceData deviceBase in DevicesList)
 				deviceBase.IsExpanded = true;
 		}
 
@@ -93,7 +95,7 @@ namespace DeviceHandler.ViewModel
 		{
 			LoggerService.Inforamtion(this, "Collapsing all the devices");
 
-			foreach (DeviceBase deviceBase in DevicesList)
+			foreach (DeviceData deviceBase in DevicesList)
 				deviceBase.IsExpanded = false;
 		}
 
@@ -136,7 +138,7 @@ namespace DeviceHandler.ViewModel
 
 		private void DragObject(MouseEventArgs e)
 		{
-			LoggerService.Inforamtion(this, "Object is draged");
+			//LoggerService.Inforamtion(this, "Object is draged");
 
 			Point mousePos = e.GetPosition(null);
 			Vector diff = _designDragDropData.StartPoint - mousePos;
@@ -182,6 +184,8 @@ namespace DeviceHandler.ViewModel
 				else
 					actualParam = param;
 
+				LoggerService.Inforamtion(this, "Dragging parameter \"" + actualParam.Name + "\"");
+
 				DataObject dragData = new DataObject(DragDropFormat, actualParam);
 				DragDrop.DoDragDrop(sourceObject, dragData, DragDropEffects.Move);
 			}
@@ -203,7 +207,7 @@ namespace DeviceHandler.ViewModel
 
 		private void SetSearchedTest(string text)
 		{
-			foreach (DeviceBase deviceBase in DevicesList)
+			foreach (DeviceData deviceBase in DevicesList)
 			{
 				if(!(deviceBase is DeviceData deviceData))
 					continue;
@@ -275,6 +279,14 @@ namespace DeviceHandler.ViewModel
 			ParamDoubleClickedEvent?.Invoke(paramData);
 		}
 
+		private void ListSourceParam_TreeView_SelectedItemChanged(RoutedPropertyChangedEventArgs<object> e)
+		{
+			if (!(e.NewValue is DeviceParameterData paramData))
+				return;
+
+			LoggerService.Inforamtion(this, "Selected parameter \"" + paramData.Name + "\"");
+		}
+
 
 		private void BuildDevicesList()
 		{
@@ -285,7 +297,7 @@ namespace DeviceHandler.ViewModel
 				AddEvvaDevice();
 
 
-			foreach (DeviceBase deviceBase in _devicesContainer.DevicesList)
+			foreach (DeviceData deviceBase in _devicesContainer.DevicesList)
 			{
 				if (_isHideEvvaDevice && deviceBase.Name == DeviceTypesEnum.EVVA.ToString())
 					continue;
@@ -392,6 +404,16 @@ namespace DeviceHandler.ViewModel
 			{
 				return _ListSourceParam_MouseDoubleClickCommand ?? (_ListSourceParam_MouseDoubleClickCommand =
 					new RelayCommand<MouseEventArgs>(ListSourceParam_MouseDoubleClick));
+			}
+		}
+
+		private RelayCommand<RoutedPropertyChangedEventArgs<object>> _ListSourceParam_TreeView_SelectedItemChangedCommand;
+		public RelayCommand<RoutedPropertyChangedEventArgs<object>> ListSourceParam_TreeView_SelectedItemChangedCommand
+		{
+			get
+			{
+				return _ListSourceParam_TreeView_SelectedItemChangedCommand ?? (_ListSourceParam_TreeView_SelectedItemChangedCommand =
+					new RelayCommand<RoutedPropertyChangedEventArgs<object>>(ListSourceParam_TreeView_SelectedItemChanged));
 			}
 		}
 

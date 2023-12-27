@@ -1,4 +1,5 @@
-﻿using Entities.Models;
+﻿using DeviceCommunicators.Models;
+using Entities.Models;
 using System.Collections.Generic;
 using System.Security.RightsManagement;
 

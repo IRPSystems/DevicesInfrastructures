@@ -2,7 +2,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.BTMTempLogger;
 using DeviceCommunicators.EvvaDevice;
+using DeviceCommunicators.FieldLogger;
 using DeviceCommunicators.MCU;
+using DeviceCommunicators.Models;
 using Entities.Enums;
 using Entities.Models;
 using ExcelDataReader;
@@ -21,7 +23,7 @@ namespace DeviceCommunicators.Services
 	{
 
 
-		public ObservableCollection<DeviceBase> ReadAllFiles(
+		public ObservableCollection<DeviceData> ReadAllFiles(
 			string dir,
 			string mcuFilePath,
 			string mcuB2BFilePath,
@@ -31,7 +33,7 @@ namespace DeviceCommunicators.Services
 			if (!Directory.Exists(dir))
 				return null;
 
-			ObservableCollection<DeviceBase> devicesList = new ObservableCollection<DeviceBase>();
+			ObservableCollection<DeviceData> devicesList = new ObservableCollection<DeviceData>();
 
 			List<string> filesList = Directory.GetFiles(dir).ToList();
 
@@ -45,23 +47,40 @@ namespace DeviceCommunicators.Services
 				}
 				else if(extension.ToLower().EndsWith("json"))
 				{
+					string path = file;
 					if (Path.GetFileName(file) == "param_defaults.json")
 						continue;
 
-					ReadFromJson(file, devicesList);
+					else if (Path.GetFileName(file) == "Dyno Communication.json" && dynoFilePath != null)
+						path = dynoFilePath;
+
+					else if (Path.GetFileName(file) == "NI_6002.json" && ni6002FilePath != null)
+						path = ni6002FilePath;
+
+					ReadFromJson(dir, path, devicesList);
 				}
 			}
 
-			ReadFromMCUJson(
-				mcuFilePath,
-				devicesList,
-				"MCU",
-				DeviceTypesEnum.MCU);
-			ReadFromMCUJson(
-				mcuB2BFilePath,
-				devicesList,
-				"MCU - B2B",
-				DeviceTypesEnum.MCU_B2B);
+			if (mcuFilePath != null)
+			{
+				ReadFromMCUJson(
+					mcuFilePath,
+					devicesList,
+					"MCU",
+					DeviceTypesEnum.MCU);
+			}
+
+			if (mcuB2BFilePath != null)
+			{
+				ReadFromMCUJson(
+					mcuB2BFilePath,
+					devicesList,
+					"MCU - B2B",
+					DeviceTypesEnum.MCU_B2B);
+			}
+
+			InitBTMTempLogger(devicesList);
+			InitFieldLogger(devicesList);
 
 
 			return devicesList;
@@ -70,7 +89,7 @@ namespace DeviceCommunicators.Services
 
 		public void ReadFromMCUJson(
 			string path,
-			ObservableCollection<DeviceBase> devicesList,
+			ObservableCollection<DeviceData> devicesList,
 			string name, 
 			DeviceTypesEnum deviceTypes)
 		{
@@ -88,37 +107,93 @@ namespace DeviceCommunicators.Services
 			mcu_ListHandler.ReadMCUDeviceData(path, deviceData);
 		}
 
-		public void ReadFromJson(
-			string path,
-			ObservableCollection<DeviceBase> devicesList)
+		public void InitBTMTempLogger(ObservableCollection<DeviceData> devicesList)
 		{
-			//string path = Path.Combine(dir, "Power Supply BK.json");
-
-			// Remove previouse PSBK
-			int index = -1;
-			DeviceBase dynoDevice = devicesList.ToList().Find(
-				(d) => (d as DeviceData).DeviceType == DeviceTypesEnum.PowerSupplyBK);
-			if (dynoDevice != null)
+			DeviceData btmTempLogger = new DeviceData()
 			{
-				index = devicesList.IndexOf(dynoDevice);
-				if (dynoDevice != null)
-					devicesList.Remove(dynoDevice);
+				Name = "BTM Temp Logger",
+				DeviceType = DeviceTypesEnum.BTMTempLogger,
+			};
+
+			btmTempLogger.ParemetersList = new ObservableCollection<DeviceParameterData>();
+			for (int i = 1; i <= 12; i++)
+			{
+				DeviceParameterData param = new BTMTempLogger_ParamData()
+				{
+					Channel = i,
+					Name = "Channel " + i,
+					Units = "°C",
+					DeviceType = DeviceTypesEnum.BTMTempLogger,
+					Device = btmTempLogger,
+				};
+
+				btmTempLogger.ParemetersList.Add(param);
 			}
 
+			devicesList.Add(btmTempLogger);
+		}
+
+		public void InitFieldLogger(ObservableCollection<DeviceData> devicesList)
+		{
+			DeviceData fieldLogger = new DeviceData()
+			{
+				Name = "Field Logger",
+				DeviceType = DeviceTypesEnum.FieldLogger,
+			};
+
+			fieldLogger.ParemetersList = new ObservableCollection<DeviceParameterData>();
+			for (int i = 1; i <= 8; i++)
+			{
+				DeviceParameterData param = new FieldLogger_ParamData()
+				{
+					Channel = i,
+					Name = "Channel " + i,
+					//Units = "°C",
+					DeviceType = DeviceTypesEnum.FieldLogger,
+					Device = fieldLogger,
+				};
+
+				fieldLogger.ParemetersList.Add(param);
+			}
+
+			devicesList.Add(fieldLogger);
+		}
+
+		public void ReadFromJson(
+			string originalDir,
+			string path,
+			ObservableCollection<DeviceData> devicesList)
+		{
+
+			if(path.Contains(originalDir) == false)
+				FixJson(path);
 
 			string jsonString = File.ReadAllText(path);
 
 			JsonSerializerSettings settings = new JsonSerializerSettings();
 			settings.Formatting = Formatting.Indented;
 			settings.TypeNameHandling = TypeNameHandling.All;
-			DeviceBase device = JsonConvert.DeserializeObject(jsonString, settings) as DeviceBase;
-			if (device != null)
+			DeviceData device = JsonConvert.DeserializeObject(jsonString, settings) as DeviceData;
+			if (device == null)
+				return;
+
+
+			int index = -1;
+			DeviceData existingDevice = devicesList.ToList().Find(
+				(d) => (d as DeviceData).DeviceType == device.DeviceType);
+			if (existingDevice != null)
 			{
-				if (index >= 0)
-					devicesList.Insert(index, device);
-				else
-					devicesList.Add(device);
+				index = devicesList.IndexOf(existingDevice);
+				if (existingDevice != null)
+					devicesList.Remove(existingDevice);
 			}
+
+			if (index >= 0)
+				devicesList.Insert(index, device);
+			else
+				devicesList.Add(device);
+			
+
 
 			if (device is DeviceData deviceData)
 			{
@@ -132,7 +207,7 @@ namespace DeviceCommunicators.Services
 
 		public void ReadFromExcel(
 			string path,
-			ObservableCollection<DeviceBase> devicesList)
+			ObservableCollection<DeviceData> devicesList)
 		{
 
 			IExcelDataReader reader;
@@ -227,7 +302,32 @@ namespace DeviceCommunicators.Services
 			}
 		}
 
-		
 
+
+		private void FixJson(string filePath)
+		{
+
+			string fileData = null;
+			using (StreamReader sr = new StreamReader(filePath))
+			{
+				fileData = sr.ReadToEnd();
+			}
+
+			fileData = fileData.Replace(
+				"Entities.Models.DeviceData, Entities",
+				"DeviceCommunicators.Models.DeviceData, DeviceCommunicators");
+
+			fileData = fileData.Replace(
+				"Entities.Models.DeviceParameterData, Entities",
+				"DeviceCommunicators.Models.DeviceParameterData, DeviceCommunicators");
+
+			using (StreamWriter sw = new StreamWriter(filePath))
+			{
+				sw.Write(fileData);
+			}
+
+
+
+		}	
 	}
 }

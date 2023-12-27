@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
+using DeviceCommunicators.Models;
 
 namespace DeviceCommunicators.MCU
 {

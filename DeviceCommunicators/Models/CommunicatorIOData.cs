@@ -1,9 +1,9 @@
 ﻿
 using DeviceCommunicators.Enums;
-using Entities.Models;
+using DeviceCommunicators.Models;
 using System;
 
-namespace DeviceCommunicators.Model
+namespace DeviceCommunicators.Models
 {
 	public class CommunicatorIOData
 	{

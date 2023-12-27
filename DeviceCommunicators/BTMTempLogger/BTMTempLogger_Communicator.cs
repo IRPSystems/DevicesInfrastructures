@@ -1,17 +1,25 @@
 ﻿using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
-using DeviceCommunicators.Model;
-using Entities.Models;
+using DeviceCommunicators.Interfaces;
+using DeviceCommunicators.Models;
 using Services.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Timers;
 
 namespace DeviceCommunicators.BTMTempLogger
 {
-    public class BTMTempLogger_Communicator: DeviceCommunicator
+    public class BTMTempLogger_Communicator: DeviceCommunicator, IDataLoggerCommunicator
 	{
+		private enum WorkState 
+		{ 
+			StartNotFound,
+			StartFound,
+			EndFound
+		}
+
 		#region Fields
 
 		private const string _startOfText = "\u0002";
@@ -23,11 +31,20 @@ namespace DeviceCommunicators.BTMTempLogger
 
         public string Name;
 
+		private string _totalMessage;
+		private System.Timers.Timer _timer;
+
+		private bool _isDataReceived;
+
 		#endregion Fields
 
 
 		#region Properties
 
+		public int NumberOfChannels 
+		{
+			get => 12;
+		}
 
 		#endregion Properties
 
@@ -37,7 +54,15 @@ namespace DeviceCommunicators.BTMTempLogger
         {
 			_channelTemp = new ConcurrentDictionary<int, double>();
 
+
+			_timer = new System.Timers.Timer(500);
+			_timer.Elapsed += _timer_Elapsed;
+			//_workState = WorkState.StartNotFound;
+			_totalMessage = string.Empty;
+
 		}
+
+		
 
 		#endregion Constructor
 
@@ -54,7 +79,10 @@ namespace DeviceCommunicators.BTMTempLogger
             _name_comport = comName;
             _boud_rate = baudtate;
 
-            if(isUdpSimulation)
+			_isDataReceived = false;
+
+
+			if (isUdpSimulation)
 				CommService = new SerialUdpSimulationService(rxPort, txPort, address);
             else
 			    CommService = new SerialService(_name_comport, _boud_rate);
@@ -65,7 +93,8 @@ namespace DeviceCommunicators.BTMTempLogger
 			CommService.Init(true);
 
 			InitBase();
-
+			//_message = string.Empty;
+			_timer.Start();
 
 		}
 
@@ -101,6 +130,20 @@ namespace DeviceCommunicators.BTMTempLogger
 			if (!(param is BTMTempLogger_ParamData btmParam))
 				return;
 
+			if(!_isDataReceived)
+			{
+				callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
+				return;
+			}
+
+			if(btmParam.Name == "Check Communication")
+			{
+				callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+
+				return;
+			}
+
+
 			double value;
 			bool res = GetChannelValue(btmParam.Channel, out value);
 			if(res == false)
@@ -128,10 +171,35 @@ namespace DeviceCommunicators.BTMTempLogger
 
 		private void MessageReceived(byte[] buffer)
 		{
+			_isDataReceived = true;
+			var str = System.Text.Encoding.Default.GetString(buffer);
+			lock(_totalMessage)
+				_totalMessage += str.Replace("\0", string.Empty);
+		}
+
+		
+
+		private void _timer_Elapsed(object sender, ElapsedEventArgs e)
+		{
+			HandleMessage();
+		}
+
+		private void HandleMessage()
+		{
 			try
 			{
-				
-				var str = System.Text.Encoding.Default.GetString(buffer);
+				string str = string.Empty;
+				lock (_totalMessage)
+				{
+					if(string.IsNullOrEmpty(_totalMessage))
+					{
+						_isDataReceived = false;
+						return;
+					}
+
+					str = _totalMessage;
+					_totalMessage = string.Empty;
+				}
 
 				string[] channelsList = str.Split(_startOfText);
 
@@ -170,7 +238,7 @@ namespace DeviceCommunicators.BTMTempLogger
 					_channelTemp[nch] = dVal;
 				}
 			}
-			catch(Exception ex) 
+			catch (Exception ex)
 			{
 				LoggerService.Error(this, "Error on parssing channel temperature", ex);
 			}

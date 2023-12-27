@@ -1,28 +1,29 @@
-﻿//#define _SAVE_TIME
+﻿
+//#define _SAVE_TIME
+using Communication.Interfaces;
 using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
-using DeviceCommunicators.Model;
 using DeviceCommunicators.Models;
-using DeviceCommunicators.Services;
-using Entities.Enums;
 using Entities.Models;
 using Services.Services;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Diagnostics;
 #if _SAVE_TIME
+using System.Collections.Generic;
 using System.IO;
 #endif
+using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
-using TmctlAPINet;
+using System.Windows.Markup;
 
 namespace DeviceCommunicators.MCU
 {
 	public class MCU_Communicator : DeviceCommunicator, IDisposable
 	{
-#region Fields
+		#region Fields
 
 		private const int _maxNumOfBuffers = 3000;
 		private const int _maxNumOfIds = 5000;
@@ -34,6 +35,7 @@ namespace DeviceCommunicators.MCU
 		private const byte _errShift = 4;
 
 		private const int _getResponseRepeats = 5;
+		private const int _getResponsesTime = 20;
 
 		public ConcurrentDictionary<int, string> _mcuErrorToDescription;
 
@@ -42,11 +44,8 @@ namespace DeviceCommunicators.MCU
 
 		private System.Timers.Timer _poolBuildTimer;
 
-		private bool _isTimeout;
-		private System.Timers.Timer _timeoutTimer;
 
-		private  ConcurrentDictionary<uint, byte[]> _messagesDict;
-
+		private uint _syncID;
 
 #if _SAVE_TIME
 		private List<(TimeSpan, string)> _commTimeList;
@@ -61,9 +60,9 @@ namespace DeviceCommunicators.MCU
 			get => CommService as CanService;
 		}
 
-#endregion Properties
+		#endregion Properties
 
-#region Constructor
+		#region Constructor
 
 		public MCU_Communicator()
 		{
@@ -74,15 +73,14 @@ namespace DeviceCommunicators.MCU
 			_poolBuildTimer = new System.Timers.Timer(500);
 			_poolBuildTimer.Elapsed += PoolBuildTimerElapsed;
 
-
 #if _SAVE_TIME
 			_commTimeList = new List<(TimeSpan, string)>();
 #endif
 		}
 
-#endregion Constructor
+		#endregion Constructor
 
-#region Methods
+		#region Methods
 
 		protected override void InitErrorsDictionary()
 		{
@@ -97,10 +95,9 @@ namespace DeviceCommunicators.MCU
 		public void Init(
 			string canAdapterType,
 			int baudrate,
-			uint nodeId,
-			string hwId = "",
-			uint syncId = 0xAB, 
-			uint asyncId = 0xAA,
+			uint syncID,
+			uint asyncID,
+			ushort hwId = 0,
 			int rxPort = 0,
 			int txPort = 0,
 			string address = "")
@@ -109,30 +106,23 @@ namespace DeviceCommunicators.MCU
 				this,
 				"Initiating communication - Adapter: " + canAdapterType);
 
+			_syncID = syncID;
+
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, nodeId, CanPCanService.GetHWId(hwId), asyncId, syncId);
-			}
-			if (canAdapterType.ToUpper() == "IXXAT")
-			{
-				CommService = new CanIxxatService(baudrate, nodeId, CanIxxatService.GetDeviceId(hwId), asyncId, syncId);
+				CommService = new CanPCanService(baudrate, hwId, syncID, asyncID);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
-				CommService = new CanUdpSimulationService(baudrate, nodeId, rxPort, txPort, address, asyncId, syncId);
+				CommService = new CanUdpSimulationService(baudrate, syncID, asyncID, rxPort, txPort, address);
 			}
-
-
-			CanService.RegisterId(syncId, SyncMessageHandler);
-			CanService.RegisterId(asyncId, AsyncMessageHandler);
 
 
 			CommService.Init(false);
 			CommService.Name = "MCU_Communicator";
+			CanService.CanMessageReceivedEvent += AsyncMessageWasReceived;
 
 
-			_timeoutTimer = new System.Timers.Timer(50);
-			_timeoutTimer.Elapsed += TimoutElapsedEventHandler;
 
 			_poolBuildTimer.Start();
 
@@ -141,35 +131,10 @@ namespace DeviceCommunicators.MCU
 			InitBase();
 		}
 
-		public void InitMessageDict(DeviceData device)
-		{
-			_messagesDict = new ConcurrentDictionary<uint, byte[]>();
-
-			foreach(DeviceParameterData param in device.ParemetersList)
-			{
-				if (!(param is MCU_ParamData mcuParam))
-					continue;
-
-				if (mcuParam.Cmd == null)
-					continue;
-
-				byte[] idBuff = new byte[3];
-				mcuParam.GetMessageID(ref idBuff);
-				
-				uint id = GetIdFromBuffer(idBuff);
-
-				_messagesDict[id] = null;
-			}
-		}
-
 		public override void Dispose()
 		{
 			LoggerService.Inforamtion(this, "Disposing");
 
-			_isTimeout = true;
-
-			if (_timeoutTimer != null)
-				_timeoutTimer.Stop();
 
 			_poolBuildTimer.Stop();
 
@@ -220,9 +185,15 @@ namespace DeviceCommunicators.MCU
 			int i = 0;
 			for (; i < _getResponseRepeats; i++)
 			{
-
-
-				byte[] id = _idBuffersPool.Take(_cancellationToken);
+				byte[] id = null;
+				try
+				{
+					id = _idBuffersPool.Take(_cancellationToken);
+				}
+				catch (OperationCanceledException)
+				{
+					break;
+				}
 
 
 				var buffer = ConvertToData(mcuParam, data.Value, ref id, data.IsSet);
@@ -268,8 +239,6 @@ namespace DeviceCommunicators.MCU
 					result = CommunicatorResultEnum.Error;
 				}
 
-				if(mcuParam.Name.Contains("Manual Throttle")) { }
-
 				if (result == CommunicatorResultEnum.OK)
 					break;
 
@@ -298,7 +267,7 @@ namespace DeviceCommunicators.MCU
 		private int GetValueAsInt(object valOb)
 		{
 			double d = 0;
-			if(valOb is string str)
+			if (valOb is string str)
 				double.TryParse(str, out d);
 			else
 			{
@@ -306,7 +275,7 @@ namespace DeviceCommunicators.MCU
 			}
 
 			return Convert.ToInt32(d);
-			
+
 		}
 
 		private object _lockObj = new object();
@@ -317,25 +286,24 @@ namespace DeviceCommunicators.MCU
 			byte[] paramId,
 			int setValue = 0)
 		{
-			
+
 
 			lock (_lockObj)
 			{
 				CommunicatorResultEnum isSuccess = CommunicatorResultEnum.None;
 				errorDescription = null;
 
-				_isTimeout = false;
-				_timeoutTimer.Start();
 
 				byte[] readBuffer = null;
 
 				readBuffer = null;
-				GetBuffer(ref readBuffer, paramId);
+				ReadBuffer(ref readBuffer);
 
-				
+
 				if (readBuffer != null)
 				{
 					isSuccess = HandleBuffer(
+						paramId,
 						readBuffer,
 						mcuParam,
 						isSet,
@@ -349,46 +317,46 @@ namespace DeviceCommunicators.MCU
 				System.Threading.Thread.Sleep(1);
 
 
-				if ((readBuffer == null || _isTimeout) && isSuccess == CommunicatorResultEnum.None)
+				if (readBuffer == null && isSuccess == CommunicatorResultEnum.None)
 				{
-					isSuccess =  CommunicatorResultEnum.NoResponse;
+					isSuccess = CommunicatorResultEnum.NoResponse;
 				}
-
-				_timeoutTimer.Stop();
-				_isTimeout = false;
 
 				return isSuccess;
 			}
 
-			
+
 		}
 
-		private void GetBuffer(
-			ref byte[] readBuffer,
-			byte[] paramId)
+		private void ReadBuffer(ref byte[] readBuffer)
 		{
-			uint id = GetIdFromBuffer(paramId);
+			uint readNode = 0;
 
-			while (readBuffer == null)
+			Stopwatch timeout = new Stopwatch();
+			timeout.Start();
+			while (readBuffer == null && (timeout.ElapsedMilliseconds < _getResponsesTime))
 			{
-				System.Threading.Thread.Sleep(1);
-				if (_isTimeout)
-					break;
 
-				lock (_messagesDict)
+				CanService.Read(out readBuffer, out readNode);
+
+
+				if (readBuffer != null)
 				{
-					if (_messagesDict.ContainsKey(id) == false)
+					if (readNode != _syncID)
+					{
+						readBuffer = null;
 						continue;
-
-					readBuffer = _messagesDict[id];
-					_messagesDict[id] = null;
+					}
+					break;
 				}
 
-				break;
+				System.Threading.Thread.Sleep(1);
+
 			}
 		}
 
 		private CommunicatorResultEnum HandleBuffer(
+			byte[] paramId,
 			byte[] readBuffer,
 			MCU_ParamData mcuParam,
 			bool isSet,
@@ -401,8 +369,8 @@ namespace DeviceCommunicators.MCU
 
 			try
 			{
-				
-				int isSuccess = IsErr(readBuffer);
+
+				int isSuccess = IsErr(readBuffer, paramId);
 
 
 				if (isSuccess == 0)
@@ -415,7 +383,7 @@ namespace DeviceCommunicators.MCU
 
 					double dvalue = (double)value / mcuParam.Scale;
 
-					if(dvalue == 0 && 
+					if (dvalue == 0 &&
 						mcuParam.Value is double prevValue &&
 						prevValue != 0)
 					{
@@ -447,7 +415,7 @@ namespace DeviceCommunicators.MCU
 					mcuParam.Name + ": ValueNotSet: Original=" + value + "; Ack=" + dsetValue);
 				return CommunicatorResultEnum.ValueNotSet;
 			}
-			
+
 
 
 			return CommunicatorResultEnum.OK;
@@ -467,7 +435,7 @@ namespace DeviceCommunicators.MCU
 
 			byte[] data = _buffersPool.Take(_cancellationToken);
 
-			
+
 			//! Split command and value:
 			int write_permission = isSet ? 1 : 0;
 
@@ -509,9 +477,21 @@ namespace DeviceCommunicators.MCU
 		}
 
 		private int IsErr(
-			byte[] buffer)
+			byte[] buffer,
+			byte[] out_id)
 		{
 
+			byte[] in_id = _idBuffersPool.Take(_cancellationToken);
+
+			Array.Copy(buffer, 0, in_id, 0, 3);
+
+			//! Check if id sent is id received
+			if (!Enumerable.SequenceEqual(in_id, out_id))
+			{
+				return 4;
+			}
+
+			//! err bits locates in H nibble in data byte[3]
 			var err = (buffer[3] & _errMask) >> _errShift;
 
 			if (err != 0)
@@ -527,16 +507,10 @@ namespace DeviceCommunicators.MCU
 
 		}
 
-
-		private void TimoutElapsedEventHandler(object sender, ElapsedEventArgs e)
-		{
-			_isTimeout = true;
-		}
-
 		private void PoolBuildTimerElapsed(object sender, ElapsedEventArgs e)
-        {
-            while (_buffersPool.Count < _maxNumOfBuffers)
-            {
+		{
+			while (_buffersPool.Count < _maxNumOfBuffers)
+			{
 				try
 				{
 					_buffersPool.Add(new byte[8], _cancellationToken);
@@ -548,8 +522,8 @@ namespace DeviceCommunicators.MCU
 				}
 			}
 
-            while (_idBuffersPool.Count < _maxNumOfIds)
-            {
+			while (_idBuffersPool.Count < _maxNumOfIds)
+			{
 				try
 				{
 					_idBuffersPool.Add(new byte[3], _cancellationToken);
@@ -560,9 +534,16 @@ namespace DeviceCommunicators.MCU
 					break;
 				}
 			}
-        }
+		}
 
-#region CAN Message
+
+		private void AsyncMessageWasReceived(uint node, byte[] buffer)
+		{
+			AsyncMessageReceivedEvent?.Invoke(node, buffer);
+		}
+
+
+		#region CAN Message
 
 		public override void SendMessage(bool isExtended, uint id, byte[] buffer, Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
 		{
@@ -593,51 +574,11 @@ namespace DeviceCommunicators.MCU
 
 		#endregion DBC
 
-
-
-		private void SyncMessageHandler(byte[] buffer)
-		{
-			if (_messagesDict == null)
-			{
-				return;
-			}
-
-			lock (_messagesDict)
-			{
-				DateTime start = DateTime.Now;
-
-				byte[] idBuffer = _idBuffersPool.Take(_cancellationToken);
-				Array.Copy(buffer, idBuffer, 3);
-
-				uint id = GetIdFromBuffer(buffer);
-
-				_messagesDict[id] = buffer;
-
-				TimeSpan diff = DateTime.Now - start;
-			}
-		}
-
-		private void AsyncMessageHandler(byte[] buffer)
-		{
-			AsyncIdMessageReceived?.Invoke(buffer);
-		}
-
-		private uint GetIdFromBuffer(byte[] buffer) 
-		{
-			uint id = 0;
-			for(int i = 0; i < 3; i++) 
-			{
-				id += (uint)(buffer[i] << (i * 8));
-			}
-
-			return id;
-		}
-
 		#endregion Methods
 
 		#region Events
 
-		public event Action<byte[]> AsyncIdMessageReceived;
+		public event Action<uint, byte[]> AsyncMessageReceivedEvent;
 
 		#endregion Events
 	}

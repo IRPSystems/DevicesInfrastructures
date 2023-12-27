@@ -6,14 +6,13 @@ using System.Collections.Generic;
 using System.Threading;
 using DeviceCommunicators.Enums;
 using Entities.Models;
-using DeviceCommunicators.Model;
 using DeviceCommunicators.NI_6002;
 using Entities.Enums;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Metrics;
 using System.IO;
-
+using DeviceCommunicators.Models;
 
 namespace DeviceCommunicators.Scop_MSOX3104T
 {

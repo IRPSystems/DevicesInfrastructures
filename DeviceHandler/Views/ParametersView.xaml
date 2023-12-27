@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"   
-             xmlns:entity_models="clr-namespace:Entities.Models;assembly=Entities" 
+             xmlns:device_comm_models="clr-namespace:DeviceCommunicators.Models;assembly=DeviceCommunicators" 
              xmlns:mcu_modles="clr-namespace:DeviceCommunicators.MCU;assembly=DeviceCommunicators"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" 
              mc:Ignorable="d" 
@@ -115,6 +115,14 @@
                                            PassEventArgsToCommand="True"/>
                 </i:EventTrigger>
 
+
+                <i:EventTrigger EventName="SelectedItemChanged">
+                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ListSourceParam_TreeView_SelectedItemChangedCommand, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}" 
+                                           PassEventArgsToCommand="True"/>
+                </i:EventTrigger>
+
             </i:Interaction.Triggers>
 
             <TreeView.Resources>
@@ -127,13 +135,13 @@
                 <HierarchicalDataTemplate DataType="{x:Type mcu_modles:MCU_DeviceData}" ItemsSource="{Binding MCU_GroupList}" >
                     <TextBlock Text="{Binding Path=Name}" Margin="0,2" />
                 </HierarchicalDataTemplate>
-                <HierarchicalDataTemplate DataType="{x:Type entity_models:DeviceData}" ItemsSource="{Binding ParemetersList}">
+                <HierarchicalDataTemplate DataType="{x:Type device_comm_models:DeviceData}" ItemsSource="{Binding ParemetersList}">
                     <TextBlock Text="{Binding Path=Name}" Margin="0,2"/>
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type mcu_modles:ParamGroup}" ItemsSource="{Binding ParamList}">
                     <TextBlock Text="{Binding Path=GroupName}" Margin="0,2" />
                 </HierarchicalDataTemplate>
-                <DataTemplate DataType="{x:Type entity_models:DeviceParameterData}" >
+                <DataTemplate DataType="{x:Type device_comm_models:DeviceParameterData}" >
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -204,7 +212,7 @@
                 <treeViewEngine:HierarchyPropertyDescriptor TargetType="{x:Type mcu_modles:MCU_DeviceData}" 
                                                             ChildPropertyName="MCU_GroupList"/>
 
-                <treeViewEngine:HierarchyPropertyDescriptor TargetType="{x:Type entity_models:DeviceData}" 
+                <treeViewEngine:HierarchyPropertyDescriptor TargetType="{x:Type device_comm_models:DeviceData}" 
                                                             ChildPropertyName="ParemetersList"/>
 
                 <treeViewEngine:HierarchyPropertyDescriptor TargetType="{x:Type mcu_modles:ParamGroup}" 

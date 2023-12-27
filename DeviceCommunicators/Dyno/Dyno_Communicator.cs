@@ -1,9 +1,8 @@
-﻿using Communication.Interfaces;
+﻿
+using Communication.Interfaces;
 using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
-using DeviceCommunicators.MCU;
-using DeviceCommunicators.Model;
 using DeviceCommunicators.Models;
 using Entities.Models;
 using Services.Services;
@@ -15,8 +14,8 @@ using System.Timers;
 
 namespace DeviceCommunicators.Dyno
 {
-    public class Dyno_Communicator: DeviceCommunicator
-    {
+	public class Dyno_Communicator : DeviceCommunicator
+	{
 		#region Fields
 
 		public ConcurrentDictionary<int, string> _dynoErrorToDescription;
@@ -36,10 +35,6 @@ namespace DeviceCommunicators.Dyno
 		private List<TimeSpan> _commTimeList;
 
 		private uint _nodeId;
-
-
-
-		private ConcurrentDictionary<(int,byte), byte[]> _messagesDict;
 
 		#endregion Fields
 
@@ -114,9 +109,9 @@ namespace DeviceCommunicators.Dyno
 			int rxPort = 0,
 			int txPort = 0,
 			string address = "")
-        {
+		{
 			LoggerService.Inforamtion(
-				this, 
+				this,
 				"Initiating communication - Adapter: " + canAdapterType);
 
 			_nodeId = nodeId;
@@ -124,15 +119,12 @@ namespace DeviceCommunicators.Dyno
 
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, 0x600 + _nodeId, hwId, 0x580 + _nodeId, 0x600 + _nodeId);
+				CommService = new CanPCanService(baudrate, hwId, 0x580 + _nodeId, 0x600 + _nodeId);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
-				CommService = new CanUdpSimulationService(baudrate, 0x600 + _nodeId, rxPort, txPort, address, 0x580 + _nodeId, 0x600 + _nodeId);
+				CommService = new CanUdpSimulationService(baudrate, 0x580 + _nodeId, 0x600 + _nodeId, rxPort, txPort, address);
 			}
-
-
-			CanService.RegisterId(0x580 + _nodeId, MessageReceivedEventHandler);
 
 			CommService.Init(false);
 			CommService.Name = "Dyno_Communicator";
@@ -148,27 +140,13 @@ namespace DeviceCommunicators.Dyno
 			InitBase();
 		}
 
-		public void InitMessageDict(DeviceData device)
-		{
-			_messagesDict = new ConcurrentDictionary<(int, byte), byte[]>();
-
-			foreach (DeviceParameterData param in device.ParemetersList)
-			{
-				if (!(param is Dyno_ParamData dynoParam))
-					continue;
-
-				_messagesDict[(dynoParam.Index, dynoParam.SubIndex)] = null;
-			}
-		}
-
-
 		public override void Dispose()
 		{
 			LoggerService.Inforamtion(this, "Disposing");
 
 			_isTimeout = true;
 
-			if(_cancellationTokenSource != null) 
+			if (_cancellationTokenSource != null)
 				_cancellationTokenSource.Cancel();
 
 			if (_poolBuildTimer != null)
@@ -204,7 +182,7 @@ namespace DeviceCommunicators.Dyno
 			if (!(data.Parameter is Dyno_ParamData dynoParam))
 				return;
 
-			LoggerService.Debug(this, 
+			LoggerService.Debug(this,
 				"Setting parameter - Nane: " + dynoParam +
 				" - Value: " + data.Value);
 
@@ -243,24 +221,24 @@ namespace DeviceCommunicators.Dyno
 			value = (value - value % 256) / 256;
 			buffer[index++] = Convert.ToByte(value);
 
-			CanService.Send(buffer);
+			CanService.Send(buffer, 0x600 + _nodeId, false);
 
-			
-			
+
+
 			WaitForResponse(
 				dynoParam,
 				data.Callback,
 				true);
-			
+
 
 
 		}
 
-       
+
 
 		private void HandleGetParams(CommunicatorIOData data)
 		{
-			
+
 
 			if (!(data.Parameter is Dyno_ParamData dynoParam))
 				return;
@@ -285,16 +263,16 @@ namespace DeviceCommunicators.Dyno
 			index++;
 
 
-			CommService.Send(buffer);
+			CanService.Send(buffer, 0x600 + _nodeId, false);
 
-			
 
-			
+
+
 			WaitForResponse(
 				dynoParam,
 				data.Callback,
 				false);
-			
+
 
 		}
 		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
@@ -324,34 +302,46 @@ namespace DeviceCommunicators.Dyno
 		{
 			lock (_lockObj)
 			{
-				
+
 				_isTimeout = false;
 				_timeoutTimer.Start();
 
 				byte[] readBuffer = null;
-				
+				uint readNode = 0;
+
 				while (readBuffer == null)
 				{
 					if (_isTimeout)
 						break;
 
 
-					if (_messagesDict.ContainsKey((dynoParam.Index, dynoParam.SubIndex)) == false)
-						continue;
+					CanService.Read(out readBuffer, out readNode);
 
-					readBuffer = _messagesDict[(dynoParam.Index, dynoParam.SubIndex)];
+
+
+					if (readBuffer != null)
+					{
+						if (readNode != (_nodeId + 0x580))
+						{
+							readBuffer = null;
+							continue;
+						}
+
+
+						break;
+					}
 
 					System.Threading.Thread.Sleep(1);
 
 				}
-				
+
 
 
 				if (readBuffer != null)
 				{
 					byte commandByte = readBuffer[0];
 					commandByte = (byte)(commandByte >> 4);
-					switch(commandByte)
+					switch (commandByte)
 					{
 						case 0x4:
 							GetResponse(
@@ -385,23 +375,53 @@ namespace DeviceCommunicators.Dyno
 				_timeoutTimer.Stop();
 				_isTimeout = false;
 
-				
+
 			}
 		}
 
-		
+		private bool IsUniqueIdOk(
+			Dyno_ParamData dynoParam,
+			byte[] readBuffer,
+			bool isError = false)
+		{
+			int index = 1;
+			int uniqueParamID = (int)GetDataFromBuffer(readBuffer, index, 2);
+			index += 2;
+
+			int subIndex = (byte)GetDataFromBuffer(readBuffer, index, 1);
+
+
+			int uniqueId = Dyno_ParamData.BaseUniqueParamID - uniqueParamID;
+			if (isError)
+			{
+				uniqueId = Math.Abs(uniqueId);
+			}
+
+			if (!(uniqueId == dynoParam.Index &&
+				subIndex == dynoParam.SubIndex))
+			{
+				return false;
+			}
+
+			return true;
+		}
 
 		private void ErrorResponse(
 			Dyno_ParamData dynoParam,
 			byte[] readBuffer,
 			Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
 		{
-			
+			bool isUniqueIdOk = IsUniqueIdOk(dynoParam, readBuffer, true);
+			if (!isUniqueIdOk)
+			{
+				callback?.Invoke(dynoParam, CommunicatorResultEnum.InvalidUniqueId, null);
+				return;
+			}
 
 			int errCode = (int)GetDataFromBuffer(readBuffer, 4, 4);
 
 			string errDescription = "Unknown error code";
-			if (_dynoErrorToDescription.ContainsKey(errCode)) 
+			if (_dynoErrorToDescription.ContainsKey(errCode))
 				errDescription = _dynoErrorToDescription[errCode];
 
 			LoggerService.Debug(this,
@@ -419,8 +439,13 @@ namespace DeviceCommunicators.Dyno
 			LoggerService.Debug(this,
 				"Response for set - Nane: " + dynoParam);
 
-			
-						
+			bool isUniqueIdOk = IsUniqueIdOk(dynoParam, readBuffer);
+			if (!isUniqueIdOk)
+			{
+				callback?.Invoke(dynoParam, CommunicatorResultEnum.InvalidUniqueId, null);
+				return;
+			}
+
 			callback?.Invoke(dynoParam, CommunicatorResultEnum.OK, null);
 		}
 
@@ -432,15 +457,20 @@ namespace DeviceCommunicators.Dyno
 			LoggerService.Debug(this,
 				"Response for get - Nane: " + dynoParam);
 
-			
+			bool isUniqueIdOk = IsUniqueIdOk(dynoParam, readBuffer);
+			if (!isUniqueIdOk)
+			{
+				callback?.Invoke(dynoParam, CommunicatorResultEnum.InvalidUniqueId, null);
+				return;
+			}
 
 			double value = (int)GetDataFromBuffer(readBuffer, 4, 4);
 
-			
 
-			
+
+
 			byte commandByte = readBuffer[0];
-			switch(commandByte)
+			switch (commandByte)
 			{
 				case 0x43: commandByte = 32; break;
 				case 0x4B: commandByte = 16; break;
@@ -510,43 +540,9 @@ namespace DeviceCommunicators.Dyno
 			while (_buffersPool.Count < _maxNumOfMessages)
 			{
 				_buffersPool.Add(new byte[8], _cancellationToken);
-                System.Threading.Thread.Sleep(1);
-            }
-		}
-
-
-
-
-		private void MessageReceivedEventHandler(byte[] buffer)
-		{
-			if (_messagesDict == null)
-			{
-				return;
+				System.Threading.Thread.Sleep(1);
 			}
-
-			DateTime start = DateTime.Now;
-
-			int index = 1;
-			int uniqueParamID = (int)GetDataFromBuffer(buffer, index, 2);
-			index += 2;
-
-			int subIndex = (byte)GetDataFromBuffer(buffer, index, 1);
-
-
-			int uniqueId = Dyno_ParamData.BaseUniqueParamID - uniqueParamID;
-
-			byte commandByte = buffer[0];
-			commandByte = (byte)(commandByte >> 4);
-			if (commandByte == 0x8)
-			{
-				uniqueId = Math.Abs(uniqueId);
-			}
-
-			_messagesDict[(uniqueId, (byte)subIndex)] = buffer;
-
-			TimeSpan diff = DateTime.Now - start;
 		}
-
 
 		#endregion Methods
 

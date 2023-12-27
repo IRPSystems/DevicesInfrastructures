@@ -1,4 +1,5 @@
 ﻿using DeviceCommunicators.Interfaces;
+using DeviceCommunicators.Models;
 using DeviceCommunicators.Services;
 using Entities.Models;
 using NationalInstruments.Restricted;
@@ -30,13 +31,15 @@ namespace DeviceCommunicators.YokogawaWT1804E
           
 
             ReadDevicesFileService readDevicesFileService = new ReadDevicesFileService();
-            ObservableCollection<DeviceBase> list = new ObservableCollection<DeviceBase>();
+            ObservableCollection<DeviceData> list = new ObservableCollection<DeviceData>();
 
             string path = Directory.GetCurrentDirectory();
             path = Path.Combine(path, @"Data\Device Communications\YOKOGAWA WT1804E.json");
 
-            readDevicesFileService.ReadFromJson(path, list);
-            _deviceData = list[0] as DeviceData;
+
+            readDevicesFileService.ReadFromJson("Data\\Device Communications", path, list);
+
+			_deviceData = list[0] as DeviceData;
 
             _nameToParam = new Dictionary<string, DeviceParameterData>();
 

@@ -1,4 +1,5 @@
-﻿using Entities.Models;
+﻿using DeviceCommunicators.Models;
+using Entities.Models;
 using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
 

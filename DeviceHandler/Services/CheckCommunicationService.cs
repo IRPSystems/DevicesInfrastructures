@@ -2,8 +2,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using ControlzEx.Standard;
 using DeviceCommunicators.Enums;
+using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
-using DeviceHandler.Models;
+using DeviceHandler.Models.DeviceFullDataModels;
 using Entities.Models;
 using Services.Services;
 using System;
@@ -12,7 +13,7 @@ using System.Timers;
 
 namespace DeviceHandler.Services
 {
-	public class CheckCommunicationService: ObservableObject, IDisposable
+    public class CheckCommunicationService: ObservableObject, IDisposable
 	{
 		#region Fields
 
