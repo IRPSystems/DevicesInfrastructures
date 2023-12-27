@@ -1,19 +1,14 @@
-﻿using Communication.Interfaces;
-using Communication.Services;
+﻿using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
+using DeviceCommunicators.Interfaces;
 using DeviceCommunicators.Models;
 using Services.Services;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Timers;
 
 namespace DeviceCommunicators.FieldLogger
 {
-    public class FieldLogger_Communicator : DeviceCommunicator
+    public class FieldLogger_Communicator : DeviceCommunicator, IDataLoggerCommunicator
 	{
 		#region Fields
 
@@ -24,15 +19,15 @@ namespace DeviceCommunicators.FieldLogger
 		private ushort _noOfItems;
 		private ushort _sizeOfItems;
 
-
-		private System.Timers.Timer _timer;
-		public List<short> _channelsValue { get; set; }
-
 		#endregion Fields
 
 
 		#region Properties
 
+		public int NumberOfChannels
+		{
+			get => 8;
+		}
 
 		private ModbusTCPSevice ModbusTCPSevice
 		{
@@ -46,10 +41,7 @@ namespace DeviceCommunicators.FieldLogger
 
 		public FieldLogger_Communicator()
         {
-			_timer = new System.Timers.Timer(1000);
-			_timer.Elapsed += _timer_Elapsed;
-
-			_channelsValue = new List<short>();
+			
 		}
 
 		#endregion Constructor
@@ -86,8 +78,6 @@ namespace DeviceCommunicators.FieldLogger
 					_sizeOfItems);
 
 			CommService.Init(false);
-
-			_timer.Start();
 
 			InitBase();
 		}
@@ -128,13 +118,21 @@ namespace DeviceCommunicators.FieldLogger
 					return;
 				}
 
-				if(_channelsValue.Count < 8)
+				byte[] buffer;
+				ModbusTCPSevice.Read(out buffer);
+
+				if(buffer == null)
 				{
 					callback?.Invoke(param, CommunicatorResultEnum.NoResponse, "");
 					return;
 				}
 
-				param.Value = _channelsValue[fieldLogger_ParamData.Channel - 1];
+				int channelIndex = fieldLogger_ParamData.Channel - 1;
+
+				short val = (short)(buffer[channelIndex] << 8);
+				val += buffer[channelIndex + 1];
+
+				param.Value = val;
 				callback?.Invoke(param, CommunicatorResultEnum.OK, "");
 
 			}
@@ -142,30 +140,6 @@ namespace DeviceCommunicators.FieldLogger
             { 
                 LoggerService.Error(this, "Failed to receive value for parameter: " + param.Name, ex);
             }
-		}
-
-		private void _timer_Elapsed(object sender, ElapsedEventArgs e)
-		{
-			ReadChannels();
-		}
-
-		private void ReadChannels()
-		{
-			byte[] buffer;
-			ModbusTCPSevice.Read(out buffer);
-
-			_channelsValue.Clear();
-
-			if (buffer == null)
-				return;
-
-			for (int i = 0; i < buffer.Length; i++)
-			{
-				short val = (short)(buffer[i] << 8);
-				i++;
-				val += buffer[i];
-				_channelsValue.Add(val);
-			}
 		}
 
 		#endregion Methods

@@ -1,19 +1,17 @@
 ﻿using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
+using DeviceCommunicators.Interfaces;
 using DeviceCommunicators.Models;
-using Entities.Models;
 using Services.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Globalization;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Timers;
 
 namespace DeviceCommunicators.BTMTempLogger
 {
-    public class BTMTempLogger_Communicator: DeviceCommunicator
+    public class BTMTempLogger_Communicator: DeviceCommunicator, IDataLoggerCommunicator
 	{
 		private enum WorkState 
 		{ 
@@ -43,6 +41,10 @@ namespace DeviceCommunicators.BTMTempLogger
 
 		#region Properties
 
+		public int NumberOfChannels 
+		{
+			get => 12;
+		}
 
 		#endregion Properties
 
