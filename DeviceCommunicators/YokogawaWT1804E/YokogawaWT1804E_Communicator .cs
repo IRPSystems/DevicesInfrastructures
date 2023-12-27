@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Markup;
 using DeviceCommunicators.Models;
+using System.Timers;
+using System.Diagnostics;
 
 namespace DeviceCommunicators.YokogawaWT1804E
 {
@@ -24,7 +26,10 @@ namespace DeviceCommunicators.YokogawaWT1804E
 
         private System.Timers.Timer _timer;
 
-		private TMCTL _connct_to_yoko = new TMCTL();
+
+        Stopwatch time = new Stopwatch();
+
+        private TMCTL _connct_to_yoko = new TMCTL();
 		private StringBuilder _temp = new StringBuilder(1000);
 		private YokogawaWT1804E_ParamData _data = new YokogawaWT1804E_ParamData();
 		private string _send_to_yoko = ":NUM:NUM 28 ;ITEM1   URMS,1; ITEM2    URMS,2;ITEM3    URMS,3;ITEM4    udc,4;" +
@@ -107,9 +112,10 @@ namespace DeviceCommunicators.YokogawaWT1804E
         public YokogawaWT1804E_Communicator()
         {
 
-            _timer = new System.Timers.Timer(1500);
+            _timer = new System.Timers.Timer(50);
             _timer.Elapsed += timer_ElapsedEventHandler;
-		}
+           
+        }
 
         #endregion Constructor
 
@@ -139,9 +145,7 @@ namespace DeviceCommunicators.YokogawaWT1804E
                 }
 
                 _yokogawa_communicator.Init(ip);
-
                 _connct_to_yoko.Send(0, _send_to_yoko);
-                
                 InitBase();
             }
             catch (Exception ex)
@@ -277,24 +281,30 @@ namespace DeviceCommunicators.YokogawaWT1804E
 
         public void Read_Dump()
         {
+            double start_time = 0;
+            double end_time = 0;
+            double sum_time = 0;
+
+            time.Start();
+
             try
             {
                 DateTime startTime = DateTime.Now;
                 int ret;
 
                 int rln = 1000;
+                start_time = time.ElapsedMilliseconds;
 
+                // _connct_to_yoko.Send(0, _send_to_yoko);
 
-                //_connct_to_yoko.Send(0, _send_to_yoko);
-
-				_connct_to_yoko.Send(0, "NUMeric:NORMal:VALue?");
+                _connct_to_yoko.Send(0, "NUMeric:NORMal:VALue?");
 
                // System.Threading.Thread.Sleep(250);
 
                 ret = _connct_to_yoko.Receive(0, _temp, 1000, ref rln);
-                if(ret == 1)
+                if (ret == 1)
                 {
-                  
+
                     for (int i = 0; i < paramers_from_dump.Values.Count; i++)
                     {
                         YokogawaWT1804E_parameters_to_dump param = paramers_from_dump.Values.ElementAt(i);
@@ -302,8 +312,11 @@ namespace DeviceCommunicators.YokogawaWT1804E
                     }
                 }
                 else
-                    parsing_to_parameters(_temp);
+                  
+                parsing_to_parameters(_temp);
+                end_time= time.ElapsedMilliseconds;
 
+                sum_time = end_time - start_time;
                 TimeSpan diff = DateTime.Now - startTime;
             }
             catch (Exception ) 
