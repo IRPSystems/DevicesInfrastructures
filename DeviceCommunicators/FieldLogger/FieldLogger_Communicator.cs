@@ -5,6 +5,8 @@ using DeviceCommunicators.Interfaces;
 using DeviceCommunicators.Models;
 using Services.Services;
 using System;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace DeviceCommunicators.FieldLogger
 {
@@ -18,6 +20,8 @@ namespace DeviceCommunicators.FieldLogger
 		private ushort _startAddress;
 		private ushort _noOfItems;
 		private ushort _sizeOfItems;
+
+		private ObservableCollection<short> _channelsValue;
 
 		#endregion Fields
 
@@ -79,6 +83,8 @@ namespace DeviceCommunicators.FieldLogger
 
 			CommService.Init(false);
 
+			GetValues();
+
 			InitBase();
 		}
 
@@ -118,21 +124,13 @@ namespace DeviceCommunicators.FieldLogger
 					return;
 				}
 
-				byte[] buffer;
-				ModbusTCPSevice.Read(out buffer);
-
-				if(buffer == null)
+				if(_channelsValue.Count == 0)
 				{
 					callback?.Invoke(param, CommunicatorResultEnum.NoResponse, "");
 					return;
 				}
 
-				int channelIndex = fieldLogger_ParamData.Channel - 1;
-
-				short val = (short)(buffer[channelIndex] << 8);
-				val += buffer[channelIndex + 1];
-
-				param.Value = val;
+				param.Value = _channelsValue[fieldLogger_ParamData.Channel - 1];
 				callback?.Invoke(param, CommunicatorResultEnum.OK, "");
 
 			}
@@ -140,6 +138,31 @@ namespace DeviceCommunicators.FieldLogger
             { 
                 LoggerService.Error(this, "Failed to receive value for parameter: " + param.Name, ex);
             }
+		}
+
+		private void GetValues()
+		{
+			Task.Run(() =>
+			{
+				while(!_cancellationToken.IsCancellationRequested) 
+				{
+					byte[] buffer;
+					ModbusTCPSevice.Read(out buffer);
+
+					_channelsValue.Clear();
+
+					for (int i = 0; i < buffer.Length; i++)
+					{
+						short val = (short)(buffer[i] << 8);
+						i++;
+						val += buffer[i];
+						_channelsValue.Add(val);
+					}
+
+					System.Threading.Thread.Sleep(1);
+				}
+
+			}, _cancellationToken);
 		}
 
 		#endregion Methods
