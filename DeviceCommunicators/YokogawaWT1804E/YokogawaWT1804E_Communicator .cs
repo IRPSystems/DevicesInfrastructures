@@ -141,6 +141,8 @@ namespace DeviceCommunicators.YokogawaWT1804E
 
                 _yokogawa_communicator.Init(ip);
 
+                _connct_to_yoko.Send(0, _send_to_yoko);
+                
                 InitBase();
             }
             catch (Exception ex)
@@ -284,7 +286,7 @@ namespace DeviceCommunicators.YokogawaWT1804E
                 int rln = 1000;
 
 
-                _connct_to_yoko.Send(0, _send_to_yoko);
+                //_connct_to_yoko.Send(0, _send_to_yoko);
 
 				_connct_to_yoko.Send(0, "NUMeric:NORMal:VALue?");
 
