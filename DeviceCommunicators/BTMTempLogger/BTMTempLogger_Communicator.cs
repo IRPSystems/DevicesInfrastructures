@@ -55,7 +55,7 @@ namespace DeviceCommunicators.BTMTempLogger
 			_channelTemp = new ConcurrentDictionary<int, double>();
 
 
-			_timer = new System.Timers.Timer(1000);
+			_timer = new System.Timers.Timer(500);
 			_timer.Elapsed += _timer_Elapsed;
 			//_workState = WorkState.StartNotFound;
 			_totalMessage = string.Empty;
