@@ -165,46 +165,10 @@ namespace DeviceHandler.Models.DeviceFullDataModels
             if (Directory.Exists(path) == false)
                 Directory.CreateDirectory(path);
 
-            string fileName = "";
-            switch (Device.DeviceType)
-            {
-                case DeviceTypesEnum.Dyno:
-                    fileName = "DynoCanConnect.json";
-                    break;
-                case DeviceTypesEnum.MCU:
-                    fileName = "MCUCanConnect.json";
-                    break;
-                case DeviceTypesEnum.MCU_B2B:
-                    fileName = "MCU-B2BCanConnect.json";
-                    break;
-                case DeviceTypesEnum.PowerSupplyBK:
-                    fileName = "PSBKSerialConnect.json";
-                    break;
-                case DeviceTypesEnum.PowerSupplyEA:
-                    fileName = "PSEASerialConnect.json";
-                    break;
-                case DeviceTypesEnum.BTMTempLogger:
-                    fileName = "BTMTempLoggerSerialConnect.json";
-                    break;
-                case DeviceTypesEnum.SwitchRelay32:
-                    fileName = "SwitchRelay32Connect.json";
-                    break;
-                case DeviceTypesEnum.NI_6002:
-                    fileName = "NI_6002Connect.json";
-                    break;
-                case DeviceTypesEnum.TorqueKistler:
-                    fileName = "TorqueKistlerConnect.json";
-                    break;
-                case DeviceTypesEnum.Yokogawa_WT1804E:
-                    fileName = "Yokogawa_WT1804EConnect.json";
-                    break;
-
-                case DeviceTypesEnum.KeySight:
-                    break;
-            }
+			string fileName = GetConnectionFileName();
 
 
-            path = Path.Combine(path, fileName);
+			path = Path.Combine(path, fileName);
             File.WriteAllText(path, sz);
 
 

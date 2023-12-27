@@ -44,14 +44,14 @@ namespace DeviceHandler.ViewModels
 			ushort port,
 			byte modbusAddress,
 			ushort startAddress,
-			ushort moOfItems,
+			ushort noOfItems,
 			ushort sizeOfItems)
 		{
 			IPAddress = idAddress;
 			Port = port;
 			ModbusAddress = modbusAddress;
 			StartAddress = startAddress;
-			NoOfItems = NoOfItems;
+			NoOfItems = noOfItems;
 			SizeOfItems = sizeOfItems;
 
 			LoggerService.Inforamtion(this, "Starting CanConnctViewModel");

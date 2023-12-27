@@ -6,6 +6,7 @@ using DeviceCommunicators.Models;
 using Services.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using System.Timers;
 
@@ -21,6 +22,10 @@ namespace DeviceCommunicators.FieldLogger
 		private ushort _startAddress;
 		private ushort _noOfItems;
 		private ushort _sizeOfItems;
+
+
+		private System.Timers.Timer _timer;
+		public List<short> _channelsValue { get; set; }
 
 		#endregion Fields
 
@@ -40,7 +45,10 @@ namespace DeviceCommunicators.FieldLogger
 
 		public FieldLogger_Communicator()
         {
-			
+			_timer = new System.Timers.Timer(1000);
+			_timer.Elapsed += _timer_Elapsed;
+
+			_channelsValue = new List<short>();
 		}
 
 		#endregion Constructor
@@ -117,21 +125,7 @@ namespace DeviceCommunicators.FieldLogger
 					return;
 				}
 
-				byte[] buffer;
-				ModbusTCPSevice.Read(out buffer);
-
-				if(buffer == null)
-				{
-					callback?.Invoke(param, CommunicatorResultEnum.NoResponse, "");
-					return;
-				}
-
-				int channelIndex = fieldLogger_ParamData.Channel - 1;
-
-				short val = (short)(buffer[channelIndex] << 8);
-				val += buffer[channelIndex + 1];
-
-				param.Value = val;
+				param.Value = _channelsValue[fieldLogger_ParamData.Channel - 1];
 				callback?.Invoke(param, CommunicatorResultEnum.OK, "");
 
 			}
@@ -139,6 +133,27 @@ namespace DeviceCommunicators.FieldLogger
             { 
                 LoggerService.Error(this, "Failed to receive value for parameter: " + param.Name, ex);
             }
+		}
+
+		private void _timer_Elapsed(object sender, ElapsedEventArgs e)
+		{
+			ReadChannels();
+		}
+
+		private void ReadChannels()
+		{
+			byte[] buffer;
+			ModbusTCPSevice.Read(out buffer);
+
+			_channelsValue.Clear();
+
+			for (int i = 0; i < buffer.Length; i++)
+			{
+				short val = (short)(buffer[i] << 8);
+				i++;
+				val += buffer[i];
+				_channelsValue.Add(val);
+			}
 		}
 
 		#endregion Methods
