@@ -130,12 +130,15 @@ namespace DeviceCommunicators.BTMTempLogger
 			if (!(param is BTMTempLogger_ParamData btmParam))
 				return;
 
+			if(!_isDataReceived)
+			{
+				callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
+				return;
+			}
+
 			if(btmParam.Name == "Check Communication")
 			{
-				if(_isDataReceived)
-					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
-				else
-					callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
+				callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 
 				return;
 			}
