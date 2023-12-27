@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Timers;
 
 namespace DeviceCommunicators.FieldLogger
@@ -86,6 +87,8 @@ namespace DeviceCommunicators.FieldLogger
 
 			CommService.Init(false);
 
+			_timer.Start();
+
 			InitBase();
 		}
 
@@ -125,6 +128,12 @@ namespace DeviceCommunicators.FieldLogger
 					return;
 				}
 
+				if(_channelsValue.Count < 8)
+				{
+					callback?.Invoke(param, CommunicatorResultEnum.NoResponse, "");
+					return;
+				}
+
 				param.Value = _channelsValue[fieldLogger_ParamData.Channel - 1];
 				callback?.Invoke(param, CommunicatorResultEnum.OK, "");
 
@@ -146,6 +155,9 @@ namespace DeviceCommunicators.FieldLogger
 			ModbusTCPSevice.Read(out buffer);
 
 			_channelsValue.Clear();
+
+			if (buffer == null)
+				return;
 
 			for (int i = 0; i < buffer.Length; i++)
 			{
