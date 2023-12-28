@@ -71,7 +71,7 @@
                 <iconPacks:PackIconMaterial Kind="LanConnect" />
             </Button>
 
-            <TextBlock Text="Select device" VerticalAlignment="Center" Margin="0,0,5,0" />
+            <TextBlock Text="Select device" VerticalAlignment="Center" Margin="0,0,5,0" FontWeight="DemiBold" />
             <ComboBox ItemsSource="{Binding DevicesContainter.DevicesList}" 
                       SelectedItem="{Binding SelectedDevice}"
                       Width="150"
@@ -96,12 +96,30 @@
 
             </ComboBox>
 
-            <TextBlock Text="Record" VerticalAlignment="Center" Margin="0,0,5,0" />
+            <Line Y1="1" Stretch="Fill" Stroke="{DynamicResource MahApps.Brushes.Accent2}" Margin="0,0,10,0"/>
+
+            <TextBlock Text="Record" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="DemiBold"/>
+            
+            
+
+            <TextBlock Text="Rate"
+                           Margin="0,0,5,0"
+                           VerticalAlignment="Center"/>
+            <ComboBox SelectedItem="{Binding RecordingRate}"
+                          ItemsSource="{Binding RecordingRateList}"
+                          Margin="0,1,5,1"/>
+            <TextBlock Text="Hz"
+                           Margin="0,0,20,0"
+                           VerticalAlignment="Center"/>
+            
+
+
             <Button Style="{StaticResource ButtonWithIconStyle}"
                     Width="30"
                     Margin="0,0,5,0"
                     ToolTip="Start recording"
-                    Command="{Binding StartRecordingCommand}">
+                    Command="{Binding StartRecordingCommand}"
+                    IsEnabled="{Binding IsRecordStartEnable}">
                 <iconPacks:Material Kind="Play" />
             </Button>
 
@@ -109,7 +127,8 @@
                     Width="30"
                     Margin="0,0,50,0"
                     ToolTip="Stop recording"
-                    Command="{Binding StopRecordingCommand}" >
+                    Command="{Binding StopRecordingCommand}" 
+                    IsEnabled="{Binding IsRecordStopEnable}">
                 <iconPacks:PackIconMaterial Kind="Stop" />
             </Button>
 
@@ -121,7 +140,7 @@
               Margin="5,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="50" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="10" />
                 <ColumnDefinition Width="*" />

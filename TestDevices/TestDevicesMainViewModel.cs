@@ -19,10 +19,11 @@ using System;
 using DeviceCommunicators.Enums;
 using DeviceHandler.ViewModel;
 using Entities.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace TestDevices
 {
-	public class TestDevicesMainViewModel
+	public class TestDevicesMainViewModel: ObservableObject
 	{
 		#region Properties
 
@@ -33,11 +34,19 @@ namespace TestDevices
 		public ParametersViewModel FullParametersList { get; set; }
 		public SelectedParametersListViewModel SelectedParametersList { get; set; }
 
+		public ObservableCollection<int> RecordingRateList { get; set; }
+		public int RecordingRate { get; set; }
+		public ParamRecordingService ParamRecording { get; set; }
+		public bool IsRecordStartEnable { get; set; }
+		public bool IsRecordStopEnable { get; set; }
+
 		public string Version { get; set; }
 
 		#endregion Properties
 
 		#region Fields
+
+		
 
 		#endregion Fields
 
@@ -49,6 +58,9 @@ namespace TestDevices
 
 			InitDevicesContainter();
 
+			IsRecordStartEnable = true;
+			IsRecordStopEnable = false;
+
 			CommunicationViewModel communicationSettings =
 				new CommunicationViewModel(DevicesContainter);
 			DeviceSimulatorsViewModel deviceSimulatorsViewModel = 
@@ -58,8 +70,14 @@ namespace TestDevices
 				communicationSettings, 
 				deviceSimulatorsViewModel);
 
-			DragDropData dragDropData = new DragDropData();
-			FullParametersList = new ParametersViewModel(dragDropData, DevicesContainter, true);
+			ParamRecording = new ParamRecordingService();
+
+			RecordingRateList = new ObservableCollection<int>()
+			{
+				1, 5, 10, 20
+			};
+
+			RecordingRate = 5;
 
 			SelectedParametersList = new SelectedParametersListViewModel(DevicesContainter, "Recordings");
 			SelectedParametersList.IsLimitParametersList = true;
@@ -125,12 +143,6 @@ namespace TestDevices
 				if (DevicesContainter.TypeToDevicesFullData.ContainsKey(device.DeviceType) == false)
 					DevicesContainter.TypeToDevicesFullData.Add(device.DeviceType, deviceFullData);
 			}
-
-			//foreach (DeviceFullData device in DevicesContainter.DevicesFullDataList)
-			//{
-			//	device.Connect();
-			//	device.InitCheckConnection();
-			//}
 		}
 
 		private void InitCommunicationSettings()
@@ -162,12 +174,19 @@ namespace TestDevices
 
 		private void SelectedDevicechanged(SelectionChangedEventArgs e)
 		{
-			
-			
-			DeviceFullData deviceFullData = 
+			DeviceFullData deviceFullData =
 				DevicesContainter.TypeToDevicesFullData[SelectedDevice.DeviceType];
 			deviceFullData.Connect();
 			deviceFullData.InitCheckConnection();
+
+			DevicesContainer devicesContainter = new DevicesContainer();
+			devicesContainter.DevicesFullDataList = new ObservableCollection<DeviceFullData>() { deviceFullData };
+			devicesContainter.DevicesList = new ObservableCollection<DeviceData>() { deviceFullData.Device };
+			devicesContainter.TypeToDevicesFullData = new Dictionary<DeviceTypesEnum, DeviceFullData>();
+			devicesContainter.TypeToDevicesFullData.Add(deviceFullData.Device.DeviceType, deviceFullData);
+
+			DragDropData dragDropData = new DragDropData();
+			FullParametersList = new ParametersViewModel(dragDropData, devicesContainter, true);
 		}
 
 		private void Set(DeviceParameterData deviceParam)
@@ -192,12 +211,48 @@ namespace TestDevices
 
 		private void StartRecording()
 		{
-		
+			if(SelectedDevice == null || SelectedParametersList == null || SelectedParametersList.ParametersList.Count == 0 ||
+				ParamRecording == null) 
+			{
+				return;
+			}
+
+			string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+			path = Path.Combine(path, "TestDevice");
+			if(Directory.Exists(path) == null)
+				Directory.CreateDirectory(path);
+
+			path = Path.Combine(path, "Recordings");
+			if (Directory.Exists(path) == null)
+				Directory.CreateDirectory(path);
+
+			DeviceFullData deviceFullData = DevicesContainter.TypeToDevicesFullData[SelectedDevice.DeviceType];
+			ParamRecording.StartRecording(
+				path,
+				5,
+				SelectedParametersList.ParametersList,
+				deviceFullData);
+
+
+
+			IsRecordStartEnable = false;
+			IsRecordStopEnable = true;
 		}
 
 		private void StopRecording()
 		{
-			
+			if (SelectedDevice == null || ParamRecording == null)
+			{
+				return;
+			}			
+
+			DeviceFullData deviceFullData = DevicesContainter.TypeToDevicesFullData[SelectedDevice.DeviceType];
+			ParamRecording.StopRecording(deviceFullData);
+
+
+
+			IsRecordStartEnable = true;
+			IsRecordStopEnable = false;
 		}
 
 
