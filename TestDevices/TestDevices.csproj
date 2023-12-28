@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>disable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="MahApps.Metro" Version="2.4.10" />
+    <PackageReference Include="MahApps.Metro.IconPacks" Version="4.11.0" />
+    <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DeviceCommunicators\DeviceCommunicators.csproj" />
+    <ProjectReference Include="..\DeviceHandler\DeviceHandler.csproj" />
+    <ProjectReference Include="..\DeviceSimulators\DeviceSimulators.csproj" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="mkdir &quot;$(OutDir)Device Communications&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Device Communications\*.*&quot; &quot;$(OutDir)Device Communications\*.*&quot;" />
+  </Target>
+
+</Project>
