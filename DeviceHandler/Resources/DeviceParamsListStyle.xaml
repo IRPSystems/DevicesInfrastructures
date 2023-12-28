@@ -24,12 +24,12 @@
                         <TextBox Text="{Binding Value}" Grid.Column="4" />
 
                         <Button Grid.Column="6" 
-                                Command="{Binding DataContext.SetCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" 
+                                Command="{Binding DataContext.SetCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" 
                                 CommandParameter="{Binding}" 
                                 Content="Set"
                                 Visibility="{Binding GetSetVisibility}"/>
                         <Button Grid.Column="8" 
-                                Command="{Binding DataContext.GetCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" 
+                                Command="{Binding DataContext.GetCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" 
                                 CommandParameter="{Binding}" 
                                 Content="Get"
                                 Visibility="{Binding GetSetVisibility}"/>
