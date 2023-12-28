@@ -1,7 +1,5 @@
 ﻿
 using CommunityToolkit.Mvvm.Input;
-using DeviceCommunicators.Enums;
-using DeviceCommunicators.Interfaces;
 using DeviceCommunicators.Models;
 using DeviceCommunicators.Services;
 using DeviceHandler.Models;
@@ -13,13 +11,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
-using System.Threading;
 using TempLoggerViewer.ViewModels;
 using DeviceSimulators.ViewModels;
-using DeviceSimulators.Views;
 using System.Windows.Controls;
 using System.Windows;
+using System;
+using DeviceCommunicators.Enums;
 
 namespace TestDevices
 {
@@ -59,6 +56,12 @@ namespace TestDevices
 			CommunicationSettingsCommand = new RelayCommand(InitCommunicationSettings);
 			ClosingCommand = new RelayCommand<CancelEventArgs>(Closing);
 			DeviceSimulatorCommand = new RelayCommand(DeviceSimulator);
+
+			StartRecordingCommand = new RelayCommand(StartRecording);
+			StopRecordingCommand = new RelayCommand(StopRecording);
+
+			SetCommand = new RelayCommand<DeviceParameterData>(Set);
+			GetCommand = new RelayCommand<DeviceParameterData>(Get);
 
 
 		}
@@ -111,11 +114,11 @@ namespace TestDevices
 					DevicesContainter.TypeToDevicesFullData.Add(device.DeviceType, deviceFullData);
 			}
 
-			foreach (DeviceFullData device in DevicesContainter.DevicesFullDataList)
-			{
-				device.Connect();
-				device.InitCheckConnection();
-			}
+			//foreach (DeviceFullData device in DevicesContainter.DevicesFullDataList)
+			//{
+			//	device.Connect();
+			//	device.InitCheckConnection();
+			//}
 		}
 
 		private void InitCommunicationSettings()
@@ -145,6 +148,48 @@ namespace TestDevices
 			}
 		}
 
+		private void SelectedDevicechanged(SelectionChangedEventArgs e)
+		{
+			
+			
+			DeviceFullData deviceFullData = 
+				DevicesContainter.TypeToDevicesFullData[SelectedDevice.DeviceType];
+			deviceFullData.Connect();
+			deviceFullData.InitCheckConnection();
+		}
+
+		private void Set(DeviceParameterData deviceParam)
+		{
+			DeviceFullData deviceFullData = DevicesContainter.TypeToDevicesFullData[deviceParam.DeviceType];
+			deviceFullData.DeviceCommunicator.SetParamValue(deviceParam, Convert.ToDouble(deviceParam.Value), MessageCallback);
+		}
+
+		private void Get(DeviceParameterData deviceParam)
+		{
+			DeviceFullData deviceFullData = DevicesContainter.TypeToDevicesFullData[deviceParam.DeviceType];
+			deviceFullData.DeviceCommunicator.GetParamValue(deviceParam, MessageCallback);
+		}
+
+		private void MessageCallback(DeviceParameterData param, CommunicatorResultEnum result, string resultDescription)
+		{
+			if (result != CommunicatorResultEnum.OK)
+			{
+				MessageBox.Show("Failed to get response\r\n" + resultDescription);
+			}
+		}
+
+		private void StartRecording()
+		{
+		
+		}
+
+		private void StopRecording()
+		{
+			
+		}
+
+
+
 		#endregion Methods
 
 		#region Commands
@@ -152,6 +197,13 @@ namespace TestDevices
 		public RelayCommand CommunicationSettingsCommand { get; private set; }
 		public RelayCommand<CancelEventArgs> ClosingCommand { get; private set; }
 		public RelayCommand DeviceSimulatorCommand { get; private set; }
+
+		public RelayCommand StartRecordingCommand { get; private set; }
+		public RelayCommand StopRecordingCommand { get; private set; }
+
+		public RelayCommand<DeviceParameterData> SetCommand { get; private set; }
+		public RelayCommand<DeviceParameterData> GetCommand { get; private set; }
+
 
 
 		private RelayCommand<TextChangedEventArgs> _SearchText_TextChangedCommand;
@@ -161,6 +213,16 @@ namespace TestDevices
 			{
 				return _SearchText_TextChangedCommand ?? (_SearchText_TextChangedCommand =
 					new RelayCommand<TextChangedEventArgs>(SearchText_TextChanged));
+			}
+		}
+
+		private RelayCommand<SelectionChangedEventArgs> _SelectedDevicechangedCommand;
+		public RelayCommand<SelectionChangedEventArgs> SelectedDevicechangedCommand
+		{
+			get
+			{
+				return _SelectedDevicechangedCommand ?? (_SelectedDevicechangedCommand =
+					new RelayCommand<SelectionChangedEventArgs>(SelectedDevicechanged));
 			}
 		}
 

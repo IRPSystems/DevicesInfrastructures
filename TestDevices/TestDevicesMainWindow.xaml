@@ -7,6 +7,7 @@
                 xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"      
                 xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                 xmlns:device_handler_views="clr-namespace:DeviceHandler.Views;assembly=DeviceHandler"
+                 xmlns:device_handler_controls="clr-namespace:DeviceHandler.Controls;assembly=DeviceHandler"
                 xmlns:local="clr-namespace:TestDevices"
                 mc:Ignorable="d"
                 Title="Test Devices" Height="450" Width="800"
@@ -73,20 +74,50 @@
             <TextBlock Text="Select device" VerticalAlignment="Center" Margin="0,0,5,0" />
             <ComboBox ItemsSource="{Binding DevicesContainter.DevicesList}" 
                       SelectedItem="{Binding SelectedDevice}"
-                      Width="100">
+                      Width="150"
+                      Margin="0,0,100,0">
+                
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Name}" />
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
+
+                <i:Interaction.Triggers>
+
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding Path=DataContext.SelectedDevicechangedCommand, 
+                                                                 Mode=OneWay, 
+                                                                 RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" 
+                                               PassEventArgsToCommand="True"/>
+                    </i:EventTrigger>
+
+                </i:Interaction.Triggers>
+
             </ComboBox>
+
+            <TextBlock Text="Record" VerticalAlignment="Center" Margin="0,0,5,0" />
+            <Button Style="{StaticResource ButtonWithIconStyle}"
+                    Width="30"
+                    Margin="0,0,5,0"
+                    ToolTip="Start recording"
+                    Command="{Binding StartRecordingCommand}">
+                <iconPacks:Material Kind="Play" />
+            </Button>
+
+            <Button Style="{StaticResource ButtonWithIconStyle}"
+                    Width="30"
+                    Margin="0,0,50,0"
+                    ToolTip="Stop recording"
+                    Command="{Binding StopRecordingCommand}" >
+                <iconPacks:PackIconMaterial Kind="Stop" />
+            </Button>
 
         </StackPanel>
 
         <Line Grid.Row="3" X1="1" Stretch="Fill" Stroke="{DynamicResource MahApps.Brushes.Accent2}" />
 
-        <Grid Grid.Row="4" 
-              DataContext="{Binding SelectedDevice}"
+        <Grid Grid.Row="4"               
               Margin="5,0"
               HorizontalAlignment="Left">
             <Grid.RowDefinitions>
@@ -103,6 +134,7 @@
                        FontWeight="DemiBold"/>
 
             <TextBox Grid.Row="2" 
+                     DataContext="{Binding SelectedDevice}"
                      HorizontalContentAlignment="Stretch"
                      mah:TextBoxHelper.ClearTextButton="True"
                      mah:TextBoxHelper.UseFloatingWatermark="True"
@@ -124,7 +156,7 @@
 
             </TextBox>
 
-            <ListView ItemsSource="{Binding ParemetersList}" 
+            <device_handler_controls:EmptyListView ItemsSource="{Binding SelectedDevice.ParemetersList}" 
                       Grid.Row="4"
                       Name="lv"
                       ItemContainerStyle="{StaticResource DeviceParamsListStyle}"

@@ -27,5 +27,5 @@ namespace TestDevices
 
 			DataContext = new TestDevicesMainViewModel();
 		}
-	}
+    }
 }
