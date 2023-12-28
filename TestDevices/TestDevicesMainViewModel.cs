@@ -8,6 +8,7 @@ using DeviceHandler.ViewModels;
 using Entities.Enums;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
@@ -39,8 +40,11 @@ namespace TestDevices
 		public ParamRecordingService ParamRecording { get; set; }
 		public bool IsRecordStartEnable { get; set; }
 		public bool IsRecordStopEnable { get; set; }
+		public string RecordDirectory { get; set; }
 
 		public string Version { get; set; }
+
+		
 
 		#endregion Properties
 
@@ -83,6 +87,19 @@ namespace TestDevices
 			SelectedParametersList.IsLimitParametersList = true;
 			SelectedParametersList.LimitOfParametersList = 40;
 
+
+			string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+			path = Path.Combine(path, "TestDevice");
+			if (Directory.Exists(path) == false)
+				Directory.CreateDirectory(path);
+
+			path = Path.Combine(path, "Recordings");
+			if (Directory.Exists(path) == false)
+				Directory.CreateDirectory(path);
+
+			RecordDirectory = path;
+
+
 			CommunicationSettingsCommand = new RelayCommand(InitCommunicationSettings);
 			ClosingCommand = new RelayCommand<CancelEventArgs>(Closing);
 			DeviceSimulatorCommand = new RelayCommand(DeviceSimulator);
@@ -92,6 +109,8 @@ namespace TestDevices
 
 			SetCommand = new RelayCommand<DeviceParameterData>(Set);
 			GetCommand = new RelayCommand<DeviceParameterData>(Get);
+
+			BrowseRecordFileCommand = new RelayCommand(BrowseRecordFile);
 
 
 		}
@@ -217,18 +236,11 @@ namespace TestDevices
 				return;
 			}
 
-			string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			path = Path.Combine(path, "TestDevice");
-			if(Directory.Exists(path) == null)
-				Directory.CreateDirectory(path);
-
-			path = Path.Combine(path, "Recordings");
-			if (Directory.Exists(path) == null)
-				Directory.CreateDirectory(path);
+			
 
 			DeviceFullData deviceFullData = DevicesContainter.TypeToDevicesFullData[SelectedDevice.DeviceType];
 			ParamRecording.StartRecording(
-				path,
+				RecordDirectory,
 				5,
 				SelectedParametersList.ParametersList,
 				deviceFullData);
@@ -255,6 +267,17 @@ namespace TestDevices
 			IsRecordStopEnable = false;
 		}
 
+		private void BrowseRecordFile()
+		{
+			CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog();
+			commonOpenFile.IsFolderPicker = true;
+			CommonFileDialogResult results = commonOpenFile.ShowDialog();
+			if (results != CommonFileDialogResult.Ok)
+				return;
+
+
+			RecordDirectory = commonOpenFile.FileName;
+		}
 
 
 		#endregion Methods
@@ -270,6 +293,8 @@ namespace TestDevices
 
 		public RelayCommand<DeviceParameterData> SetCommand { get; private set; }
 		public RelayCommand<DeviceParameterData> GetCommand { get; private set; }
+
+		public RelayCommand BrowseRecordFileCommand { get; private set; }
 
 
 

@@ -10,7 +10,7 @@
                  xmlns:device_handler_controls="clr-namespace:DeviceHandler.Controls;assembly=DeviceHandler"
                 xmlns:local="clr-namespace:TestDevices"
                 mc:Ignorable="d"
-                Title="Test Devices" Height="450" Width="800"
+                Title="Test Devices" Height="450" Width="1200"
                  WindowState="Maximized">
 
     <mah:MetroWindow.Resources>
@@ -109,9 +109,23 @@
                           ItemsSource="{Binding RecordingRateList}"
                           Margin="0,1,5,1"/>
             <TextBlock Text="Hz"
-                           Margin="0,0,20,0"
+                           Margin="0,0,50,0"
                            VerticalAlignment="Center"/>
-            
+
+            <TextBlock Text="Directory" 
+                       VerticalAlignment="Center"
+                       Margin="0,0,5,0"/>
+            <TextBox Text="{Binding RecordDirectory}" 
+                     ToolTip="{Binding RecordDirectory}"
+                     HorizontalAlignment="Stretch"
+                     VerticalContentAlignment="Center"
+                     Width="250"
+                       Margin="0,1,5,1"/>
+            <Button Content="..."
+                    Command="{Binding BrowseRecordFileCommand}"
+                    FontSize="16"
+                    Margin="0,1,50,1"/>
+
 
 
             <Button Style="{StaticResource ButtonWithIconStyle}"
@@ -131,6 +145,8 @@
                     IsEnabled="{Binding IsRecordStopEnable}">
                 <iconPacks:PackIconMaterial Kind="Stop" />
             </Button>
+
+            
 
         </StackPanel>
 
