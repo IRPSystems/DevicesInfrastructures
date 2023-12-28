@@ -19,10 +19,4 @@
     <ProjectReference Include="..\DeviceHandler\DeviceHandler.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Views\DeviceSimulatorsView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
-
 </Project>
