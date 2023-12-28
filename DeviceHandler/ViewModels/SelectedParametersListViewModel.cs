@@ -123,8 +123,7 @@ namespace DeviceHandler.ViewModels
 
 			GetActualParameters(parametersList);
 
-			if (this is Record_SelectedParametersListViewModel)
-				WeakReferenceMessenger.Default.Send(new RECORD_LIST_CHANGEDMessage() { LogParametersList = ParametersList });
+			SendRECORD_LIST_CHANGEDMessage();
 		}
 
 		#endregion Save / Load
@@ -185,8 +184,7 @@ namespace DeviceHandler.ViewModels
 
 			SetIndeces();
 
-			if(this is Record_SelectedParametersListViewModel)
-				WeakReferenceMessenger.Default.Send(new RECORD_LIST_CHANGEDMessage() { LogParametersList = ParametersList });
+			SendRECORD_LIST_CHANGEDMessage();
 		}
 
 		private void FixJson(string path)
@@ -387,8 +385,7 @@ namespace DeviceHandler.ViewModels
 
 			SetIndeces();
 
-			if (this is Record_SelectedParametersListViewModel)
-				WeakReferenceMessenger.Default.Send(new RECORD_LIST_CHANGEDMessage() { LogParametersList = ParametersList });
+			SendRECORD_LIST_CHANGEDMessage();
 		}
 
 
@@ -423,8 +420,7 @@ namespace DeviceHandler.ViewModels
 
 			SetIndeces();
 
-			if (this is Record_SelectedParametersListViewModel)
-				WeakReferenceMessenger.Default.Send(new RECORD_LIST_CHANGEDMessage() { LogParametersList = ParametersList });
+			SendRECORD_LIST_CHANGEDMessage();
 		}
 
 		private void MoveParam(
@@ -491,6 +487,11 @@ namespace DeviceHandler.ViewModels
 			{
 				ParametersList_WithIndex[i].Index = i + 1;
 			}
+		}
+
+		protected virtual void SendRECORD_LIST_CHANGEDMessage()
+		{
+			
 		}
 
 		#endregion Methods
