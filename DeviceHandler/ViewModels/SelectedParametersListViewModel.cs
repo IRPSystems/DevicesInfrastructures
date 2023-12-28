@@ -31,6 +31,7 @@ namespace DeviceHandler.ViewModels
 		public ObservableCollection<RecordData> ParametersList_WithIndex { get; set; }
 
 		public bool IsLimitParametersList { get; set; }
+		public int LimitOfParametersList { get; set; }
 
 		#endregion Properties
 
@@ -46,7 +47,7 @@ namespace DeviceHandler.ViewModels
 
 		private DragDropData _designDragDropData;
 
-		protected int _limitOfParametersList;
+		
 		
 
 		#endregion Fields
@@ -160,7 +161,7 @@ namespace DeviceHandler.ViewModels
 
 
 
-			while (IsLimitParametersList && ParametersList.Count > _limitOfParametersList)
+			while (IsLimitParametersList && ParametersList.Count > LimitOfParametersList)
 			{
 				ParametersList.RemoveAt(ParametersList.Count - 1);
 				ParametersList_WithIndex.RemoveAt(ParametersList.Count - 1);
@@ -318,7 +319,7 @@ namespace DeviceHandler.ViewModels
 						if (!(obj is DeviceParameterData param))
 							continue;
 
-						if (IsLimitParametersList && ParametersList.Count == _limitOfParametersList)
+						if (IsLimitParametersList && ParametersList.Count == LimitOfParametersList)
 						{
 							MessageBox.Show("Only up to 40 parameters are allowed");
 							return;

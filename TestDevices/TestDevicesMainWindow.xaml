@@ -117,50 +117,68 @@
 
         <Line Grid.Row="3" X1="1" Stretch="Fill" Stroke="{DynamicResource MahApps.Brushes.Accent2}" />
 
-        <Grid Grid.Row="4"               
-              Margin="5,0"
-              HorizontalAlignment="Left">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="25"/>
-                <RowDefinition Height="5"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="5"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <Grid Grid.Row="4"            
+              Margin="5,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-            <TextBlock Text="{Binding Name}"
-                       Grid.Row="0"
-                       FontSize="16"
-                       FontWeight="DemiBold"/>
+            <Grid Grid.Column="0"  >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <TextBox Grid.Row="2" 
-                     DataContext="{Binding SelectedDevice}"
-                     HorizontalContentAlignment="Stretch"
-                     mah:TextBoxHelper.ClearTextButton="True"
-                     mah:TextBoxHelper.UseFloatingWatermark="True"
-                     mah:TextBoxHelper.Watermark="Search..."
-                     mah:TextBoxHelper.WatermarkAlignment="Left"
-                     SpellCheck.IsEnabled="True"
-                     ToolTip="Search parameter">
+                <TextBlock Text="{Binding Name}"
+                           Grid.Row="0"
+                           FontSize="16"
+                           FontWeight="DemiBold"/>
 
-                <i:Interaction.Triggers>
+                <TextBox Grid.Row="2" 
+                         DataContext="{Binding SelectedDevice}"
+                         HorizontalContentAlignment="Stretch"
+                         mah:TextBoxHelper.ClearTextButton="True"
+                         mah:TextBoxHelper.UseFloatingWatermark="True"
+                         mah:TextBoxHelper.Watermark="Search..."
+                         mah:TextBoxHelper.WatermarkAlignment="Left"
+                         SpellCheck.IsEnabled="True"
+                         ToolTip="Search parameter">
 
-                    <i:EventTrigger EventName="TextChanged">
-                        <i:InvokeCommandAction Command="{Binding Path=DataContext.SearchText_TextChangedCommand, 
+                    <i:Interaction.Triggers>
+
+                        <i:EventTrigger EventName="TextChanged">
+                            <i:InvokeCommandAction Command="{Binding Path=DataContext.SearchText_TextChangedCommand, 
                                                                  Mode=OneWay, 
                                                                  RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" 
                                                PassEventArgsToCommand="True"/>
-                    </i:EventTrigger>
+                        </i:EventTrigger>
 
-                </i:Interaction.Triggers>
+                    </i:Interaction.Triggers>
 
-            </TextBox>
+                </TextBox>
 
-            <device_handler_controls:EmptyListView ItemsSource="{Binding SelectedDevice.ParemetersList}" 
-                      Grid.Row="4"
-                      Name="lv"
-                      ItemContainerStyle="{StaticResource DeviceParamsListStyle}"
-                      Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"/>
+                <device_handler_controls:EmptyListView ItemsSource="{Binding SelectedDevice.ParemetersList}" 
+                          Grid.Row="4"
+                          Name="lv"
+                          ItemContainerStyle="{StaticResource DeviceParamsListStyle}"
+                          Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"/>
+
+            </Grid>
+
+            <Line Grid.Column="1" Y1="1" Stretch="Fill" Stroke="{DynamicResource MahApps.Brushes.Accent2}" />
+
+            <device_handler_views:ParametersView Grid.Column="2" DataContext="{Binding FullParametersList}"/>
+
+            <Line Grid.Column="3" Y1="1" Stretch="Fill" Stroke="{DynamicResource MahApps.Brushes.Accent2}" />
+
+            <device_handler_views:SelectedParametersListView Grid.Column="4" DataContext="{Binding SelectedParametersList}" />
 
         </Grid>
 

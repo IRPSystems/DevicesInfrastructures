@@ -17,6 +17,8 @@ using System.Windows.Controls;
 using System.Windows;
 using System;
 using DeviceCommunicators.Enums;
+using DeviceHandler.ViewModel;
+using Entities.Models;
 
 namespace TestDevices
 {
@@ -27,6 +29,9 @@ namespace TestDevices
 		public DevicesContainer DevicesContainter { get; set; }
 		public DockingTestDevicesViewModel Docking { get; set; }
 		public DeviceData SelectedDevice { get; set; }
+
+		public ParametersViewModel FullParametersList { get; set; }
+		public SelectedParametersListViewModel SelectedParametersList { get; set; }
 
 		public string Version { get; set; }
 
@@ -52,6 +57,13 @@ namespace TestDevices
 			Docking = new DockingTestDevicesViewModel(
 				communicationSettings, 
 				deviceSimulatorsViewModel);
+
+			DragDropData dragDropData = new DragDropData();
+			FullParametersList = new ParametersViewModel(dragDropData, DevicesContainter, true);
+
+			SelectedParametersList = new SelectedParametersListViewModel(DevicesContainter, "Recordings");
+			SelectedParametersList.IsLimitParametersList = true;
+			SelectedParametersList.LimitOfParametersList = 40;
 
 			CommunicationSettingsCommand = new RelayCommand(InitCommunicationSettings);
 			ClosingCommand = new RelayCommand<CancelEventArgs>(Closing);
