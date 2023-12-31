@@ -7,6 +7,7 @@ using Services.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace DeviceCommunicators.BTMTempLogger
@@ -32,7 +33,7 @@ namespace DeviceCommunicators.BTMTempLogger
         public string Name;
 
 		private string _totalMessage;
-		private System.Timers.Timer _timer;
+		//private System.Timers.Timer _timer;
 
 		private bool _isDataReceived;
 
@@ -55,8 +56,8 @@ namespace DeviceCommunicators.BTMTempLogger
 			_channelTemp = new ConcurrentDictionary<int, double>();
 
 
-			_timer = new System.Timers.Timer(500);
-			_timer.Elapsed += _timer_Elapsed;
+			//_timer = new System.Timers.Timer(500);
+			//_timer.Elapsed += _timer_Elapsed;
 			//_workState = WorkState.StartNotFound;
 			_totalMessage = string.Empty;
 
@@ -94,7 +95,7 @@ namespace DeviceCommunicators.BTMTempLogger
 
 			InitBase();
 			//_message = string.Empty;
-			_timer.Start();
+			//_timer.Start();
 
 		}
 
@@ -179,9 +180,18 @@ namespace DeviceCommunicators.BTMTempLogger
 
 		
 
-		private void _timer_Elapsed(object sender, ElapsedEventArgs e)
+		private void HandleReceivedText(object sender, ElapsedEventArgs e)
 		{
-			HandleMessage();
+			Task.Run(() =>
+			{
+				while(!_cancellationToken.IsCancellationRequested)
+				{
+					HandleMessage();
+
+					Task.Delay(100);
+				}
+
+			}, _cancellationToken);
 		}
 
 		private void HandleMessage()
