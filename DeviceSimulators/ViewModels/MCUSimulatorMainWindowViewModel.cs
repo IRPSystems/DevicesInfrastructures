@@ -1,5 +1,4 @@
-﻿
-#if _SYNC_COMM
+﻿#if _SYNC_COMM
 
 using Communication.Services;
 using System;
@@ -29,13 +28,13 @@ namespace DeviceSimulators.ViewModels
 			public long Message { get; set; }
 		}
 
-		#region Properties
+#region Properties
 
 		public ObservableCollection<CanMessageData> CanMessagesList { get; set; }
 
-		#endregion Properties
+#endregion Properties
 
-		#region Fields
+#region Fields
 
 		private const uint _func1ID = 0x0C3D69;
 		private const uint _func2ID = 0x5FE4C3;
@@ -68,9 +67,9 @@ namespace DeviceSimulators.ViewModels
 
 		private List<uint> _functionsIdList;
 
-		#endregion Fields
+#endregion Fields
 
-		#region Constructor
+#region Constructor
 
 		public MCUSimulatorMainWindowViewModel(DeviceData deviceData) :
 			base(deviceData)
@@ -111,9 +110,9 @@ namespace DeviceSimulators.ViewModels
 
 
 
-		#endregion Constructor
+#endregion Constructor
 
-		#region Methods
+#region Methods
 
 		public void Dispose()
 		{
@@ -158,7 +157,7 @@ namespace DeviceSimulators.ViewModels
 			catch { }
 		}
 
-		#region Set Values
+#region Set Values
 
 		private void SetValuesToParams()
 		{
@@ -181,9 +180,9 @@ namespace DeviceSimulators.ViewModels
 			SetValuesToParams();
 		}
 
-		#endregion Set Values
+#endregion Set Values
 
-		#region Connect / Disconnect
+#region Connect / Disconnect
 
 		private void Connect()
 		{
@@ -224,9 +223,9 @@ namespace DeviceSimulators.ViewModels
 			ConnectVM.IsDisconnectButtonEnabled = false;
 		}
 
-		#endregion Connect / Disconnect
+#endregion Connect / Disconnect
 
-		#region Receive
+#region Receive
 
 		private void MessageReceivedEventHandler(uint node, byte[] buffer)
 		{
@@ -439,7 +438,7 @@ namespace DeviceSimulators.ViewModels
 			}
 		}
 
-		#endregion Receive
+#endregion Receive
 
 		private void ErrorEventHendler(string errorDescription)
 		{
@@ -447,7 +446,7 @@ namespace DeviceSimulators.ViewModels
 		}
 
 
-		#endregion Methods
+#endregion Methods
 
 	}
 }
@@ -661,6 +660,8 @@ namespace DeviceSimulators.ViewModels
 
 			_commService.Init(true);
 			_commService.Name = "MCUSimulator";
+
+			_commService.MessageReceivedEvent += MessageReceivedEventHandler;
 
 
 			ConnectVM.IsConnectButtonEnabled = false;
