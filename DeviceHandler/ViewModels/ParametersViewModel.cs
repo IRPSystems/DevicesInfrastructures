@@ -121,6 +121,11 @@ namespace DeviceHandler.ViewModel
 
 			_designDragDropData.IsMouseDown = true;
 			_designDragDropData.StartPoint = e.GetPosition(null);
+
+			TreeViewItem treeViewItem =
+					FindAncestorService.FindAncestor<TreeViewItem>((DependencyObject)e.OriginalSource);
+			if(treeViewItem.DataContext is DeviceParameterData actualParam)
+				LoggerService.Inforamtion(this, "Mouse down on parameter \"" + actualParam.Name + "\"");
 		}
 
 		private void ListSourceParam_PreviewMouseLeftButtonUp(MouseButtonEventArgs e)
