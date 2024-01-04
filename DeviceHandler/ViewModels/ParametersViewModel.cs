@@ -124,6 +124,8 @@ namespace DeviceHandler.ViewModel
 
 			TreeViewItem treeViewItem =
 					FindAncestorService.FindAncestor<TreeViewItem>((DependencyObject)e.OriginalSource);
+			if (treeViewItem == null || treeViewItem.DataContext == null)
+				return;
 			if(treeViewItem.DataContext is DeviceParameterData actualParam)
 				LoggerService.Inforamtion(this, "Mouse down on parameter \"" + actualParam.Name + "\"");
 		}
