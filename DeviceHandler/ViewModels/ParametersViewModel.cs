@@ -176,16 +176,20 @@ namespace DeviceHandler.ViewModel
 				if (!(item is DeviceParameterData param))
 					return;
 
+				LoggerService.Inforamtion(this, "Dragging original parameter \"" + param.Name + "\"");
+
 				DeviceParameterData actualParam = null;
 				if (param.DeviceType != DeviceTypesEnum.EVVA)
 				{
 					DeviceFullData deviceFullData = _devicesContainer.TypeToDevicesFullData[param.DeviceType];
 					if (deviceFullData == null)
-						return;
+						return;					
 
 					actualParam = deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == param.Name);
 					if (actualParam == null)
 						return;
+
+					LoggerService.Inforamtion(this, "Dragging actual parameter \"" + actualParam.Name + "\"");
 
 				}
 				else
