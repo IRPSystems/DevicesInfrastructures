@@ -122,7 +122,7 @@ namespace DeviceCommunicators.PowerSupplayGK
 					return;
 
 				byte[] buffer = null;
-				ModbusTCP.ReadInputRegister(4, 255, 8220, 1, ref buffer);
+				ModbusTCP.ReadInputRegister(4, 255, gk_ParamData.ReadAddress, 1, ref buffer);
 
 				if(buffer == null || buffer.Length < 2)
 				{
