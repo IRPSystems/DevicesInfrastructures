@@ -5,7 +5,8 @@ namespace DeviceCommunicators.PowerSupplayGK
 {
 	public class PowerSupplayGK_ParamData : DeviceParameterData
 	{
-		public ushort Address { get; set; }
-		public ushort TriggerAddress { get; set; }
+		public ushort ReadAddress { get; set; }
+		public ushort WriteAddress { get; set; }
+		public ushort WriteTriggerAddress { get; set; }
 	}
 }

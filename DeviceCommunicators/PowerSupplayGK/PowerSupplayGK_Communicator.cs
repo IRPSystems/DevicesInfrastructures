@@ -99,8 +99,8 @@ namespace DeviceCommunicators.PowerSupplayGK
 
 
 
-				ModbusTCP.WriteSingleRegister(7, 255, gk_ParamData.Address, buffer);
-				ModbusTCP.WriteSingleRegister(7, 255, gk_ParamData.TriggerAddress, buffer); // trigger
+				ModbusTCP.WriteSingleRegister(7, 255, gk_ParamData.WriteAddress, buffer);
+				ModbusTCP.WriteSingleRegister(7, 255, gk_ParamData.WriteTriggerAddress, buffer); // trigger
 
 				callback?.Invoke(param, CommunicatorResultEnum.OK, "");
 
