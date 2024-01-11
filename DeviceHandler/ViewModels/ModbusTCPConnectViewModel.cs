@@ -43,9 +43,9 @@ namespace DeviceHandler.ViewModels
 			string idAddress,
 			ushort port,
 			byte modbusAddress,
-			ushort startAddress,
-			ushort noOfItems,
-			ushort sizeOfItems)
+			ushort startAddress = 0,
+			ushort noOfItems = 0,
+			ushort sizeOfItems = 0)
 		{
 			IPAddress = idAddress;
 			Port = port;
