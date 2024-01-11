@@ -34,7 +34,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new ModbusTCPConnectViewModel("192.168.2.250", 502);
+			ConnectionViewModel = new ModbusTCPConnectViewModel("192.168.2.250", 502, 255);
 		}
 
 		protected override void ConstructCheckConnection()
