@@ -106,16 +106,16 @@ namespace DeviceCommunicators.PowerSupplayGK
 		{
             try
             {
-				if (!(param is PowerSupplayGK_ParamData ea_ParamData))
+				if (!(param is PowerSupplayGK_ParamData gk_ParamData))
 					return;
 
-                string cmd = ea_ParamData.Cmd + " " + value;
-				if(_onOfCommands.IndexOf(ea_ParamData.Cmd) >= 0)
+                string cmd = gk_ParamData.Cmd + " " + value;
+				if(_onOfCommands.IndexOf(gk_ParamData.Cmd) >= 0)
 				{
 					if(value == 0)
-						cmd = ea_ParamData.Cmd + " ON";
+						cmd = gk_ParamData.Cmd + " ON";
 					else if (value == 1)
-						cmd = ea_ParamData.Cmd + " OFF";
+						cmd = gk_ParamData.Cmd + " OFF";
 				}
 
 				_serial_port.Send(cmd);
@@ -133,12 +133,12 @@ namespace DeviceCommunicators.PowerSupplayGK
 		{
             try
             {
-				if (!(param is PowerSupplayGK_ParamData ea_ParamData))
+				if (!(param is PowerSupplayGK_ParamData gk_ParamData))
 					return;
 
-				string cmd = ea_ParamData.Cmd;
-				if(ea_ParamData.Name != "Identity")
-					cmd = ea_ParamData.Cmd + "?";
+				string cmd = gk_ParamData.Cmd;
+				if(gk_ParamData.Name != "Identity")
+					cmd = gk_ParamData.Cmd + "?";
 				_serial_port.Send(cmd);
 
 				_isTimeout = false;
@@ -164,13 +164,13 @@ namespace DeviceCommunicators.PowerSupplayGK
 					return;
 				}
 
-				if (ea_ParamData.Name == "Identity")
+				if (gk_ParamData.Name == "Identity")
 				{
 					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 					return;
 				}
 
-				if (_onOfCommands.IndexOf(ea_ParamData.Cmd) >= 0)
+				if (_onOfCommands.IndexOf(gk_ParamData.Cmd) >= 0)
 				{
 					if (buffer.ToLower() == "ON")
 						param.Value = 0;
