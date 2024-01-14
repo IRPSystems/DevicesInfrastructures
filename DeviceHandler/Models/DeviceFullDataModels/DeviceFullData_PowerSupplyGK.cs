@@ -39,7 +39,8 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as DeviceParameterData).Name == "Voltage");
+			DeviceParameterData data = Device.ParemetersList.ToList().Find(
+				(p) => (p as DeviceParameterData).Name == "Measured Voltage");
 
 			CheckCommunication = new CheckCommunicationService(
 				this,

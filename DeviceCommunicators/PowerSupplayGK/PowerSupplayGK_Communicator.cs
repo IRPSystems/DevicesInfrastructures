@@ -94,8 +94,9 @@ namespace DeviceCommunicators.PowerSupplayGK
 				if (!(param is PowerSupplayGK_ParamData gk_ParamData))
 					return;
 
-				ushort val = Convert.ToUInt16(gk_ParamData.Value);
-				byte[] buffer = BitConverter.GetBytes(val);
+				double val = Convert.ToUInt16(gk_ParamData.Value);
+				val /= gk_ParamData.Scale;
+				byte[] buffer = BitConverter.GetBytes((ushort)val);
 
 
 
@@ -130,8 +131,8 @@ namespace DeviceCommunicators.PowerSupplayGK
 					return;
 				}
 
-				ushort val = BitConverter.ToUInt16(buffer, 0);
-				param.Value = val;
+				double val = BitConverter.ToUInt16(buffer, 0);
+				param.Value = val * gk_ParamData.Scale;
 
 				callback?.Invoke(param, CommunicatorResultEnum.OK, "");
 
