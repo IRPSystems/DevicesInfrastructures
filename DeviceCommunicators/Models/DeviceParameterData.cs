@@ -13,8 +13,8 @@ namespace DeviceCommunicators.Models
 		public string Name { get; set; }
 		public string Units { get; set; }
 
-		private object _value;
-		public object Value
+		protected object _value;
+		public virtual object Value
 		{
 			get
 			{
