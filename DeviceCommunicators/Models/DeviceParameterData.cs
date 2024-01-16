@@ -53,9 +53,16 @@ namespace DeviceCommunicators.Models
 		public Visibility Visibility { get; set; }
 		[JsonIgnore]
 		public Visibility GetSetVisibility { get; set; }
+		[JsonIgnore]
+		public bool IsValid { get; set; }
 
 		[JsonIgnore]
 		public bool IsAbsolute { get; set; }
+
+		public DeviceParameterData()
+		{
+			IsValid = true;
+		}
 
 		public virtual object Clone()
 		{
