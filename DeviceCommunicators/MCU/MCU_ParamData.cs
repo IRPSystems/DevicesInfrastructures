@@ -47,6 +47,11 @@ namespace DeviceCommunicators.MCU
 		public List<double> Range { get; set; }
 
 		/// <summary>
+		/// Allow formating the value
+		/// </summary>
+		public string Format { get; set; }
+
+		/// <summary>
 		/// parameter scale
 		/// </summary>
 		private double _scale = 1;
