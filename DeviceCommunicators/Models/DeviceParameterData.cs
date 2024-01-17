@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Entities.Enums;
 using System.Windows;
 using System;
+using System.Windows.Media;
 
 namespace DeviceCommunicators.Models
 {
@@ -54,14 +55,14 @@ namespace DeviceCommunicators.Models
 		[JsonIgnore]
 		public Visibility GetSetVisibility { get; set; }
 		[JsonIgnore]
-		public bool IsValid { get; set; }
+		public Brush Background { get; set; }
 
 		[JsonIgnore]
 		public bool IsAbsolute { get; set; }
 
 		public DeviceParameterData()
 		{
-			IsValid = true;
+			
 		}
 
 		public virtual object Clone()
