@@ -18,6 +18,9 @@ namespace DeviceCommunicators.MCU
 
 		public void GetMessageID(ref byte[] id)
 		{
+			if(Cmd == null) 
+				return;
+
 			using (var md5 = MD5.Create())
 			{
 				Array.Copy(md5.ComputeHash(ASCIIEncoding.ASCII.GetBytes(Cmd)), 0, id, 0, 3);
