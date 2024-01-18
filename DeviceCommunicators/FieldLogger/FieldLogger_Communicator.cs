@@ -45,7 +45,7 @@ namespace DeviceCommunicators.FieldLogger
 
 		public FieldLogger_Communicator()
         {
-			
+			_channelsValue = new ObservableCollection<short>();
 		}
 
 		#endregion Constructor
