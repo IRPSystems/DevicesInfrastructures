@@ -608,6 +608,26 @@ namespace DeviceSimulators.ViewModels
 					idEmpty = new byte[3];
 					Array.Copy(md5.ComputeHash(ASCIIEncoding.ASCII.GetBytes("save_param")), 0, idEmpty, 0, 3);
 					_md5ToParam.Add(idEmpty, new MCU_ParamData() { Cmd = "save_param", Name = "save param" });
+
+					idEmpty = new byte[3];
+					Array.Copy(md5.ComputeHash(ASCIIEncoding.ASCII.GetBytes("protocol")), 0, idEmpty, 0, 3);
+					_md5ToParam.Add(idEmpty, new MCU_ParamData() { Cmd = "protocol", Name = "protocol" });
+
+					idEmpty = new byte[3];
+					Array.Copy(md5.ComputeHash(ASCIIEncoding.ASCII.GetBytes("protocol")), 0, idEmpty, 0, 3);
+					_md5ToParam.Add(idEmpty, new MCU_ParamData() { Cmd = "protocol", Name = "protocol" });
+
+					idEmpty = new byte[3];
+					Array.Copy(md5.ComputeHash(ASCIIEncoding.ASCII.GetBytes("default")), 0, idEmpty, 0, 3);
+					_md5ToParam.Add(idEmpty, new MCU_ParamData() { Cmd = "default", Name = "default" });
+
+					idEmpty = new byte[3];
+					Array.Copy(md5.ComputeHash(ASCIIEncoding.ASCII.GetBytes("run_btlr")), 0, idEmpty, 0, 3);
+					_md5ToParam.Add(idEmpty, new MCU_ParamData() { Cmd = "run_btlr", Name = "run_btlr" });
+
+					idEmpty = new byte[3];
+					Array.Copy(md5.ComputeHash(ASCIIEncoding.ASCII.GetBytes("save")), 0, idEmpty, 0, 3);
+					_md5ToParam.Add(idEmpty, new MCU_ParamData() { Cmd = "save", Name = "save" });
 				}
 			}
 			catch { }
