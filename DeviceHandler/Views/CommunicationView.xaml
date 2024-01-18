@@ -7,7 +7,7 @@
              xmlns:selectors="clr-namespace:DeviceHandler.Selectors"
              xmlns:local="clr-namespace:DeviceHandler.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" MinWidth="1050">
+             d:DesignHeight="450" d:DesignWidth="1050">
 
     <UserControl.Resources>
 
@@ -40,9 +40,10 @@
 
     </UserControl.Resources>
     
-    <Grid>
+    <Grid >
 
-        <ListView ItemsSource="{Binding DevicesContainer.DevicesFullDataList}">
+        <ListView ItemsSource="{Binding DevicesContainer.DevicesFullDataList}" 
+                  MinHeight="100" MinWidth="1050">
 
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
