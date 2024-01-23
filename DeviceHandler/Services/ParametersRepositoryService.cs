@@ -30,7 +30,7 @@ namespace DeviceHandler.Services
 
 		#region Fields
 
-		public const int AcquisitionRate = 5; 
+		public const int AcquisitionRate = 10; 
 		private const int _maxNumOfParams = 3000;
 
 		private ConcurrentDictionary<string, RepositoryParam> _nameToRepositoryParamList;
