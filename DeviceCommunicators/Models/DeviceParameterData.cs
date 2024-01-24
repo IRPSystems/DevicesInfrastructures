@@ -56,6 +56,8 @@ namespace DeviceCommunicators.Models
 		public Visibility GetSetVisibility { get; set; }
 		[JsonIgnore]
 		public Brush Background { get; set; }
+		[JsonIgnore]
+		public string ErrorDescription { get; set; }
 
 		[JsonIgnore]
 		public bool IsAbsolute { get; set; }
