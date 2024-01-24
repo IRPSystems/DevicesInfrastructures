@@ -49,6 +49,8 @@ namespace DeviceCommunicators.Models
 		[JsonIgnore]
 		public bool IsExpanded { get; set; }
 		[JsonIgnore]
+		public bool IsEnabled { get; set; }
+		[JsonIgnore]
 		public bool IsSelected { get; set; }
 		[JsonIgnore]
 		public Visibility Visibility { get; set; }
