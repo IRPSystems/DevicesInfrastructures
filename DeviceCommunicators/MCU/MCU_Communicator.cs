@@ -239,7 +239,7 @@ namespace DeviceCommunicators.MCU
 					result = CommunicatorResultEnum.Error;
 				}
 
-				if (result == CommunicatorResultEnum.OK || result == CommunicatorResultEnum.Error)
+				if (result == CommunicatorResultEnum.OK/* || result == CommunicatorResultEnum.Error*/)
 					break;
 
 				System.Threading.Thread.Sleep(1);
