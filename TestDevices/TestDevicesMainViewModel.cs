@@ -12,7 +12,6 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
-using TempLoggerViewer.ViewModels;
 using DeviceSimulators.ViewModels;
 using System.Windows.Controls;
 using System.Windows;
@@ -21,6 +20,8 @@ using DeviceCommunicators.Enums;
 using DeviceHandler.ViewModel;
 using Entities.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
+using DeviceHandler.Views;
+using DeviceSimulators.Views;
 
 namespace TestDevices
 {
@@ -29,7 +30,6 @@ namespace TestDevices
 		#region Properties
 
 		public DevicesContainer DevicesContainter { get; set; }
-		public DockingTestDevicesViewModel Docking { get; set; }
 		public DeviceData SelectedDevice { get; set; }
 
 		public ParametersViewModel FullParametersList { get; set; }
@@ -44,13 +44,14 @@ namespace TestDevices
 
 		public string Version { get; set; }
 
-		
+
 
 		#endregion Properties
 
 		#region Fields
 
-		
+		private CommunicationViewModel _communicationSettings;
+		private DeviceSimulatorsViewModel _deviceSimulatorsViewModel;
 
 		#endregion Fields
 
@@ -65,14 +66,11 @@ namespace TestDevices
 			IsRecordStartEnable = true;
 			IsRecordStopEnable = false;
 
-			CommunicationViewModel communicationSettings =
+			_communicationSettings =
 				new CommunicationViewModel(DevicesContainter);
-			DeviceSimulatorsViewModel deviceSimulatorsViewModel = 
+			_deviceSimulatorsViewModel = 
 				new DeviceSimulatorsViewModel(DevicesContainter);
 
-			Docking = new DockingTestDevicesViewModel(
-				communicationSettings, 
-				deviceSimulatorsViewModel);
 
 			ParamRecording = new ParamRecordingService();
 
@@ -166,12 +164,18 @@ namespace TestDevices
 
 		private void InitCommunicationSettings()
 		{
-			Docking.OpenCommSettings();
+			CommunicationContainerView communication = 
+				new CommunicationContainerView() { DataContext = _communicationSettings };
+			communication.Show();
 		}
 
 		private void DeviceSimulator()
 		{
-			Docking.OpenDeviceSimulators();
+			DeviceSimulatorsContainterView deviceSimulators = 
+				new DeviceSimulatorsContainterView() { DataContext = _deviceSimulatorsViewModel };
+			deviceSimulators.Show();
+
+
 		}
 
 		private void SearchText_TextChanged(TextChangedEventArgs e)
