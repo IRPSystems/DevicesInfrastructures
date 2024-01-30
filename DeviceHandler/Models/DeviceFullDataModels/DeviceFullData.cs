@@ -32,6 +32,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
         #region Fields
 
         private bool _isReconnect;
+        private string _appName;
 
         #endregion Fields
 
@@ -51,7 +52,9 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
         public void Init(string appName)
         {
-            LoggerService.Inforamtion(this, "Initiating " + Device.DeviceType);
+			_appName = appName;
+
+			LoggerService.Inforamtion(this, "Initiating " + Device.DeviceType);
             string fileName = GetConnectionFileName();
             ConstructCommunicator();
 
@@ -161,7 +164,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
             var sz = JsonConvert.SerializeObject(ConnectionViewModel, settings);
 
             string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            path = Path.Combine(path, "Evva");
+            path = Path.Combine(path, _appName);
             if (Directory.Exists(path) == false)
                 Directory.CreateDirectory(path);
 
