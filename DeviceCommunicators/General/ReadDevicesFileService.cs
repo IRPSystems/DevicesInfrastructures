@@ -28,7 +28,8 @@ namespace DeviceCommunicators.Services
 			string mcuFilePath,
 			string mcuB2BFilePath,
 			string dynoFilePath,
-			string ni6002FilePath)
+			string ni6002FilePath,
+			bool isAddDataLoggers = true)
 		{
 			if (!Directory.Exists(dir))
 				return null;
@@ -79,8 +80,11 @@ namespace DeviceCommunicators.Services
 					DeviceTypesEnum.MCU_B2B);
 			}
 
-			InitBTMTempLogger(devicesList);
-			InitFieldLogger(devicesList);
+			if (isAddDataLoggers)
+			{
+				InitBTMTempLogger(devicesList);
+				InitFieldLogger(devicesList);
+			}
 
 
 			return devicesList;
