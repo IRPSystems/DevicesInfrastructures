@@ -16,8 +16,8 @@ namespace DeviceCommunicators.PowerSupplayBK
 		#region Fields
 
 		
-		private string _name_comport;
-		private int _boud_rate;
+		//private string _name_comport;
+		//private int _boud_rate;
 
 		#endregion Fields
 
@@ -51,13 +51,13 @@ namespace DeviceCommunicators.PowerSupplayBK
 			int txPort = 0,
 			string address = "")
         {
-            _name_comport = comName;
-            _boud_rate = baudtate;
+            //_name_comport = comName;
+            //_boud_rate = baudtate;
 
             if(isUdpSimulation)
 				CommService = new SerialUdpSimulationService(rxPort, txPort, address);
             else
-				CommService = new SerialService(_name_comport, _boud_rate);
+				CommService = new SerialService(comName, baudtate);
             
             _serial_port.Init(false);
 

@@ -251,6 +251,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				case DeviceTypesEnum.Yokogawa_WT1804E: return new DeviceFullData_Yokogawa_WT1804E(deviceData);
 				case DeviceTypesEnum.FieldLogger: return new DeviceFullData_FieldLogger(deviceData);
 				case DeviceTypesEnum.PowerSupplyGK: return new DeviceFullData_PowerSupplyGK(deviceData);
+				case DeviceTypesEnum.ATEBox: return new DeviceFullData_ATEBox(deviceData);
 				default: return null;
             }
         }

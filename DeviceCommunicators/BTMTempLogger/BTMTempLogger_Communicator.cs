@@ -279,7 +279,7 @@ namespace DeviceCommunicators.BTMTempLogger
 
 				}
 
-				int i = 0;
+				
 
 			}, _cancellationToken);
 		}
