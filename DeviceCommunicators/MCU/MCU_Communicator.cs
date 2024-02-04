@@ -195,8 +195,8 @@ namespace DeviceCommunicators.MCU
 					break;
 				}
 
-
-				var buffer = ConvertToData(mcuParam, data.Value, ref id, data.IsSet);
+				byte[] buffer = _buffersPool.Take(_cancellationToken);
+				ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
 				CommService.Send(buffer);
 
 
@@ -428,15 +428,16 @@ namespace DeviceCommunicators.MCU
 
 
 
-		private byte[] ConvertToData(
+		public static byte[] ConvertToData(
 			MCU_ParamData mcu_Message,
 			double value,
 			ref byte[] id,
+			ref byte[] data,
 			bool isSet)
 		{
 			value = value * mcu_Message.Scale;
 
-			byte[] data = _buffersPool.Take(_cancellationToken);
+			
 
 
 			//! Split command and value:
