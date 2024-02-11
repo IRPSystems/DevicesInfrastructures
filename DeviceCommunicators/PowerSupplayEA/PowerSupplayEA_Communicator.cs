@@ -111,7 +111,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 						cmd = ea_ParamData.Cmd + " ON";
 					else if (value == 1)
 					{
-						//cmd = ea_ParamData.Cmd + " OFF";
+						cmd = ea_ParamData.Cmd + " OFF";
 
 						Task task = Task.Run(() =>
 						{
@@ -119,7 +119,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 						}, _cancellationToken);
 
 						task.Wait();
-						return;
+						//return;
 					}
 				}
 
@@ -231,8 +231,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 			for (double i = startV; i >= 0 && !_cancellationToken.IsCancellationRequested; i--)
 			{
-				_serial_port.Send("SOUR:VOLTAGE " + i.ToString());
-				System.Threading.Thread.Sleep(1);
+				_serial_port.Send("SOUR:CURRENT " + i.ToString());
+				System.Threading.Thread.Sleep(100);
 			}
 		}
 
@@ -241,7 +241,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 			dVal = 0;
 			for (int i = 0; i < 3; i++)
 			{
-				_serial_port.Send("SOUR:VOLTAGE?");
+				_serial_port.Send("SOUR:CURRENT?");
 				string buffer = Read();
 				if (string.IsNullOrEmpty(buffer) == false)
 				{
