@@ -7,6 +7,7 @@ using Services.Services;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace DeviceCommunicators.PowerSupplayEA
@@ -20,8 +21,6 @@ namespace DeviceCommunicators.PowerSupplayEA
 
         public string Name;
 
-		private bool _isTimeout;
-		private System.Timers.Timer _timeoutTimer;
 
 		private List<string> _onOfCommands;
 
@@ -43,8 +42,6 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		public PowerSupplayEA_Communicator()
         {
-			_timeoutTimer = new System.Timers.Timer(50);
-			_timeoutTimer.Elapsed += TimoutElapsedEventHandler;
 
 			_onOfCommands = new List<string>() { "SYST:LOCK", "OUTP" };
 		}
@@ -76,8 +73,6 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		public override void Dispose()
 		{
-			if (_timeoutTimer != null)
-				_timeoutTimer.Stop();
 
 			base.Dispose();
 		}
@@ -112,10 +107,20 @@ namespace DeviceCommunicators.PowerSupplayEA
                 string cmd = ea_ParamData.Cmd + " " + value;
 				if(_onOfCommands.IndexOf(ea_ParamData.Cmd) >= 0)
 				{
-					if(value == 0)
+					if (value == 0)
 						cmd = ea_ParamData.Cmd + " ON";
 					else if (value == 1)
-						cmd = ea_ParamData.Cmd + " OFF";
+					{
+						//cmd = ea_ParamData.Cmd + " OFF";
+
+						Task task = Task.Run(() =>
+						{
+							TurnOffProcess();
+						}, _cancellationToken);
+
+						task.Wait();
+						return;
+					}
 				}
 
 				_serial_port.Send(cmd);
@@ -141,22 +146,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 					cmd = ea_ParamData.Cmd + "?";
 				_serial_port.Send(cmd);
 
-				_isTimeout = false;
-				_timeoutTimer.Start();
-				string buffer = null;
-				while (string.IsNullOrEmpty(buffer))
-				{
-					if (_isTimeout)
-						break;
-
-					_serial_port.Read(out buffer);
-					if (string.IsNullOrEmpty(buffer) == false)
-						break;
-
-					System.Threading.Thread.Sleep(1);
-				}
-
-				_timeoutTimer.Stop();
+				string buffer = Read();
 
 				if (string.IsNullOrEmpty(buffer))
 				{
@@ -186,9 +176,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 				}
 				else
 				{
-					buffer = Regex.Replace(buffer, "[A-Za-z ]", "");
 					double dVal;
-					bool res = double.TryParse(buffer, out dVal);
+					bool res = GetValueFromMessage(buffer, out dVal);
 
 					if (!res)
 						callback?.Invoke(param, CommunicatorResultEnum.Error, "Invalid value");
@@ -205,9 +194,66 @@ namespace DeviceCommunicators.PowerSupplayEA
             }
 		}
 
-		private void TimoutElapsedEventHandler(object sender, ElapsedEventArgs e)
+		private string Read()
 		{
-			_isTimeout = true;
+			string buffer = null;
+			DateTime startTime = DateTime.Now;
+			TimeSpan timeout50ms = new TimeSpan(0, 0, 0, 0, 50);
+
+			while (string.IsNullOrEmpty(buffer) &&
+				(DateTime.Now - startTime) < timeout50ms)
+			{
+				_serial_port.Read(out buffer);
+				if (string.IsNullOrEmpty(buffer) == false)
+					break;
+
+				System.Threading.Thread.Sleep(1);
+			}
+
+			return buffer;
+		}
+
+		private bool GetValueFromMessage(string buffer, out double dVal)
+		{
+			buffer = Regex.Replace(buffer, "[A-Za-z ]", "");
+			bool res = double.TryParse(buffer, out dVal);
+
+			return res;
+		}
+
+
+		private void TurnOffProcess()
+		{
+			double startV;
+			bool res = GetCurrentV(out startV);
+			if (res == false)
+				return;
+
+			for (double i = startV; i >= 0 && !_cancellationToken.IsCancellationRequested; i--)
+			{
+				_serial_port.Send("SOUR:VOLTAGE " + i.ToString());
+				System.Threading.Thread.Sleep(1);
+			}
+		}
+
+		private bool GetCurrentV(out double dVal)
+		{
+			dVal = 0;
+			for (int i = 0; i < 3; i++)
+			{
+				_serial_port.Send("SOUR:VOLTAGE?");
+				string buffer = Read();
+				if (string.IsNullOrEmpty(buffer) == false)
+				{
+					bool res = GetValueFromMessage(buffer, out dVal);
+					if (res == false)
+						continue;
+
+					break;
+				}
+			}
+
+			return false;
 		}
 
 		#endregion Methods
