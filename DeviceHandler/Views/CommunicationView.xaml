@@ -35,6 +35,10 @@
             <local:ModbusTCPConnectView DataContext="{Binding }"/>
         </DataTemplate>
 
+        <DataTemplate x:Key="ModbusRTUConnectTemplate">
+            <local:ModbusRTUConnectView DataContext="{Binding }"/>
+        </DataTemplate>
+
         <converter:TypeToNameConverter x:Key="ConnectionTypeStringConverter"/>
         <selectors:ConnectTemplateSelector x:Key="ConnectTemplateSelector"/>
 
