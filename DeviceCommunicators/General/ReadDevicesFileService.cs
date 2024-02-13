@@ -1,5 +1,6 @@
 ﻿
 using CommunityToolkit.Mvvm.ComponentModel;
+using DeviceCommunicators.BrainChild;
 using DeviceCommunicators.BTMTempLogger;
 using DeviceCommunicators.EvvaDevice;
 using DeviceCommunicators.FieldLogger;
@@ -81,6 +82,7 @@ namespace DeviceCommunicators.Services
 
 			InitBTMTempLogger(devicesList);
 			InitFieldLogger(devicesList);
+			InitBrainChild(devicesList);
 
 
 			return devicesList;
@@ -148,7 +150,7 @@ namespace DeviceCommunicators.Services
 				{
 					Channel = i,
 					Name = "Channel " + i,
-					//Units = "°C",
+					Units = "°C",
 					DeviceType = DeviceTypesEnum.FieldLogger,
 					Device = fieldLogger,
 				};
@@ -157,6 +159,32 @@ namespace DeviceCommunicators.Services
 			}
 
 			devicesList.Add(fieldLogger);
+		}
+
+		public void InitBrainChild(ObservableCollection<DeviceData> devicesList)
+		{
+			DeviceData brainChild = new DeviceData()
+			{
+				Name = "Brain Child",
+				DeviceType = DeviceTypesEnum.BrainChild,
+			};
+
+			brainChild.ParemetersList = new ObservableCollection<DeviceParameterData>();
+			for (int i = 1; i <= 8; i++)
+			{
+				DeviceParameterData param = new BrainChild_ParamData()
+				{
+					Channel = i,
+					Name = "Channel " + i,
+					Units = "°C",
+					DeviceType = DeviceTypesEnum.BrainChild,
+					Device = brainChild,
+				};
+
+				brainChild.ParemetersList.Add(param);
+			}
+
+			devicesList.Add(brainChild);
 		}
 
 		public void ReadFromJson(
