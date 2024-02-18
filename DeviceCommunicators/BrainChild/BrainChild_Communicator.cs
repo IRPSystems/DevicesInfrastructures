@@ -172,6 +172,24 @@ namespace DeviceCommunicators.BrainChild
 			}, _cancellationToken);
 		}
 
+
+		public void ReadTCType()
+		{
+			byte[] buffer;
+			ModbusRTUSevice.ReadAddress(out buffer, 101, 1);
+
+			if (buffer == null)
+				return;
+
+			for (int i = 0; i < buffer.Length; i++)
+			{
+				short val = (short)(buffer[i] << 8);
+				i++;
+				val += buffer[i];
+				
+			}
+		}
+
 		#endregion Methods
 
 	}
