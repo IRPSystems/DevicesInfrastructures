@@ -22,7 +22,7 @@ namespace DeviceCommunicators.PowerSupplayEA
         public string Name;
 
 
-		private List<string> _onOfCommands;
+		private List<string> _onOffCommands;
 
 		#endregion Fields
 
@@ -43,7 +43,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 		public PowerSupplayEA_Communicator()
         {
 
-			_onOfCommands = new List<string>() { "SYST:LOCK", "OUTP" };
+			_onOffCommands = new List<string>() { "SYST:LOCK", "OUTP" };
 		}
 
 		#endregion Constructor
@@ -105,21 +105,31 @@ namespace DeviceCommunicators.PowerSupplayEA
 					return;
 
                 string cmd = ea_ParamData.Cmd + " " + value;
-				if(_onOfCommands.IndexOf(ea_ParamData.Cmd) >= 0)
+				if(_onOffCommands.IndexOf(ea_ParamData.Cmd) >= 0)
 				{
 					if (value == 0)
+					{
 						cmd = ea_ParamData.Cmd + " ON";
+
+						Task task = Task.Run(() =>
+						{
+							TurnOnProcess(cmd);
+						}, _cancellationToken);
+
+						task.Wait();
+						return;
+					}
 					else if (value == 1)
 					{
 						cmd = ea_ParamData.Cmd + " OFF";
 
 						Task task = Task.Run(() =>
 						{
-							TurnOffProcess();
+							TurnOffProcess(cmd);
 						}, _cancellationToken);
 
 						task.Wait();
-						//return;
+						return;
 					}
 				}
 
@@ -160,7 +170,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 					return;
 				}
 
-				if (_onOfCommands.IndexOf(ea_ParamData.Cmd) >= 0)
+				if (_onOffCommands.IndexOf(ea_ParamData.Cmd) >= 0)
 				{
 					if (buffer.ToLower() == "ON")
 						param.Value = 0;
@@ -222,21 +232,68 @@ namespace DeviceCommunicators.PowerSupplayEA
 		}
 
 
-		private void TurnOffProcess()
+		private void TurnOffProcess(string offCmd)
 		{
-			double startV;
-			bool res = GetCurrentV(out startV);
+			double startVoltage;
+			bool res = GetVoltage(out startVoltage);
 			if (res == false)
 				return;
 
-			for (double i = startV; i >= 0 && !_cancellationToken.IsCancellationRequested; i--)
+			for (double i = startVoltage; i >= 0 && !_cancellationToken.IsCancellationRequested; i--)
 			{
-				_serial_port.Send("SOUR:CURRENT " + i.ToString());
+				_serial_port.Send("SOUR:VOLTAGE " + i.ToString());
 				System.Threading.Thread.Sleep(100);
 			}
+
+			_serial_port.Send(offCmd);
 		}
 
-		private bool GetCurrentV(out double dVal)
+		private void TurnOnProcess(string onCmd) 
+		{
+			double startVoltage;
+			bool res = GetVoltage(out startVoltage);
+			if (res == false)
+				return;
+
+			double startCurrent;
+			res = GetCurrent(out startCurrent);
+			if (res == false)
+				return;
+
+			_serial_port.Send("SOUR:VOLTAGE 0");
+			_serial_port.Send("SOUR:CURRENT 1");
+			_serial_port.Send(onCmd);
+
+			for (double i = 0; i < startVoltage && !_cancellationToken.IsCancellationRequested; i++)
+			{
+				_serial_port.Send("SOUR:VOLTAGE " + i.ToString());
+				System.Threading.Thread.Sleep(100);
+			}
+
+			_serial_port.Send("SOUR:CURRENT " + startCurrent.ToString());
+		}
+
+		private bool GetVoltage(out double dVal)
+		{
+			dVal = 0;
+			for (int i = 0; i < 3; i++)
+			{
+				_serial_port.Send("SOUR:VOLTAGE?");
+				string buffer = Read();
+				if (string.IsNullOrEmpty(buffer) == false)
+				{
+					bool res = GetValueFromMessage(buffer, out dVal);
+					if (res == false)
+						continue;
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		private bool GetCurrent(out double dVal)
 		{
 			dVal = 0;
 			for (int i = 0; i < 3; i++)
@@ -249,7 +306,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 					if (res == false)
 						continue;
 
-					break;
+					return true;
 				}
 			}
 
