@@ -173,21 +173,20 @@ namespace DeviceCommunicators.BrainChild
 		}
 
 
-		public void ReadTCType()
+		public void SetTCType(char tcType)
 		{
-			byte[] buffer;
-			ModbusRTUSevice.ReadAddress(out buffer, 101, 1);
-
-			if (buffer == null)
-				return;
-
-			for (int i = 0; i < buffer.Length; i++)
+			short type = 0;
+			switch(tcType)
 			{
-				short val = (short)(buffer[i] << 8);
-				i++;
-				val += buffer[i];
-				
+				case 'K': type = 2; break;
+				case 'T': type = 4; break;
+				default:return;
 			}
+
+
+			ModbusRTUSevice.WriteSingleRegister(101, type);
+
+			
 		}
 
 		#endregion Methods
