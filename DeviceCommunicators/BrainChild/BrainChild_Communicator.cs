@@ -172,6 +172,23 @@ namespace DeviceCommunicators.BrainChild
 			}, _cancellationToken);
 		}
 
+
+		public void SetTCType(char tcType)
+		{
+			short type = 0;
+			switch(tcType)
+			{
+				case 'K': type = 2; break;
+				case 'T': type = 4; break;
+				default:return;
+			}
+
+
+			ModbusRTUSevice.WriteSingleRegister(101, type);
+
+			
+		}
+
 		#endregion Methods
 
 	}
