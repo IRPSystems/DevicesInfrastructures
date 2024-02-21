@@ -142,7 +142,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 				LoggerService.Error(this, "Failed to set value for parameter: " + param.Name, ex);
 			}
 		}
-
+		bool isOPMode = false;
 
         private void GetParamValue_Do(DeviceParameterData param, Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
 		{
@@ -151,9 +151,10 @@ namespace DeviceCommunicators.PowerSupplayEA
 				if (!(param is PowerSupplayEA_ParamData ea_ParamData))
 					return;
 
+				
+
 				string cmd = ea_ParamData.Cmd;
-				if(ea_ParamData.Name != "Identity")
-					cmd = ea_ParamData.Cmd + "?";
+				cmd = ea_ParamData.Cmd + "?";
 				_serial_port.Send(cmd);
 
 				string buffer = Read();
@@ -164,11 +165,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 					return;
 				}
 
-				if (ea_ParamData.Name == "Identity")
-				{
-					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
-					return;
-				}
+				
 
 				if (_onOffCommands.IndexOf(ea_ParamData.Cmd) >= 0)
 				{
@@ -189,13 +186,12 @@ namespace DeviceCommunicators.PowerSupplayEA
 					double dVal;
 					bool res = GetValueFromMessage(buffer, out dVal);
 
-					if (!res)
-						callback?.Invoke(param, CommunicatorResultEnum.Error, "Invalid value");
-					else
-					{
+					if (res)
 						param.Value = dVal;
-						callback?.Invoke(param, CommunicatorResultEnum.OK, null);
-					}
+					else
+						param.Value = buffer;
+					
+					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 				}
 			}
             catch(Exception ex) 
