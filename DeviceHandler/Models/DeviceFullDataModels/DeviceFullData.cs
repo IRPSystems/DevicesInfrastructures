@@ -49,7 +49,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
         #region Methodes
 
-        public void Init()
+        public void Init(string appName)
         {
             LoggerService.Inforamtion(this, "Initiating " + Device.DeviceType);
             string fileName = GetConnectionFileName();
@@ -60,7 +60,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
             LoggerService.Inforamtion(this, "Communicator constructed");
 
             string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            path = Path.Combine(path, "Evva");
+            path = Path.Combine(path, appName);
             if (Directory.Exists(path) == false)
                 Directory.CreateDirectory(path);
             path = Path.Combine(path, fileName);

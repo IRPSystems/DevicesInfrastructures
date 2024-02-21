@@ -153,7 +153,7 @@ namespace TestDevices
 			{
 				DeviceFullData deviceFullData = DeviceFullData.Factory(device);
 
-				deviceFullData.Init();
+				deviceFullData.Init("TestDevices");
 
 				DevicesContainter.DevicesFullDataList.Add(deviceFullData);
 				DevicesContainter.DevicesList.Add(device);
