@@ -242,6 +242,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 			}
 
 			_serial_port.Send(offCmd);
+
+			_serial_port.Send("SOUR:VOLTAGE " + startVoltage.ToString());
 		}
 
 		private void TurnOnProcess(string onCmd) 
@@ -257,7 +259,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 				return;
 
 			_serial_port.Send("SOUR:VOLTAGE 0");
-			_serial_port.Send("SOUR:CURRENT 1");
+			_serial_port.Send("SOUR:CURRENT 2");
 			_serial_port.Send(onCmd);
 
 			for (double i = 0; i < startVoltage && !_cancellationToken.IsCancellationRequested; i++)
@@ -266,7 +268,9 @@ namespace DeviceCommunicators.PowerSupplayEA
 				System.Threading.Thread.Sleep(100);
 			}
 
+			_serial_port.Send("SOUR:VOLTAGE " + startVoltage.ToString());
 			_serial_port.Send("SOUR:CURRENT " + startCurrent.ToString());
+
 		}
 
 		private bool GetVoltage(out double dVal)
