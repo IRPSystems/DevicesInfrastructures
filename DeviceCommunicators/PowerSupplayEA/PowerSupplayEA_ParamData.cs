@@ -10,7 +10,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 	{
 		public string Cmd { get; set; }
 		public int Max { get; set; }   
-		public ParamTypeEnum PramType { get; set; }
+		public ParamTypeEnum ParamType { get; set; }
 		public List<DropDownParamData> DropDown { get; set; }
 	}
 }
