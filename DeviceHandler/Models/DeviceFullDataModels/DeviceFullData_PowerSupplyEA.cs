@@ -41,7 +41,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructCheckConnection()
 		{
-			PowerSupplayEA_ParamData data = new PowerSupplayEA_ParamData() { Name = "Identity", Cmd = "*IDN?" };
+			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as DeviceParameterData).Name == "Identification");
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
