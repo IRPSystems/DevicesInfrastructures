@@ -59,6 +59,8 @@ namespace DeviceCommunicators.Models
 		[JsonIgnore]
 		public Brush Background { get; set; }
 		[JsonIgnore]
+		public Brush Foreground { get; set; }
+		[JsonIgnore]
 		public string ErrorDescription { get; set; }
 
 		[JsonIgnore]
