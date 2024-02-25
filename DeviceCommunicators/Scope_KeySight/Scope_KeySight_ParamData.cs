@@ -3,9 +3,9 @@ using Entities.Models;
 using System.Collections.Generic;
 using System.Security.RightsManagement;
 
-namespace DeviceCommunicators.Scop_MSOX3104T
+namespace DeviceCommunicators.Scope_KeySight
 {
-     public class Scop_MSOX3104T_ParamData : DeviceParameterData, IParamWithDropDown
+     public class Scope_KeySight_ParamData : DeviceParameterData, IParamWithDropDown
 
     {
         public string User_command {  get; set; } 

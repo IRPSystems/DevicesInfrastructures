@@ -6,17 +6,15 @@ using System.Collections.Generic;
 using System.Threading;
 using DeviceCommunicators.Enums;
 using Entities.Models;
-using DeviceCommunicators.NI_6002;
 using Entities.Enums;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
-using System.Diagnostics.Metrics;
 using System.IO;
 using DeviceCommunicators.Models;
 
-namespace DeviceCommunicators.Scop_MSOX3104T
+namespace DeviceCommunicators.Scope_KeySight
 {
-    public  class Scope3104TCommunicator:DeviceCommunicator, IDisposable
+    public  class Scope_KeySight_Communicator  : DeviceCommunicator, IDisposable
     {
 
 		 #region Fields
@@ -39,39 +37,39 @@ namespace DeviceCommunicators.Scop_MSOX3104T
         {
             DeviceData device = new DeviceData()
             {
-                Name = "Scop_MSOX3104T",
+                Name = "Scope_KeySight",
                 DeviceType = DeviceTypesEnum.KeySight
             };
 
             device.ParemetersList = new ObservableCollection<DeviceParameterData>()
              {
-                new Scop_MSOX3104T_ParamData() { User_command = "channel to config",        Command = "Choose channel" ,      DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scope_KeySight_ParamData() { User_command = "channel to config",        Command = "Choose channel" ,      DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
                 
                 
                 
-                new Scop_MSOX3104T_ParamData() { User_command = "Channel Turn on ",         Command = "channel ON\\OFF" ,       data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R", DropDown = new List<DropDownParamData>() { new DropDownParamData() {Name = "Channel OFF", Value = "0" }, new DropDownParamData() {Name = "Channel ON", Value = "1" } } },
-                new Scop_MSOX3104T_ParamData() { User_command = "Channel to measurement",   Command = "Set signal" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
-                new Scop_MSOX3104T_ParamData() { User_command = "Volte\\Ampere",            Command = "Probe  Volte\\Ampere",   data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
-                new Scop_MSOX3104T_ParamData() { User_command = "Clear all ",               Command = "Clear all mesure" ,      data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
-                new Scop_MSOX3104T_ParamData() { User_command = "Run\\Stop",                Command = "Run Control" ,           data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
-                new Scop_MSOX3104T_ParamData() { User_command = "Acquire",                  Command = "Acquire" ,               data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},                      
-                new Scop_MSOX3104T_ParamData() { User_command = "Time scaling",             Command = "Time scaling" ,          data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
-                new Scop_MSOX3104T_ParamData() { User_command = "Measurement Scaling",      Command = "Measurement Scaling" ,   data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
-                new Scop_MSOX3104T_ParamData() { User_command = "Scaling prob ",            Command = "Scaling prob" ,          data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
-                new Scop_MSOX3104T_ParamData() { User_command = "Triger mode",              Command = "Triger mode" ,           data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
-                new Scop_MSOX3104T_ParamData() { User_command = "Triger slope parameter",   Command = "Triger slope" ,          data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
-                new Scop_MSOX3104T_ParamData() { User_command = "File_name",                Command = "file_name" ,             data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
-                new Scop_MSOX3104T_ParamData() { User_command = "Save ",                    Command = "Save" ,                  data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scope_KeySight_ParamData() { User_command = "Channel Turn on ",         Command = "channel ON\\OFF" ,       data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R", DropDown = new List<DropDownParamData>() { new DropDownParamData() {Name = "Channel OFF", Value = "0" }, new DropDownParamData() {Name = "Channel ON", Value = "1" } } },
+                new Scope_KeySight_ParamData() { User_command = "Channel to measurement",   Command = "Set signal" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scope_KeySight_ParamData() { User_command = "Volte\\Ampere",            Command = "Probe  Volte\\Ampere",   data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scope_KeySight_ParamData() { User_command = "Clear all ",               Command = "Clear all mesure" ,      data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scope_KeySight_ParamData() { User_command = "Run\\Stop",                Command = "Run Control" ,           data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scope_KeySight_ParamData() { User_command = "Acquire",                  Command = "Acquire" ,               data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},                      
+                new Scope_KeySight_ParamData() { User_command = "Time scaling",             Command = "Time scaling" ,          data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scope_KeySight_ParamData() { User_command = "Measurement Scaling",      Command = "Measurement Scaling" ,   data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scope_KeySight_ParamData() { User_command = "Scaling prob ",            Command = "Scaling prob" ,          data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scope_KeySight_ParamData() { User_command = "Triger mode",              Command = "Triger mode" ,           data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scope_KeySight_ParamData() { User_command = "Triger slope parameter",   Command = "Triger slope" ,          data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scope_KeySight_ParamData() { User_command = "File_name",                Command = "file_name" ,             data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
+                new Scope_KeySight_ParamData() { User_command = "Save ",                    Command = "Save" ,                  data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="R"},
                
-                new Scop_MSOX3104T_ParamData() { User_command = "CYCLe DC",                 Command = "CYCLe,DC" ,              data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="Rw"},
-                new Scop_MSOX3104T_ParamData() { User_command = "DISPlay DC",               Command = "DISPlay,DC" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="Rw "},
-                new Scop_MSOX3104T_ParamData() { User_command = "CYCLe AC",                 Command = "CYCLe,AC" ,              data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
-                new Scop_MSOX3104T_ParamData() { User_command = "DISPlay AC",               Command = "DISPlay,AC" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="Rw"},
-                new Scop_MSOX3104T_ParamData() { User_command = "Peak to peak",             Command = "VPP" ,                   data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="Rw "},
-                new Scop_MSOX3104T_ParamData() { User_command = "VAMPlitude",               Command = "VAMPlitude" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
-                new Scop_MSOX3104T_ParamData() { User_command = "VTOP",                     Command = "VTOP" ,                  data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
-                new Scop_MSOX3104T_ParamData() { User_command = "Average CYCLe",            Command = "VAVerage CYCLe" ,        data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
-                new Scop_MSOX3104T_ParamData() { User_command = "Average DISPlay",          Command = "VAVerage DISPlay" ,      data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
+                new Scope_KeySight_ParamData() { User_command = "CYCLe DC",                 Command = "CYCLe,DC" ,              data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="Rw"},
+                new Scope_KeySight_ParamData() { User_command = "DISPlay DC",               Command = "DISPlay,DC" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="Rw "},
+                new Scope_KeySight_ParamData() { User_command = "CYCLe AC",                 Command = "CYCLe,AC" ,              data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
+                new Scope_KeySight_ParamData() { User_command = "DISPlay AC",               Command = "DISPlay,AC" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="Rw"},
+                new Scope_KeySight_ParamData() { User_command = "Peak to peak",             Command = "VPP" ,                   data="",    DeviceType = DeviceTypesEnum.KeySight,  Status_paramter="Rw "},
+                new Scope_KeySight_ParamData() { User_command = "VAMPlitude",               Command = "VAMPlitude" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
+                new Scope_KeySight_ParamData() { User_command = "VTOP",                     Command = "VTOP" ,                  data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
+                new Scope_KeySight_ParamData() { User_command = "Average CYCLe",            Command = "VAVerage CYCLe" ,        data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
+                new Scope_KeySight_ParamData() { User_command = "Average DISPlay",          Command = "VAVerage DISPlay" ,      data="",    DeviceType = DeviceTypesEnum.KeySight,   Status_paramter="Rw"},
             };
 
 
@@ -83,7 +81,7 @@ namespace DeviceCommunicators.Scop_MSOX3104T
             settings.Formatting = Formatting.Indented;
             settings.TypeNameHandling = TypeNameHandling.All;
             var sz = JsonConvert.SerializeObject(device, settings);
-            File.WriteAllText(@"C:\dev\Infrastructure_Evva\Evva\Data\Device Communications\Scop_MSOX3104T.json", sz);
+            File.WriteAllText(@"C:\dev\Infrastructure_Evva\Evva\Data\Device Communications\Scope_KeySight.json", sz);
 
         }
 
@@ -133,7 +131,7 @@ namespace DeviceCommunicators.Scop_MSOX3104T
 
 
 
-        private TcpStaticService _ScopeMS0X3104T
+        private TcpStaticService _ScopeKeySight
         {
             get => CommService as TcpStaticService;
         }
@@ -144,22 +142,47 @@ namespace DeviceCommunicators.Scop_MSOX3104T
 
         #region Constructor
 
-        public Scope3104TCommunicator(string iPaddres, int port)
+        public Scope_KeySight_Communicator ()
         { 
-            _iPaddres = iPaddres;
-            _port = port;
+            
         }
 
-        #endregion Constructor
+		#endregion Constructor
 
 
 
 
 
-        #region Methods
+		#region Methods
 
-        
-        protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
+		public void Init(
+            bool isUSBSimulator,
+            string iPaddres, 
+            int port)
+		{
+
+			try
+			{
+				_iPaddres = iPaddres;
+				_port = port;
+
+				CommService = new TcpStaticService(_iPaddres, _port);
+				CommService.Init(true);
+
+
+
+				//InitBase();
+			}
+			catch (Exception ex)
+			{
+				LoggerService.Error(this, "Failed to init the ScopeKeySight", ex);
+			}
+
+
+		}
+
+
+		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
         {
 
             if (data.IsSet)
@@ -185,10 +208,10 @@ namespace DeviceCommunicators.Scop_MSOX3104T
         {
             try
             {
-                if (!(param is Scop_MSOX3104T_ParamData scopeMSOX3104T))
+                if (!(param is Scope_KeySight_ParamData scopeKeySight))
                     return;
 
-                Send_command(scopeMSOX3104T);
+                Send_command(scopeKeySight);
 
                 callback?.Invoke(param, CommunicatorResultEnum.OK, null);
             }
@@ -204,12 +227,12 @@ namespace DeviceCommunicators.Scop_MSOX3104T
         {
             try
             {
-                if (!(param is Scop_MSOX3104T_ParamData scopeMSOX3104T))
+                if (!(param is Scope_KeySight_ParamData scopeKeySight))
                     return;
 
                 string data_from_scop;
 
-                data_from_scop= Read_command(scopeMSOX3104T);
+                data_from_scop= Read_command(scopeKeySight);
 
                 Thread.Sleep(10);
 
@@ -232,31 +255,13 @@ namespace DeviceCommunicators.Scop_MSOX3104T
 
 
 
-        public void Init()
-        {
-
-            try
-            {
-                CommService = new TcpStaticService(_iPaddres, _port);
-                CommService.Init(true);
-
-
-
-                //InitBase();
-            }
-            catch (Exception ex)
-            {
-                LoggerService.Error(this, "Failed to init the ScopeMS0X3104T", ex);
-            }
-
-
-        }
+        
 
 
         private void send(string data)
         {
             
-            _ScopeMS0X3104T.Send(data+"\n");
+            _ScopeKeySight.Send(data+"\n");
         }
 
 
@@ -264,14 +269,14 @@ namespace DeviceCommunicators.Scop_MSOX3104T
 
         private string Read_data()
         {
-            _ScopeMS0X3104T.Read(out _data);
+            _ScopeKeySight.Read(out _data);
             return _data;
         }
 
 
         //public void Send_command(String command, string data, int channel, string interval, string type, double number)
 
-        public void Send_command(Scop_MSOX3104T_ParamData parameter)
+        public void Send_command(Scope_KeySight_ParamData parameter)
         {
             double Value = 0;
             Value= Convert .ToDouble(parameter.Value);
@@ -379,7 +384,7 @@ namespace DeviceCommunicators.Scop_MSOX3104T
 
         //public string Read_command(string command, string data, int channel, string interval, string type)
 
-        private  string Read_command(Scop_MSOX3104T_ParamData parameter)
+        private  string Read_command(Scope_KeySight_ParamData parameter)
         {
             if (parameter.Command.ToLower() == ("Read Measurement").ToLower())
             {
@@ -458,8 +463,8 @@ namespace DeviceCommunicators.Scop_MSOX3104T
 
         public override bool Equals(object obj)
         {
-            return obj is Scope3104TCommunicator communication &&
-                    EqualityComparer<TcpStaticService>.Default.Equals(_ScopeMS0X3104T, communication._ScopeMS0X3104T) &&
+            return obj is Scope_KeySight_Communicator  communication &&
+                    EqualityComparer<TcpStaticService>.Default.Equals(_ScopeKeySight, communication._ScopeKeySight) &&
                     _data == communication._data &&
                     IsInitialized == communication.IsInitialized;
         }
