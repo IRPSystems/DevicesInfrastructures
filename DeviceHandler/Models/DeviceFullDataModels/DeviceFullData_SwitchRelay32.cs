@@ -37,7 +37,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new TcpConncetViewModel(4196, 16323, 16320);
+			ConnectionViewModel = new TcpConncetViewModel(4196, "", 16323, 16320);
 		}
 
 		protected override void ConstructCheckConnection()

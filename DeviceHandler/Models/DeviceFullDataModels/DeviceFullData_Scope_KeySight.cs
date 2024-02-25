@@ -34,12 +34,12 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new TcpConncetViewModel(4196, 21323, 21320);
+			ConnectionViewModel = new TcpConncetViewModel(5025, "192.168.10.148", 21323, 21320);
 		}
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => p.Name == "Controller Efficiency");
+			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => p.Name == "Identification");
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
