@@ -231,7 +231,7 @@ namespace DeviceCommunicators.Scope_KeySight
 
         public void Send_command(Scope_KeySight_ParamData parameter, double dVal)
         {
-            if(parameter.Name == "Save")
+            if(parameter.Name == "Save Data")
             {
                 SaveCommand(parameter, dVal);
                 return;
