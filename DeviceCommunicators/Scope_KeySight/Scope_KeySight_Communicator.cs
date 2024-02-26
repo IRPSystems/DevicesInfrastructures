@@ -183,7 +183,7 @@ namespace DeviceCommunicators.Scope_KeySight
                 if (!(param is Scope_KeySight_ParamData scopeKeySight))
                     return;
 
-                Send_command(scopeKeySight);
+                Send_command(scopeKeySight, value);
 
                 callback?.Invoke(param, CommunicatorResultEnum.OK, null);
             }
@@ -227,31 +227,13 @@ namespace DeviceCommunicators.Scope_KeySight
 
 
 
-        
 
 
-        private void send(string data)
-        {
-            
-            TCPCommService.Send(data+"\n");
-        }
-
-
-
-
-        private string Read_data()
-        {
-            TCPCommService.Read(out _data);
-            return _data;
-        }
-
-
-
-        public void Send_command(Scope_KeySight_ParamData parameter)
+        public void Send_command(Scope_KeySight_ParamData parameter, double dVal)
         {
             if(parameter.Name == "Save")
             {
-                SaveCommand(parameter);
+                SaveCommand(parameter, dVal);
                 return;
             }
 
@@ -259,6 +241,8 @@ namespace DeviceCommunicators.Scope_KeySight
 
 			// Add channel number
 			cmd = cmd.Replace("<channel>", parameter.Channel.ToString());
+
+			cmd += "\n";
 
 			TCPCommService.Send(cmd);
 
@@ -364,20 +348,22 @@ namespace DeviceCommunicators.Scope_KeySight
 
 		}
 
-        private void SaveCommand(Scope_KeySight_ParamData parameter)
+        private void SaveCommand(Scope_KeySight_ParamData parameter, double dVal)
         {
-            double dVal;
-            bool res = double.TryParse(parameter.Value.ToString(), out dVal);
-
-            string fileType = "";
+            
             if (dVal == 0)
-				fileType = "PNG";
-            else
-				fileType = "CSV";
+			{
+				TCPCommService.Send(":SAVE:IMAGe:FORMat PNG\n");
+				TCPCommService.Send(":SAVE:IMAGe:STARt \"" + parameter.data + "\"\n");
+			}
+			else
+			{
+				TCPCommService.Send(":SAVE:WAVeform:FORMat CSV\n");
+				TCPCommService.Send(":SAVE:WAVeform:STAR \"" + file_name + "\"\n");
+			}
 
-			send(":SAVE:IMAGe:FORMat " + fileType);
-            send(":SAVE:IMAGe:STARt \"" + parameter.data + "\"");
-            Thread.Sleep(500);
+
+			Thread.Sleep(500);
             
         }
 
@@ -387,31 +373,26 @@ namespace DeviceCommunicators.Scope_KeySight
 
 		private  string Read_command(Scope_KeySight_ParamData parameter)
         {
-			//TCPCommService.Send(":MEASure:VRMS? CYCLe,DC,channel1\n");
-			TCPCommService.Send("*IDN?\n");
+
+
+			//////////////////////////////////////////////////////////////////////////////////////////
+			string cmd = parameter.Command;
+			// Add channel number
+			cmd = cmd.Replace("<channel>", parameter.Channel.ToString());
+
+			// Add Question mark
+			int index = cmd.IndexOf(' ');
+			if (index < 0)
+				cmd += "?";
+			else
+				cmd = cmd.Insert(index, "?");
+
+			TCPCommService.Send(cmd + "\n");
+
 			string response;
 			TCPCommService.Read(out response);
 
 			return response;
-
-			//////////////////////////////////////////////////////////////////////////////////////////
-			//         string cmd = parameter.Command;
-			//// Add channel number
-			//cmd = cmd.Replace("<channel>", parameter.Channel.ToString());
-
-			//// Add Question mark
-			//int index = cmd.IndexOf(' ');
-			//         if (index < 0)
-			//             cmd += "?";
-			//         else
-			//             cmd = cmd.Insert(index, "?");
-
-			//         _ScopeKeySight.Send(cmd);
-
-			//         string response;
-			//_ScopeKeySight.Read(out response);
-
-			//return response;
 
 			//////////////////////////////////////////////////////////////////////////////////////////
 

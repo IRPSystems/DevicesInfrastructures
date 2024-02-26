@@ -39,7 +39,11 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => p.Name == "Identification");
+			DeviceParameterData data = new Scope_KeySight_ParamData()
+			{
+				Name = "Identification",
+				Command = "*IDN"
+			};
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
