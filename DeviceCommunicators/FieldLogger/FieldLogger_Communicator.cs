@@ -23,6 +23,8 @@ namespace DeviceCommunicators.FieldLogger
 
 		private ObservableCollection<short> _channelsValue;
 
+		private byte[] _tcTypes;
+
 		#endregion Fields
 
 
@@ -46,6 +48,7 @@ namespace DeviceCommunicators.FieldLogger
 		public FieldLogger_Communicator()
         {
 			_channelsValue = new ObservableCollection<short>();
+			_tcTypes = new byte[8];
 		}
 
 		#endregion Constructor
@@ -148,6 +151,8 @@ namespace DeviceCommunicators.FieldLogger
 				{
 					byte[] buffer;
 					ModbusTCPSevice.Read(out buffer);
+					if (buffer == null)
+						continue;
 
 					_channelsValue.Clear();
 
@@ -163,6 +168,27 @@ namespace DeviceCommunicators.FieldLogger
 				}
 
 			}, _cancellationToken);
+		}
+
+		public void SetTCType(char tcType)
+		{
+			byte type = 0;
+			switch (tcType)
+			{
+				case 'K': type = 3; break;
+				case 'T': type = 4; break;
+				default: return;
+			}
+
+			//for(int i = 0; i < _tcTypes.Length; i++) 
+			//{
+			//	_tcTypes[i] = type;
+			//}
+
+			ushort us = type;
+			_tcTypes = BitConverter.GetBytes(us);
+			ModbusTCPSevice.WriteSingleRegister(7, _modbusAddress, 1001, _tcTypes);
+
 		}
 
 		#endregion Methods
