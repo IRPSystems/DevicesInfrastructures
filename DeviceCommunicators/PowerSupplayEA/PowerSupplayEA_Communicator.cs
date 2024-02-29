@@ -120,7 +120,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 						}, _cancellationToken);
 
 						task.Wait();
-						return;
+						//return;
 					}
 					else if (value == 1)
 					{
@@ -132,8 +132,11 @@ namespace DeviceCommunicators.PowerSupplayEA
 						}, _cancellationToken);
 
 						task.Wait();
-						return;
+						//return;
 					}
+
+					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+					return;
 				}
 
 				_serial_port.Send(cmd);
