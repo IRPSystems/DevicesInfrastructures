@@ -150,7 +150,8 @@ namespace DeviceCommunicators.FieldLogger
 				while(!_cancellationToken.IsCancellationRequested) 
 				{
 					byte[] buffer;
-					ModbusTCPSevice.Read(out buffer);
+					lock(ModbusTCPSevice)
+						ModbusTCPSevice.Read(out buffer);
 					if (buffer == null)
 						continue;
 
@@ -172,23 +173,29 @@ namespace DeviceCommunicators.FieldLogger
 
 		public void SetTCType(char tcType)
 		{
-			byte type = 0;
-			switch (tcType)
+			lock (ModbusTCPSevice)
 			{
-				case 'K': type = 3; break;
-				case 'T': type = 4; break;
-				default: return;
+				byte type = 0;
+				switch (tcType)
+				{
+					case 'K': type = 3; break;
+					case 'T': type = 4; break;
+					default: return;
+				}
+
+
+
+				//ushort us = type;
+				//_tcTypes = BitConverter.GetBytes(us);
+				//ModbusTCPSevice.WriteSingleRegister(7, _modbusAddress, 1001, _tcTypes);
+
+				//byte[] buffer = new byte[2];
+				//byte[] bufferRes = new byte[10];
+				//buffer[0] = 2;
+				//ModbusTCPSevice.WriteMultipleRegister(ModbusTCPSevice.fctWriteMultipleRegister, _modbusAddress, 860, buffer, ref bufferRes);
+				//System.Threading.Thread.Sleep(2500);
+				//ModbusTCPSevice.ReadHoldingRegister(ModbusTCPSevice.fctReadHoldingRegister, _modbusAddress, 744, 1, ref buffer);
 			}
-
-			//for(int i = 0; i < _tcTypes.Length; i++) 
-			//{
-			//	_tcTypes[i] = type;
-			//}
-
-			ushort us = type;
-			_tcTypes = BitConverter.GetBytes(us);
-			ModbusTCPSevice.WriteSingleRegister(7, _modbusAddress, 1001, _tcTypes);
-
 		}
 
 		#endregion Methods
