@@ -24,6 +24,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		private List<string> _onOffCommands;
 
+		private bool _isUseRampForOnOff;
+
 		#endregion Fields
 
 
@@ -44,6 +46,7 @@ namespace DeviceCommunicators.PowerSupplayEA
         {
 
 			_onOffCommands = new List<string>() { "SYST:LOCK", "OUTP" };
+			_isUseRampForOnOff = true;
 		}
 
 		#endregion Constructor
@@ -117,7 +120,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 						}, _cancellationToken);
 
 						task.Wait();
-						return;
+						//return;
 					}
 					else if (value == 1)
 					{
@@ -129,8 +132,11 @@ namespace DeviceCommunicators.PowerSupplayEA
 						}, _cancellationToken);
 
 						task.Wait();
-						return;
+						//return;
 					}
+
+					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+					return;
 				}
 
 				_serial_port.Send(cmd);
@@ -230,6 +236,12 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		private void TurnOffProcess(string offCmd)
 		{
+			if (!_isUseRampForOnOff)
+			{
+				_serial_port.Send(offCmd);
+				return;
+			}
+
 			double startVoltage;
 			bool res = GetVoltage(out startVoltage);
 			if (res == false)
@@ -248,6 +260,12 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		private void TurnOnProcess(string onCmd) 
 		{
+			if(!_isUseRampForOnOff)
+			{
+				_serial_port.Send(onCmd);
+				return;
+			}
+
 			double startVoltage;
 			bool res = GetVoltage(out startVoltage);
 			if (res == false)
@@ -311,6 +329,11 @@ namespace DeviceCommunicators.PowerSupplayEA
 			}
 
 			return false;
+		}
+
+		public void SetIsUseRampForOnOff(bool isUseRamp)
+		{
+			_isUseRampForOnOff = isUseRamp;
 		}
 
 		#endregion Methods
