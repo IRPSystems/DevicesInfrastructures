@@ -379,7 +379,7 @@ namespace DeviceCommunicators.Scop_MSOX3104T
 
         //public string Read_command(string command, string data, int channel, string interval, string type)
 
-        private  string Read_command(Scop_MSOX3104T_ParamData parameter)
+        public  string Read_command(Scop_MSOX3104T_ParamData parameter)
         {
             if (parameter.Command.ToLower() == ("Read Measurement").ToLower())
             {
