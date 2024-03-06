@@ -222,6 +222,7 @@ using DeviceCommunicators.Dyno;
 using DeviceHandler.ViewModels;
 using Entities.Models;
 using System.Timers;
+using Communication.Interfaces;
 
 namespace DeviceSimulators.ViewModels
 {
@@ -303,13 +304,16 @@ namespace DeviceSimulators.ViewModels
 			uint canID = 0x580 + _canConnectViewModel.SyncNodeID;
 			if (_canConnectViewModel.SelectedAdapter == "PCAN")
 			{
-				_commService = new CanPCanService(_canConnectViewModel.SelectedBaudrate, 
-					CanPCanService.GetHWId(_canConnectViewModel.SelectedHwId), 0x580 + _canConnectViewModel.SyncNodeID, 0x600 + _canConnectViewModel.SyncNodeID);
+				_commService = new CanPCanService(
+					_canConnectViewModel.SelectedBaudrate, 
+					CanPCanService.GetHWId(_canConnectViewModel.SelectedHwId), 
+					0x600 + _canConnectViewModel.SyncNodeID,
+					0x580 + _canConnectViewModel.SyncNodeID);
 			}
 			else if (_canConnectViewModel.SelectedAdapter == "UDP Simulator")
 			{
-				_commService = new CanUdpSimulationService(_canConnectViewModel.SelectedBaudrate, 
-					0x580 + _canConnectViewModel.SyncNodeID, 0x600 + _canConnectViewModel.SyncNodeID,
+				_commService = new CanUdpSimulationService(_canConnectViewModel.SelectedBaudrate,
+					0x600 + _canConnectViewModel.SyncNodeID, 0x580 + _canConnectViewModel.SyncNodeID,
 					_canConnectViewModel.RxPort, 
 					_canConnectViewModel.TxPort, _canConnectViewModel.Address);
 			}
@@ -320,6 +324,7 @@ namespace DeviceSimulators.ViewModels
 
 			_commService.Init(true);
 
+			_commService.MessageReceivedEvent += MessageReceivedEventHandler;
 			_commService.ErrorEvent += ErrorEventHendler;
 
 			ConnectVM.IsConnectButtonEnabled = false;
@@ -426,7 +431,7 @@ namespace DeviceSimulators.ViewModels
 			Dyno_Communicator.SetDataToBuffer((long)value, sendBuffer, index, 4);
 
 
-			_commService.Send(sendBuffer);
+			_commService.Send(sendBuffer, 0x580 + _canConnectViewModel.SyncNodeID, false);
 		}
 
 		private void ErrorEventHendler(string errorDescription)

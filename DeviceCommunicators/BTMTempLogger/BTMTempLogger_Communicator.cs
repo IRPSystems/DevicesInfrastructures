@@ -7,6 +7,7 @@ using Services.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace DeviceCommunicators.BTMTempLogger
@@ -32,9 +33,10 @@ namespace DeviceCommunicators.BTMTempLogger
         public string Name;
 
 		private string _totalMessage;
-		private System.Timers.Timer _timer;
+		private System.Timers.Timer _timerTimeout;
 
 		private bool _isDataReceived;
+
 
 		#endregion Fields
 
@@ -55,14 +57,16 @@ namespace DeviceCommunicators.BTMTempLogger
 			_channelTemp = new ConcurrentDictionary<int, double>();
 
 
-			_timer = new System.Timers.Timer(500);
-			_timer.Elapsed += _timer_Elapsed;
-			//_workState = WorkState.StartNotFound;
-			_totalMessage = string.Empty;
+			_timerTimeout = new System.Timers.Timer(1000);
+			_timerTimeout.Elapsed += _timerTimeout_Elapsed;
 
+
+			_totalMessage = string.Empty;
 		}
 
 		
+
+
 
 		#endregion Constructor
 
@@ -93,9 +97,20 @@ namespace DeviceCommunicators.BTMTempLogger
 			CommService.Init(true);
 
 			InitBase();
-			//_message = string.Empty;
-			_timer.Start();
 
+			HandleReceivedText();
+
+			
+			//_message = string.Empty;
+			//_timer.Start();
+
+		}
+
+		public override void Dispose()
+		{
+			_timerTimeout.Stop();
+			_isDataReceived = false;
+			base.Dispose();
 		}
 
 		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
@@ -171,79 +186,141 @@ namespace DeviceCommunicators.BTMTempLogger
 
 		private void MessageReceived(byte[] buffer)
 		{
-			_isDataReceived = true;
-			var str = System.Text.Encoding.Default.GetString(buffer);
-			lock(_totalMessage)
-				_totalMessage += str.Replace("\0", string.Empty);
-		}
+			_timerTimeout.Stop();
 
-		
-
-		private void _timer_Elapsed(object sender, ElapsedEventArgs e)
-		{
-			HandleMessage();
-		}
-
-		private void HandleMessage()
-		{
-			try
+			lock (_totalMessage)
 			{
-				string str = string.Empty;
-				lock (_totalMessage)
+				//LoggerService.Inforamtion(this, "Message received *********");
+				_isDataReceived = true;
+				var str = System.Text.Encoding.Default.GetString(buffer);
+				str = str.Replace("\0", string.Empty);
+
+				_totalMessage += str.Replace("\0", string.Empty);
+			}
+
+			_timerTimeout.Start();
+		}
+
+		private enum HandleReceivedTextStateEnum
+		{
+			Start, FirstByte, EndOfMessage
+		}
+
+
+		private HandleReceivedTextStateEnum _handleReceivedTextState;
+		private void HandleReceivedText()
+		{
+			Task.Run(() =>
+			{
+
+				while (!_cancellationToken.IsCancellationRequested)
 				{
-					if(string.IsNullOrEmpty(_totalMessage))
+					try
 					{
-						_isDataReceived = false;
-						return;
+						string str = string.Empty;
+						lock (_totalMessage)
+						{
+							if (string.IsNullOrEmpty(_totalMessage))
+								continue;
+
+
+							switch (_handleReceivedTextState)
+							{
+								case HandleReceivedTextStateEnum.Start:
+									int startIndex = _totalMessage.IndexOf(_startOfText);
+									if (startIndex >= 0)
+									{
+										_totalMessage = _totalMessage.Substring(startIndex + 1);
+										_handleReceivedTextState = HandleReceivedTextStateEnum.FirstByte;
+									}
+
+									break;
+
+								case HandleReceivedTextStateEnum.FirstByte:
+									if (_totalMessage.StartsWith('4') == false)
+									{
+										_handleReceivedTextState = HandleReceivedTextStateEnum.Start;
+										break; ;
+									}
+
+									_handleReceivedTextState = HandleReceivedTextStateEnum.EndOfMessage;
+
+									break;
+
+								case HandleReceivedTextStateEnum.EndOfMessage:
+									int endOfMessageIndex = _totalMessage.IndexOf('\r');
+									if (endOfMessageIndex >= 0)
+									{
+										str = _totalMessage.Substring(0, endOfMessageIndex);
+										_totalMessage = _totalMessage.Substring(endOfMessageIndex + 1);
+										_handleReceivedTextState = HandleReceivedTextStateEnum.Start;
+									}
+
+									break;
+							}
+						}
+
+						if (string.IsNullOrEmpty(str) == false)
+						{
+							HandleMessage(str);
+							str = string.Empty;
+						}
+
+						System.Threading.Thread.Sleep(1);
+
+
+
+					}
+					catch (Exception ex) 
+					{
+						LoggerService.Error(this, "Error in parssing the message", ex);
 					}
 
-					str = _totalMessage;
-					_totalMessage = string.Empty;
+
 				}
 
-				string[] channelsList = str.Split(_startOfText);
+				
 
-				foreach (string channel in channelsList)
-				{
-					string channelTemp = channel.Trim('\0');
-					if (channelTemp.StartsWith('4') == false)
-						continue;
-					if (channelTemp.Contains("\u0018\u0018\u0018\u0018"))
-						continue;
-					if (channelTemp.Length < 15)
-						continue;
-					if (channelTemp.EndsWith('\r') == false)
-						continue;
-
-					// Get channel
-					int nch;
-					int.TryParse(channelTemp[1].ToString(), NumberStyles.HexNumber, null, out nch);
-
-					// Get floating point
-					int nfPoint;
-					int.TryParse(channelTemp[5].ToString(), out nfPoint);
-
-					char polarity = channelTemp[4];
-
-					// Build value string
-					string value = channelTemp.Substring(6, 8);
-					value = value.TrimStart('0');
-					value = value.Insert(value.Length - nfPoint, ".");
-					if (polarity == '1')
-						value = "-" + value;
-
-					double dVal;
-					double.TryParse(value, out dVal);
-
-					_channelTemp[nch] = dVal;
-				}
-			}
-			catch (Exception ex)
-			{
-				LoggerService.Error(this, "Error on parssing channel temperature", ex);
-			}
-
+			}, _cancellationToken);
 		}
+
+		private void HandleMessage(string message)
+		{
+			if (message.Contains("\u0018\u0018\u0018\u0018"))
+				return;
+
+			if (message.Length < 14)
+				return;
+
+			int nch;
+			int.TryParse(message[1].ToString(), NumberStyles.HexNumber, null, out nch);
+
+			// Get floating point
+			int nfPoint;
+			int.TryParse(message[5].ToString(), out nfPoint);
+
+			char polarity = message[4];
+
+			// Build value string
+			string value = message.Substring(6, 8);
+			value = value.TrimStart('0');
+			value = value.Insert(value.Length - nfPoint, ".");
+			if (polarity == '1')
+				value = "-" + value;
+
+			double dVal;
+			double.TryParse(value, out dVal);
+
+			_channelTemp[nch] = dVal;
+		}
+
+		private void _timerTimeout_Elapsed(object sender, ElapsedEventArgs e)
+		{
+			_timerTimeout.Stop();
+			_channelTemp.Clear();
+			_isDataReceived = false;
+		}
+
 
 		#endregion Methods
 

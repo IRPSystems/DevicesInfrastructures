@@ -18,9 +18,46 @@ namespace DeviceCommunicators.MCU
 
 		public void GetMessageID(ref byte[] id)
 		{
+			if(Cmd == null) 
+				return;
+
 			using (var md5 = MD5.Create())
 			{
 				Array.Copy(md5.ComputeHash(ASCIIEncoding.ASCII.GetBytes(Cmd)), 0, id, 0, 3);
+			}
+		}
+
+		private bool _isSettingValue;
+		public override object Value
+		{
+			get
+			{
+				if (IsAbsolute)
+				{
+					double d;
+					bool res = double.TryParse(_value.ToString(), out d);
+					if (!res)
+						return _value;
+
+					return Math.Abs(d);
+				}
+				else
+					return _value;
+
+			}
+			set
+			{
+				_value = value;
+				if (_isSettingSelectedDropDown)
+					return;
+
+				_isSettingValue = true;
+				if (DropDown != null)
+				{
+					SelectedDropDown = DropDown.Find((dd) => dd.Value == _value.ToString());
+				}
+				_isSettingValue = false;
+
 			}
 		}
 
@@ -45,6 +82,11 @@ namespace DeviceCommunicators.MCU
 		/// parameter range
 		/// </summary>
 		public List<double> Range { get; set; }
+
+		/// <summary>
+		/// Allow formating the value
+		/// </summary>
+		public string Format { get; set; }
 
 		/// <summary>
 		/// parameter scale
@@ -74,6 +116,27 @@ namespace DeviceCommunicators.MCU
 		/// 
 		/// </summary>
 		public List<DropDownParamData> DropDown { get; set; }
+
+		private DropDownParamData _selectedDropDown;
+
+		private bool _isSettingSelectedDropDown;
+		[JsonIgnore]
+		public DropDownParamData SelectedDropDown 
+		{
+			get => _selectedDropDown;
+			set
+			{
+				_selectedDropDown = value;
+				if (_isSettingValue)
+					return;
+
+				_isSettingSelectedDropDown = true;
+				int nVal;
+				bool res = int.TryParse(_selectedDropDown.Value, out nVal);
+				Value = nVal;
+				_isSettingSelectedDropDown = false;
+			}
+		}
 
 		[JsonIgnore]
 		public object Data { get; set; }

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="DeviceHandler.Views.ModbusTCPConnectView"
+﻿<UserControl x:Class="DeviceHandler.Views.ModbusRTUConnectView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -29,11 +29,23 @@
         
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,5">
 
-            <TextBlock Text="IP Address" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBox Text="{Binding IPAddress}" Margin="0,0,20,0" Width="100" VerticalContentAlignment="Center"/>
+            <TextBlock Text="COM name" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <ComboBox ItemsSource="{Binding COMList}" SelectedItem="{Binding ComPort}" Margin="0,0,10,0" Width="100" >
 
-            <TextBlock Text="Port" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBox Text="{Binding Port}" Margin="0,0,20,0" Width="100" VerticalContentAlignment="Center"/>
+                <i:Interaction.Triggers>
+
+                    <i:EventTrigger EventName="DropDownOpened">
+                        <i:InvokeCommandAction Command="{Binding Path=DataContext.COM_DropDownOpenedCommand, 
+                                                             Mode=OneWay, 
+                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="False"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+
+            </ComboBox>
+
+            <TextBlock Text="Baudrate" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <ComboBox ItemsSource="{Binding BaudratesList}" SelectedItem="{Binding Baudrate}" Margin="0,0,10,0" Width="100" />
 
             <TextBlock Text="Modbus address" VerticalAlignment="Center" Margin="0,0,5,0"/>
             <TextBox Text="{Binding ModbusAddress}" Margin="0,0,20,0" Width="100" VerticalContentAlignment="Center"/>

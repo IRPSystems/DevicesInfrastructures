@@ -121,6 +121,13 @@ namespace DeviceHandler.ViewModel
 
 			_designDragDropData.IsMouseDown = true;
 			_designDragDropData.StartPoint = e.GetPosition(null);
+
+			TreeViewItem treeViewItem =
+					FindAncestorService.FindAncestor<TreeViewItem>((DependencyObject)e.OriginalSource);
+			if (treeViewItem == null || treeViewItem.DataContext == null)
+				return;
+			if(treeViewItem.DataContext is DeviceParameterData actualParam)
+				LoggerService.Inforamtion(this, "Mouse down on parameter \"" + actualParam.Name + "\"");
 		}
 
 		private void ListSourceParam_PreviewMouseLeftButtonUp(MouseButtonEventArgs e)
@@ -169,16 +176,20 @@ namespace DeviceHandler.ViewModel
 				if (!(item is DeviceParameterData param))
 					return;
 
+				LoggerService.Inforamtion(this, "Dragging original parameter \"" + param.Name + "\"");
+
 				DeviceParameterData actualParam = null;
 				if (param.DeviceType != DeviceTypesEnum.EVVA)
 				{
 					DeviceFullData deviceFullData = _devicesContainer.TypeToDevicesFullData[param.DeviceType];
 					if (deviceFullData == null)
-						return;
+						return;					
 
 					actualParam = deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == param.Name);
 					if (actualParam == null)
 						return;
+
+					LoggerService.Inforamtion(this, "Dragging actual parameter \"" + actualParam.Name + "\"");
 
 				}
 				else

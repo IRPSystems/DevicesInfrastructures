@@ -17,6 +17,7 @@ using System;
 using DeviceCommunicators.Models;
 using DeviceHandler.Models.DeviceFullDataModels;
 using System.IO;
+using DeviceHandler.Services;
 
 namespace DeviceHandler.ViewModels
 {
@@ -47,8 +48,8 @@ namespace DeviceHandler.ViewModels
 
 		private DragDropData _designDragDropData;
 
-		
-		
+		private SelectedParamsList_MoveService _selectedParamsList_Move;
+
 
 		#endregion Fields
 
@@ -72,7 +73,7 @@ namespace DeviceHandler.ViewModels
 			SaveParametersListCommand = new RelayCommand(SaveParametersList);
 			LoadParametersListCommand = new RelayCommand(LoadParametersList);
 
-
+			_selectedParamsList_Move = new SelectedParamsList_MoveService();
 
 			ParametersList = new ObservableCollection<DeviceParameterData>();
 			ParametersList_WithIndex = new ObservableCollection<RecordData>();
@@ -267,6 +268,7 @@ namespace DeviceHandler.ViewModels
 				if (listViewItem == null)
 					return;
 
+
 				if (!listView.SelectedItems.Contains(listViewItem.DataContext))
 				{
 					DataObject dragData = new DataObject(DragDropFormat, listViewItem.DataContext);
@@ -410,58 +412,89 @@ namespace DeviceHandler.ViewModels
 			foreach (var item in _selectedItemsList)
 				list.Add(item as RecordData);
 
-			foreach (var item in list)
-			{
-				MoveParam(
-					item,
-					droppedOnParam);
+			List<DeviceParameterData> parametersList = ParametersList.ToList();
+			List<RecordData> parametersList_WithIndex = ParametersList_WithIndex.ToList();
+			_selectedParamsList_Move.MoveByDragAndDrop(
+				parametersList,
+				parametersList_WithIndex,
+				list,
+				droppedOnParam);
 
-				droppedOnParam = item;
-			}
+
+			ParametersList =
+				new ObservableCollection<DeviceParameterData>(parametersList);
+			ParametersList_WithIndex =
+				new ObservableCollection<RecordData>(parametersList_WithIndex);
+
 
 			SetIndeces();
 
 			SendRECORD_LIST_CHANGEDMessage();
 		}
 
-		private void MoveParam(
-			RecordData paramToMove,
-			RecordData droppedOnParam)
-		{
-			RecordData tempParam = paramToMove;
-
-			int sourceIndex = ParametersList_WithIndex.IndexOf(tempParam);
-
-			ParametersList.RemoveAt(sourceIndex);
-			ParametersList_WithIndex.RemoveAt(sourceIndex);
-
-			int destIndex = ParametersList_WithIndex.IndexOf(droppedOnParam);
-
-			if (destIndex < 0)
-			{
-				ParametersList.Add(tempParam.Data);
-				ParametersList_WithIndex.Add(tempParam);
-			}
-			else
-			{
-				ParametersList.Insert(destIndex, tempParam.Data);
-				ParametersList_WithIndex.Insert(destIndex, tempParam);
-			}
-		}
+		
 
 		private void MoveUp(RecordData param)
 		{
 			LoggerService.Inforamtion(this, "Moving parameter UP");
 
-			MoveGroupOfParam(param);
+			int index = ParametersList_WithIndex.IndexOf(param);
+			if (index == 0)
+				return;
+
+			List<RecordData> list = new List<RecordData>();
+			foreach (var item in _selectedItemsList)
+				list.Add(item as RecordData);
+
+			List<DeviceParameterData> parametersList = ParametersList.ToList();
+			List<RecordData> parametersList_WithIndex = ParametersList_WithIndex.ToList();
+			_selectedParamsList_Move.MoveByArrows(
+				parametersList,
+				parametersList_WithIndex,
+				list,
+				ParametersList_WithIndex[index - 1]);
+
+
+			ParametersList =
+				new ObservableCollection<DeviceParameterData>(parametersList);
+			ParametersList_WithIndex =
+				new ObservableCollection<RecordData>(parametersList_WithIndex);
+
+			SetIndeces();
+
+			SendRECORD_LIST_CHANGEDMessage();
 		}
 
 		private void MoveDown(RecordData param)
 		{
 			LoggerService.Inforamtion(this, "Moving node DOWN");
 
+			int index = ParametersList_WithIndex.IndexOf(param);
+			if (index == (ParametersList_WithIndex.Count - 1))
+				return;
 
-			MoveGroupOfParam(param);
+			List<RecordData> list = new List<RecordData>();
+			foreach (var item in _selectedItemsList)
+				list.Add(item as RecordData);
+
+			List<DeviceParameterData> parametersList = ParametersList.ToList();
+			List<RecordData> parametersList_WithIndex = ParametersList_WithIndex.ToList();
+			_selectedParamsList_Move.MoveByArrows(
+				parametersList,
+				parametersList_WithIndex,
+				list,
+				ParametersList_WithIndex[index + 1]);
+
+
+			ParametersList =
+				new ObservableCollection<DeviceParameterData>(parametersList);
+			ParametersList_WithIndex =
+				new ObservableCollection<RecordData>(parametersList_WithIndex);
+
+
+			SetIndeces();
+
+			SendRECORD_LIST_CHANGEDMessage();
 		}
 
 		#endregion Move UP/DOWN

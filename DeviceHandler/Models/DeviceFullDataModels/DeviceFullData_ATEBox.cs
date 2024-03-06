@@ -1,18 +1,16 @@
 ﻿
-using DeviceCommunicators.Dyno;
-using DeviceCommunicators.MCU;
+using DeviceCommunicators.ATEBox;
 using DeviceCommunicators.Models;
-using DeviceCommunicators.PowerSupplayEA;
+using DeviceCommunicators.PowerSupplayBK;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
-using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DeviceFullData_PowerSupplyEA : DeviceFullData
+	public class DeviceFullData_ATEBox : DeviceFullData
 	{
-		public DeviceFullData_PowerSupplyEA(DeviceData deviceData) :
+		public DeviceFullData_ATEBox(DeviceData deviceData) :
 			base(deviceData)
 		{
 
@@ -20,11 +18,11 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override string GetConnectionFileName()
 		{
-			return "PSEASerialConnect.json";
+			return "ATEBoxSerialConnect.json";
 		}
 		protected override void ConstructCommunicator()
 		{
-			DeviceCommunicator = new PowerSupplayEA_Communicator();
+			DeviceCommunicator = new ATEBox_Communicator();
 		}
 
 		protected override void DeserializeConnectionViewModel(
@@ -36,23 +34,25 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new SerialConncetViewModel(115200, "COM1", 14323, 14320);
+			ConnectionViewModel = new SerialConncetViewModel(115200, "COM1", 20323, 20320);
 		}
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as DeviceParameterData).Name == "Identification");
-
 			CheckCommunication = new CheckCommunicationService(
 				this,
-				data,
-				"PSEA");
+				new ATEBox_ParamData()
+				{
+					InterfaceType = ATEBox_InterfaceTyleEnum.Commands,
+					Command = "Check_Comm 1"
+				},
+				"ATEBox");
 		}
 
 
 		protected override void InitRealCommunicator()
 		{
-			(DeviceCommunicator as PowerSupplayEA_Communicator).Init(
+			(DeviceCommunicator as ATEBox_Communicator).Init(
 				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate);
@@ -60,13 +60,13 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void InitSimulationCommunicator()
 		{
-			(DeviceCommunicator as PowerSupplayEA_Communicator).Init(
-				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
-				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
-				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate,
-				(ConnectionViewModel as SerialConncetViewModel).RxPort,
-				(ConnectionViewModel as SerialConncetViewModel).TxPort,
-				(ConnectionViewModel as SerialConncetViewModel).Address);
+			(DeviceCommunicator as ATEBox_Communicator).Init(
+						(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
+						(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
+						(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate,
+						(ConnectionViewModel as SerialConncetViewModel).RxPort,
+						(ConnectionViewModel as SerialConncetViewModel).TxPort,
+						(ConnectionViewModel as SerialConncetViewModel).Address);
 		}
 
 		protected override bool IsSumulation()

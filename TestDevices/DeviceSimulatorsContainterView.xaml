@@ -1,0 +1,15 @@
+﻿<mah:MetroWindow x:Class="TestDevices.DeviceSimulatorsContainterView"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"  
+                 xmlns:device_simulation_views="clr-namespace:DeviceSimulators.Views;assembly=DeviceSimulators"
+                 xmlns:local="clr-namespace:TestDevices"
+                 mc:Ignorable="d"
+                 Title="Device Simulators" Height="450" Width="800"
+                 WindowStartupLocation="CenterScreen">
+
+    <device_simulation_views:DeviceSimulatorsView DataContext="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+
+</mah:MetroWindow>

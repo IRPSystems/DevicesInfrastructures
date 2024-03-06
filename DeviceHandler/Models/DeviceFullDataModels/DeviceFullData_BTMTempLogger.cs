@@ -42,7 +42,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructCheckConnection()
 		{
-			BTMTempLogger_ParamData data = new BTMTempLogger_ParamData() { Name = "Check Communication" };
+			BTMTempLogger_ParamData data = new BTMTempLogger_ParamData() { Name = "Check Communication", Channel = 1 };
 
 			CheckCommunication = new CheckCommunicationService(
 				this,

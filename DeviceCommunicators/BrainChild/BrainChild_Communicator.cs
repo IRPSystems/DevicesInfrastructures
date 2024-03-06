@@ -8,14 +8,14 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
-namespace DeviceCommunicators.FieldLogger
+namespace DeviceCommunicators.BrainChild
 {
-    public class FieldLogger_Communicator : DeviceCommunicator, IDataLoggerCommunicator
+    public class BrainChild_Communicator : DeviceCommunicator, IDataLoggerCommunicator
 	{
 		#region Fields
 
-		private string _ipAddress;
-		private ushort _port;
+		private string _comPort;
+		private int _baudrate;
 		private byte _modbusAddress;
 		private ushort _startAddress;
 		private ushort _noOfItems;
@@ -33,9 +33,9 @@ namespace DeviceCommunicators.FieldLogger
 			get => 8;
 		}
 
-		private ModbusTCPSevice ModbusTCPSevice
+		private ModbusRTUSevice ModbusRTUSevice
 		{
-			get => CommService as ModbusTCPSevice;
+			get => CommService as ModbusRTUSevice;
 		}
 
 
@@ -43,7 +43,7 @@ namespace DeviceCommunicators.FieldLogger
 
 		#region Constructor
 
-		public FieldLogger_Communicator()
+		public BrainChild_Communicator()
         {
 			_channelsValue = new ObservableCollection<short>();
 		}
@@ -54,15 +54,15 @@ namespace DeviceCommunicators.FieldLogger
 
 		public void Init(
 			bool isUdpSimulation,
-			string ipAddress,
-			ushort port,
+			string comPort,
+			int baudrate,
 			byte modbusAddress,
 			ushort startAddress,
 			ushort noOfItems,
 			ushort sizeOfItems)
 		{
-			_ipAddress = ipAddress;
-			_port = port;
+			_comPort = comPort;
+			_baudrate = baudrate;
 			_modbusAddress = modbusAddress;
 			_startAddress = startAddress;
 			_noOfItems = noOfItems;
@@ -73,9 +73,9 @@ namespace DeviceCommunicators.FieldLogger
 			{
 			}
 			else
-				CommService = new ModbusTCPSevice(
-					_ipAddress,
-					_port,
+				CommService = new ModbusRTUSevice(
+					_comPort,
+					_baudrate,
 					_modbusAddress,
 					_startAddress,
 					_noOfItems,
@@ -118,7 +118,7 @@ namespace DeviceCommunicators.FieldLogger
 		{
             try
             {
-				if(!(param is FieldLogger_ParamData fieldLogger_ParamData))
+				if(!(param is BrainChild_ParamData brainChild_ParamData))
 				{
 					callback?.Invoke(param, CommunicatorResultEnum.Error, "");
 					return;
@@ -130,7 +130,9 @@ namespace DeviceCommunicators.FieldLogger
 					return;
 				}
 
-				param.Value = _channelsValue[fieldLogger_ParamData.Channel - 1];
+				double dVal = _channelsValue[brainChild_ParamData.Channel - 1];
+				dVal /= 10;
+				param.Value = dVal;
 				callback?.Invoke(param, CommunicatorResultEnum.OK, "");
 
 			}
@@ -147,7 +149,12 @@ namespace DeviceCommunicators.FieldLogger
 				while(!_cancellationToken.IsCancellationRequested) 
 				{
 					byte[] buffer;
-					ModbusTCPSevice.Read(out buffer);
+					ModbusRTUSevice.Read(out buffer);
+					if (buffer == null)
+					{
+						System.Threading.Thread.Sleep(1);
+						continue;
+					}
 
 					_channelsValue.Clear();
 
@@ -163,6 +170,23 @@ namespace DeviceCommunicators.FieldLogger
 				}
 
 			}, _cancellationToken);
+		}
+
+
+		public void SetTCType(char tcType)
+		{
+			short type = 0;
+			switch(tcType)
+			{
+				case 'K': type = 2; break;
+				case 'T': type = 4; break;
+				default:return;
+			}
+
+
+			ModbusRTUSevice.WriteSingleRegister(101, type);
+
+			
 		}
 
 		#endregion Methods

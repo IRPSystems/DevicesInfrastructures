@@ -195,39 +195,39 @@ namespace DeviceCommunicators.MCU
 					break;
 				}
 
-
-				var buffer = ConvertToData(mcuParam, data.Value, ref id, data.IsSet);
+				byte[] buffer = _buffersPool.Take(_cancellationToken);
+				ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
 				CommService.Send(buffer);
 
 
 				try
 				{
-					int intVal = 0;
-					if (data.IsSet)
-					{
-						try
-						{
-							intVal = GetValueAsInt(data.Value);
-						}
-						catch (Exception ex)
-						{
-							errorDescription = "Failed to handle get/set.\r\n" +
-							"Parameter: " + mcuParam.Name + "\r\n" +
-							"Value: " + mcuParam.Value;
-							LoggerService.Error(this, errorDescription, ex);
-							result = CommunicatorResultEnum.Error;
+					//int intVal = 0;
+					//if (data.IsSet)
+					//{
+					//	try
+					//	{
+					//		intVal = GetValueAsInt(data.Value);
+					//	}
+					//	catch (Exception ex)
+					//	{
+					//		errorDescription = "Failed to handle get/set.\r\n" +
+					//		"Parameter: " + mcuParam.Name + "\r\n" +
+					//		"Value: " + mcuParam.Value;
+					//		LoggerService.Error(this, errorDescription, ex);
+					//		result = CommunicatorResultEnum.Error;
 
-							System.Threading.Thread.Sleep(1);
-							continue;
-						}
-					}
+					//		System.Threading.Thread.Sleep(1);
+					//		continue;
+					//	}
+					//}
 
 					result = WaitForResponse(
 						mcuParam,
 						out errorDescription,
 						data.IsSet,
 						id,
-						intVal);
+						mcuParam.Value);
 
 				}
 				catch (Exception ex)
@@ -239,7 +239,7 @@ namespace DeviceCommunicators.MCU
 					result = CommunicatorResultEnum.Error;
 				}
 
-				if (result == CommunicatorResultEnum.OK)
+				if (result == CommunicatorResultEnum.OK/* || result == CommunicatorResultEnum.Error*/)
 					break;
 
 				System.Threading.Thread.Sleep(1);
@@ -284,7 +284,7 @@ namespace DeviceCommunicators.MCU
 			out string errorDescription,
 			bool isSet,
 			byte[] paramId,
-			int setValue = 0)
+			object setValue = null)
 		{
 
 
@@ -360,7 +360,7 @@ namespace DeviceCommunicators.MCU
 			byte[] readBuffer,
 			MCU_ParamData mcuParam,
 			bool isSet,
-			int setValue,
+			object setValue,
 			out string errDescription)
 		{
 			int? value = null;
@@ -408,14 +408,17 @@ namespace DeviceCommunicators.MCU
 				return CommunicatorResultEnum.Error;
 			}
 
-			int dsetValue = (int)Math.Round(setValue * mcuParam.Scale);
-			if (isSet && value != (int?)dsetValue)
-			{
-				LoggerService.Error(this,
-					mcuParam.Name + ": ValueNotSet: Original=" + value + "; Ack=" + dsetValue);
-				return CommunicatorResultEnum.ValueNotSet;
-			}
 
+			if (setValue is double dSetValue)
+			{
+				int dsetValue = (int)Math.Round(dSetValue * mcuParam.Scale);
+				if (isSet && value != (int?)dsetValue)
+				{
+					LoggerService.Error(this,
+						mcuParam.Name + ": ValueNotSet: Original=" + value + "; Ack=" + dsetValue);
+					return CommunicatorResultEnum.ValueNotSet;
+				}
+			}
 
 
 			return CommunicatorResultEnum.OK;
@@ -425,15 +428,16 @@ namespace DeviceCommunicators.MCU
 
 
 
-		private byte[] ConvertToData(
+		public static byte[] ConvertToData(
 			MCU_ParamData mcu_Message,
 			double value,
 			ref byte[] id,
+			ref byte[] data,
 			bool isSet)
 		{
 			value = value * mcu_Message.Scale;
 
-			byte[] data = _buffersPool.Take(_cancellationToken);
+			
 
 
 			//! Split command and value:

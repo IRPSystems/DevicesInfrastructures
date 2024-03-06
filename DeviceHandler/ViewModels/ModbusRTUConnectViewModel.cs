@@ -5,21 +5,29 @@ using System;
 using Newtonsoft.Json;
 using Services.Services;
 using DeviceHandler.Interfaces;
+using System.Collections.ObjectModel;
+using System.IO.Ports;
+using System.Linq;
 
 namespace DeviceHandler.ViewModels
 {
-	public class ModbusTCPConnectViewModel : ObservableObject, IConnectionViewModel
+	public class ModbusRTUConnectViewModel : ObservableObject, IConnectionViewModel
 	{
 		#region Properties
 
-		public string IPAddress { get; set; }
-		public ushort Port { get; set; }
+		public string ComPort { get; set; }
+		public int Baudrate { get; set; }
 		public byte ModbusAddress { get; set; }
 		public ushort StartAddress { get; set; }
 		public ushort NoOfItems { get; set; }
 		public ushort SizeOfItems { get; set; }
 
 		public bool IsUdpSimulation { get; set; }
+
+		[JsonIgnore]
+		public ObservableCollection<string> COMList { get; set; }
+		[JsonIgnore]
+		public ObservableCollection<int> BaudratesList { get; set; }
 
 
 		[JsonIgnore]
@@ -29,41 +37,45 @@ namespace DeviceHandler.ViewModels
 
 		
 
-		//public int RxPort { get; set; }
-		//public int TxPort { get; set; }
-		//public string Address { get; set; }
-
 		
 
 		#endregion Properties
 
 		#region Constructor
 
-		public ModbusTCPConnectViewModel(
-			string idAddress,
-			ushort port,
+		public ModbusRTUConnectViewModel(
+			string comPort,
+			int baudrate,
 			byte modbusAddress,
 			ushort startAddress = 0,
 			ushort noOfItems = 0,
 			ushort sizeOfItems = 0)
 		{
-			IPAddress = idAddress;
-			Port = port;
+			ComPort = comPort;
+			Baudrate = baudrate;
 			ModbusAddress = modbusAddress;
 			StartAddress = startAddress;
 			NoOfItems = noOfItems;
 			SizeOfItems = sizeOfItems;
 
-			LoggerService.Inforamtion(this, "Starting CanConnctViewModel");
+			LoggerService.Inforamtion(this, "Starting ModbusRTUConnectViewModel");
 			ConnectCommand = new RelayCommand(Connect);
 			DisconnectCommand = new RelayCommand(Disconnect);
+
+			COM_DropDownOpenedCommand = new RelayCommand(COM_DropDownOpened);
 
 			IsConnectButtonEnabled = true;
 			IsDisconnectButtonEnabled = false;
 
+			FindCOMs();
+
+			BaudratesList = new ObservableCollection<int>()
+			{
+				9600, 57600, 115200, 128000, 256000
+			};
 
 
-			LoggerService.Inforamtion(this, "Ending Init of CanConnctViewModel");
+			LoggerService.Inforamtion(this, "Ending Init of ModbusRTUConnectViewModel");
 		}
 
 		#endregion Constructor
@@ -75,7 +87,11 @@ namespace DeviceHandler.ViewModels
 			
 		}
 
-		
+		private void FindCOMs()
+		{
+			string[] ports = SerialPort.GetPortNames();
+			COMList = new ObservableCollection<string>(ports.ToList());
+		}
 
 
 		private void Connect()
@@ -88,6 +104,11 @@ namespace DeviceHandler.ViewModels
 			DisconnectEvent?.Invoke();
 		}
 
+		private void COM_DropDownOpened()
+		{
+			FindCOMs();
+		}
+
 		#endregion Methods
 
 		#region Commands
@@ -96,6 +117,8 @@ namespace DeviceHandler.ViewModels
 		public RelayCommand ConnectCommand { get; private set; }
 		[JsonIgnore]
 		public RelayCommand DisconnectCommand { get; private set; }
+		[JsonIgnore]
+		public RelayCommand COM_DropDownOpenedCommand { get; private set; }
 
 		#endregion Commands
 

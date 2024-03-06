@@ -24,23 +24,33 @@ namespace DeviceHandler.Services
 			get => _communicator.IsInitialized;
 		}
 
-
+		public int AcquisitionRate 
+		{
+			get => _acquisitionRate;
+			set
+			{
+				_acquisitionRate = value;
+				if (_communicationTimer != null)
+				{
+					_communicationTimer.Stop();
+					_communicationTimer.Interval = 1000 / _acquisitionRate;
+					_communicationTimer.Start();
+				}
+			}
+		}
 
 		#endregion Properties
 
 		#region Fields
 
-		public const int AcquisitionRate = 5; 
+		private int _acquisitionRate;
+
 		private const int _maxNumOfParams = 3000;
 
 		private ConcurrentDictionary<string, RepositoryParam> _nameToRepositoryParamList;
 
 		private System.Timers.Timer _communicationTimer;
 
-
-		//private CancellationTokenSource _cancellationTokenSource;
-		//private CancellationToken _cancellationToken;
-		//private ManualResetEvent _waitGetCallback;
 
 		private DeviceCommunicator _communicator;
 
@@ -61,6 +71,8 @@ namespace DeviceHandler.Services
 			_communicator = communicator;
 
 			_nameToRepositoryParamList = new ConcurrentDictionary<string, RepositoryParam>();
+
+			AcquisitionRate = 1;
 
 
 			//_cancellationTokenSource = new CancellationTokenSource();
