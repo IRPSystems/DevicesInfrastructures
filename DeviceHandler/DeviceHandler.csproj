@@ -18,7 +18,8 @@
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
     <PackageReference Include="MahApps.Metro.IconPacks" Version="4.11.0" />
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="All" />
-    <PackageReference Include="Syncfusion.SfTreeView.WPF" Version="20.3.0.61" />
+    <PackageReference Include="Syncfusion.SfTreeView.WPF" Version="24.2.7" />
+    <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>

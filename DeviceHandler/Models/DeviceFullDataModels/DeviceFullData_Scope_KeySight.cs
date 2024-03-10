@@ -1,9 +1,6 @@
 ﻿
-using DeviceCommunicators.Dyno;
-using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
-using DeviceCommunicators.PowerSupplayEA;
-using DeviceCommunicators.SwitchRelay32;
+using DeviceCommunicators.Scope_KeySight;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
@@ -11,9 +8,9 @@ using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DeviceFullData_SwitchRelay32 : DeviceFullData
+	public class DeviceFullData_Scope_KeySight : DeviceFullData
 	{
-		public DeviceFullData_SwitchRelay32(DeviceData deviceData) :
+		public DeviceFullData_Scope_KeySight(DeviceData deviceData) :
 			base(deviceData)
 		{
 
@@ -21,11 +18,11 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override string GetConnectionFileName()
 		{
-			return "SwitchRelay32Connect.json";
+			return "Scope_KeySightConnect.json";
 		}
 		protected override void ConstructCommunicator()
 		{
-			DeviceCommunicator = new SwitchCommunicator();
+			DeviceCommunicator = new Scope_KeySight_Communicator();
 		}
 
 		protected override void DeserializeConnectionViewModel(
@@ -37,42 +34,46 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new TcpConncetViewModel(4196, "", 16323, 16320);
+			ConnectionViewModel = new TcpConncetViewModel(5025, "192.168.10.148", 21323, 21320);
 		}
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => p.Name == "All relay status");
+			DeviceParameterData data = new Scope_KeySight_ParamData()
+			{
+				Name = "Identification",
+				Command = "*IDN"
+			};
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
 				data,
-				"SwitchRelay");
+				"Scope_KeySight");
 		}
 
 
 		protected override void InitRealCommunicator()
 		{
-			(DeviceCommunicator as SwitchCommunicator).Init(
-				(ConnectionViewModel as TcpConncetViewModel).IsUdpSimulation,
+			(DeviceCommunicator as Scope_KeySight_Communicator).Init(
+				false,
 				(ConnectionViewModel as TcpConncetViewModel).Address,
 				(ConnectionViewModel as TcpConncetViewModel).Port);
 		}
 
 		protected override void InitSimulationCommunicator()
 		{
-			(DeviceCommunicator as SwitchCommunicator).Init(
-				(ConnectionViewModel as TcpConncetViewModel).IsUdpSimulation,
+			(DeviceCommunicator as Scope_KeySight_Communicator).Init(
+				true,
 				(ConnectionViewModel as TcpConncetViewModel).Address,
 				(ConnectionViewModel as TcpConncetViewModel).Port);
 		}
 
 		protected override bool IsSumulation()
 		{
-			if (!(ConnectionViewModel is TcpConncetViewModel tcpConncet))
+			if (!(ConnectionViewModel is TcpConncetViewModel scope))
 				return true;
 
-			return tcpConncet.IsUdpSimulation;
+			return scope.IsUdpSimulation;
 		}
 	}
 }

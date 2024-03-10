@@ -13,10 +13,12 @@ using System.Windows.Controls;
 using Services.Services;
 using DeviceHandler.Interfaces;
 using Communication.Services;
+using System.Management;
+using System.Collections.Generic;
 
 namespace DeviceHandler.ViewModels
 {
-	public class SerialConncetViewModel: ObservableObject, IConnectionViewModel
+	public class SerialConncetViewModel : ObservableObject, IConnectionViewModel
 	{
 		#region Properties
 
@@ -86,8 +88,23 @@ namespace DeviceHandler.ViewModels
 
 		private void FindCOMs()
 		{
-			string[] ports = SerialPort.GetPortNames();
-			COMList = new ObservableCollection<string>(ports.ToList());
+			List<string> portsList = new List<string>();
+
+			using (var searcher = new ManagementObjectSearcher("root\\CIMV2",
+			"SELECT * FROM Win32_PnPEntity"))
+			{
+				foreach (ManagementObject queryObj in searcher.Get())
+				{
+					var obj = queryObj["Caption"];
+					if (obj != null && obj.ToString().Contains("(COM"))
+					{
+						portsList.Add(queryObj["Caption"].ToString());
+					}
+				}
+			}
+
+
+			COMList = new ObservableCollection<string>(portsList);
 		}
 
 		private void GetIpAddress()
