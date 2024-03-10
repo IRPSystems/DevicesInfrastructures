@@ -133,34 +133,42 @@ namespace DeviceHandler.ViewModels
 
 			string path = openFileDialog.FileName;
 
-			string extension = Path.GetExtension(path);
-			ObservableCollection<DeviceParameterData> parametersList = null;
-			if (extension == ".json")
+			try
 			{
-				FixJson(path);
+
+				string extension = Path.GetExtension(path);
+				ObservableCollection<DeviceParameterData> parametersList = null;
+				if (extension == ".json")
+				{
+					FixJson(path);
 
 
-				string jsonString = System.IO.File.ReadAllText(path);
+					string jsonString = System.IO.File.ReadAllText(path);
 
-				JsonSerializerSettings settings = new JsonSerializerSettings();
-				settings.Formatting = Formatting.Indented;
-				settings.TypeNameHandling = TypeNameHandling.All;
-				parametersList = JsonConvert.DeserializeObject(jsonString, settings) as
-					ObservableCollection<DeviceParameterData>;
+					JsonSerializerSettings settings = new JsonSerializerSettings();
+					settings.Formatting = Formatting.Indented;
+					settings.TypeNameHandling = TypeNameHandling.All;
+					parametersList = JsonConvert.DeserializeObject(jsonString, settings) as
+						ObservableCollection<DeviceParameterData>;
 
-				GetActualParameters_Json(parametersList);
+					GetActualParameters_Json(parametersList);
+				}
+				else if (extension == ".txt")
+				{
+					string paramsString = System.IO.File.ReadAllText(path);
+					string[] paramsList = paramsString.Split("\r\n");
+
+					GetActualParameters_txt(paramsList.ToList());
+				}
+
+
+
+				SendRECORD_LIST_CHANGEDMessage();
 			}
-			else if (extension == ".txt")
+			catch(Exception ex)
 			{
-				string paramsString = System.IO.File.ReadAllText(path);
-				string[] paramsList = paramsString.Split("\r\n");
-
-				GetActualParameters_txt(paramsList.ToList());
+				LoggerService.Error(this, "Failed to load the file \"" + path + "\"", "Error", ex);
 			}
-
-
-			
-			SendRECORD_LIST_CHANGEDMessage();
 		}
 
 		#endregion Save / Load
