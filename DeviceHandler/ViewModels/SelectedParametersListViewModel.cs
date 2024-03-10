@@ -225,12 +225,18 @@ namespace DeviceHandler.ViewModels
 					continue;
 
 				string[] parts = param.Split(" ;; ");
-				if (parts.Length < 2)
-					continue;
+				DeviceTypesEnum deviceType = DeviceTypesEnum.None;
+				if (parts.Length >= 2)
+				{
+					bool res = Enum.TryParse(parts[1], out deviceType);
+				}
+
+				if (deviceType == DeviceTypesEnum.None)
+					deviceType = DeviceTypesEnum.MCU;
 
 				string name = parts[0];
-				DeviceTypesEnum deviceType;
-				bool res = Enum.TryParse(parts[1], out deviceType);
+				
+				
 
 				if (_devicesContainer.TypeToDevicesFullData.ContainsKey(deviceType) == false)
 					continue;
