@@ -13,14 +13,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Animation;
 
-namespace DeviceCommunicators.Dyno3Control
+namespace DeviceCommunicators.Dyno3
 {
-    public class Dyno3Control_Comunicator : DeviceCommunicator, IDisposable
+    public class Dyno3_Comunicator : DeviceCommunicator, IDisposable
     {
 
         #region Fields and Properties
         
-        Dyno3ParamData Param_dyno3 = new Dyno3ParamData();
+        Dyno3_ParamData Param_dyno3 = new Dyno3_ParamData();
         CommandDyno3 _Command_to_Dyno;
 
 
@@ -35,7 +35,7 @@ namespace DeviceCommunicators.Dyno3Control
 
         #region Constructor
 
-        public Dyno3Control_Comunicator()
+        public Dyno3_Comunicator()
         {
             _isInitialized = false;
         }
@@ -107,7 +107,7 @@ namespace DeviceCommunicators.Dyno3Control
         {
             try
             {
-                if (!(param is Dyno3ParamData niParamData))
+                if (!(param is Dyno3_ParamData niParamData))
                     return;
                 //need add to send data
                 bool res = Send_command(niParamData);
@@ -129,7 +129,7 @@ namespace DeviceCommunicators.Dyno3Control
         {
             try
             {
-                if (!(param is Dyno3ParamData niParamData))
+                if (!(param is Dyno3_ParamData niParamData))
                     return;
 
                 // need change to send data
@@ -156,7 +156,7 @@ namespace DeviceCommunicators.Dyno3Control
 
 
 
-        public bool Send_command(Dyno3ParamData niParamData)
+        public bool Send_command(Dyno3_ParamData niParamData)
         {
             if ((niParamData.command_to_device).ToLower() == "TurnON".ToLower())
             {
@@ -166,7 +166,12 @@ namespace DeviceCommunicators.Dyno3Control
             else if ((niParamData.command_to_device).ToLower() == "speed".ToLower())
             {
                 int Value_int = Convert.ToInt16(niParamData.Value);
-                _Command_to_Dyno.speed(Value_int);
+                _Command_to_Dyno.speed_command_to_dyno(Value_int);
+            }
+            else if ((niParamData.command_to_device).ToLower() == "acceleration".ToLower())
+            {
+                int Value_int = Convert.ToInt16(niParamData.Value);
+                _Command_to_Dyno.AccelerationDeceleration_command_to_dyno(Value_int);
             }
             else if ((niParamData.command_to_device).ToLower() == "torque".ToLower())
             {
@@ -184,7 +189,7 @@ namespace DeviceCommunicators.Dyno3Control
 
 
 
-        public string Read_command(Dyno3ParamData niParamData)
+        public string Read_command(Dyno3_ParamData niParamData)
         {
             string data_return = "";
 

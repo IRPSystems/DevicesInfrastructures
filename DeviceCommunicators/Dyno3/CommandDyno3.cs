@@ -1,22 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Markup;
+using System.Windows.Media.Animation;
 using DeviceCommunicators.Interfaces;
 using Sharp7;
 
-namespace DeviceCommunicators.Dyno3Control
+namespace DeviceCommunicators.Dyno3
 {
     public class CommandDyno3 
     {
         S7Client pls = new S7Client();
         int result = 0;
         string Derection = "FW";
+        public   int max_acceleration = 500;
+        public  int max_speed = 5000;
 
      
 
@@ -183,22 +189,37 @@ namespace DeviceCommunicators.Dyno3Control
 
         }
 
-        public void speed (int speed)
+        public int speed_send(int speed)
         {
             var bufer_wr = new byte[2];
             short send_value = 0;
             send_value = Convert.ToInt16(speed);
             S7.SetIntAt(bufer_wr, 0, send_value);
             result  = pls.DBWrite(9, 10, 2, bufer_wr);
+            return  result;
         }
-        public void Torque_load(int torque_load)
+        public int  Torque_load(int torque_load)
         {
             var bufer_wr = new byte[2];
             short send_value = 0;
             send_value = Convert.ToInt16(torque_load);
             S7.SetIntAt(bufer_wr, 0, send_value);
             result = pls.DBWrite(9, 2, 2, bufer_wr);
+            return result;
         }
+
+        public int  AccelerationDeceleration_send(int acc_dec_send)
+        {
+            {
+                var bufer_wr = new byte[2];
+                short send_value = 0;
+                send_value = Convert.ToInt16(acc_dec_send);
+                S7.SetIntAt(bufer_wr, 0, send_value);
+                result = pls.DBWrite(9, 22, 2, bufer_wr);
+                return result;
+            }
+        }
+
 
         public void Set_direct (string direct)
         {
@@ -266,15 +287,20 @@ namespace DeviceCommunicators.Dyno3Control
             }
         }
 
-       public string read_parameter(string Param)
+        public string read_parameter(string Param)
         {
             var buffer =new byte [654];
             result = pls.DBRead(10, 0, 654, buffer);
             string parameter_from_PLS;
             if (Param.ToLower() == "speed".ToLower())
             {
-                parameter_from_PLS=Convert.ToString(S7.GetDIntAt(buffer, 0));
-                return parameter_from_PLS;
+                string  a =Console.ReadLine();
+               
+               // parameter_from_PLS=Convert.ToString(S7.GetDIntAt(buffer, 0));
+                //return parameter_from_PLS;
+                
+                
+                return a;
             }
             else if (Param.ToLower() == "Torque".ToLower())
             {
@@ -284,9 +310,46 @@ namespace DeviceCommunicators.Dyno3Control
             return "";
         }
 
+        public int speed_command_to_dyno(int speed)
+        {
+            
+            if (speed > max_speed)
+            {
+                return 1; // speed command above max speed 
+            }
+            else if (speed< 0)
+            {
+                return 2; // speed negative value 
+            }
+            else if (speed <= max_speed)
+            {
+                return speed_send(speed);
+            }
+            return 4; //error
+        }
 
 
+        public int AccelerationDeceleration_command_to_dyno (int ACC_dec)
+        {
+            int send_value;
+           if (ACC_dec > max_acceleration)
+            {
+                send_value = 1000000/max_acceleration;
+                return AccelerationDeceleration_send(send_value);
+            }
+           else if(ACC_dec< 50)
+            {
+                send_value = 1000000/50;
+                return AccelerationDeceleration_send(send_value);
+            }
+           else if (ACC_dec >50 && ACC_dec<500 )
+            {
+                send_value = 1000000/ACC_dec;
+                return AccelerationDeceleration_send(send_value);
+            }
 
+            return 0;
+        }
     }
 
 
