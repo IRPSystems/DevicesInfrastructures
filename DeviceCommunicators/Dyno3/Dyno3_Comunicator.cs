@@ -1,17 +1,9 @@
 ﻿using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
-using DeviceCommunicators.Interfaces;
 using DeviceCommunicators.Models;
-using DeviceCommunicators.NI_6002;
 using Services.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Media.Animation;
 
 namespace DeviceCommunicators.Dyno3
 {
@@ -48,24 +40,7 @@ namespace DeviceCommunicators.Dyno3
             string ipAddress,
             bool simulation = false)
         {
-           _Command_to_Dyno = new CommandDyno3(ipAddress); ///("10.0.0.100")
-
-           
-
-            //try
-            //{
-            //    if (!simulation)
-            //        _commmand_to_device = new NI6002_Command(IP);
-            //    else
-            //        _commmand_to_device = new NI6002_CommandSimulation();
-
-
-            //    InitBase();
-            //}
-            //catch (Exception ex)
-            //{
-            //    LoggerService.Error(this, "Failed to init the NI", ex);
-            //}
+           _Command_to_Dyno = new CommandDyno3(ipAddress); 
 
 
             _isInitialized = true;
