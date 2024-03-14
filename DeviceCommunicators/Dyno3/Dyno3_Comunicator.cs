@@ -45,10 +45,10 @@ namespace DeviceCommunicators.Dyno3
         #region Methods
 
         public void Init(
-            string IP,
+            string ipAddress,
             bool simulation = false)
         {
-           _Command_to_Dyno = new CommandDyno3(IP); ///("10.0.0.100")
+           _Command_to_Dyno = new CommandDyno3(ipAddress); ///("10.0.0.100")
 
            
 

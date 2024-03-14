@@ -37,7 +37,7 @@
     <Compile Update="Views\NI6002ConncetView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\YokogawaWT1804EConncetView.xaml.cs">
+    <Compile Update="Views\IPAddressOnlyConncetView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\TcpConncetView.xaml.cs">

@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace DeviceHandler.Views
 {
 	/// <summary>
-	/// Interaction logic for YokogawaWT1804EConncetView.xaml
+	/// Interaction logic for IPAddressOnlyConncetView.xaml
 	/// </summary>
-	public partial class YokogawaWT1804EConncetView : UserControl
+	public partial class IPAddressOnlyConncetView : UserControl
 	{
-		public YokogawaWT1804EConncetView()
+		public IPAddressOnlyConncetView()
 		{
 			InitializeComponent();
 		}

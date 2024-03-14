@@ -1,6 +1,6 @@
 ﻿
 using DeviceCommunicators.Models;
-using DeviceCommunicators.YokogawaWT1804E;
+using DeviceCommunicators.Dyno3;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
@@ -8,9 +8,9 @@ using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
-	public class DeviceFullData_Yokogawa_WT1804E : DeviceFullData
+	public class DeviceFullData_Dyno3 : DeviceFullData
 	{
-		public DeviceFullData_Yokogawa_WT1804E(DeviceData deviceData) :
+		public DeviceFullData_Dyno3(DeviceData deviceData) :
 			base(deviceData)
 		{
 
@@ -18,11 +18,11 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override string GetConnectionFileName()
 		{
-			return "Yokogawa_WT1804EConnect.json";
+			return "Dyno3Connect.json";
 		}
 		protected override void ConstructCommunicator()
 		{
-			DeviceCommunicator = new YokogawaWT1804E_Communicator();
+			DeviceCommunicator = new Dyno3_Comunicator();
 		}
 
 		protected override void DeserializeConnectionViewModel(
@@ -44,30 +44,30 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			CheckCommunication = new CheckCommunicationService(
 				this,
 				data,
-				"Yokogawa_WT1804E");
+				"Dyno3");
 		}
 
 
 		protected override void InitRealCommunicator()
 		{
-			(DeviceCommunicator as YokogawaWT1804E_Communicator).Init(
-				false,
-				(ConnectionViewModel as IPAddressOnlyConncetViewModel).Address);
+			(DeviceCommunicator as Dyno3_Comunicator).Init(
+				(ConnectionViewModel as IPAddressOnlyConncetViewModel).Address,
+				false);
 		}
 
 		protected override void InitSimulationCommunicator()
 		{
-			(DeviceCommunicator as YokogawaWT1804E_Communicator).Init(
-				true,
-				(ConnectionViewModel as IPAddressOnlyConncetViewModel).Address);
+			(DeviceCommunicator as Dyno3_Comunicator).Init(
+				(ConnectionViewModel as IPAddressOnlyConncetViewModel).Address,
+				true);
 		}
 
 		protected override bool IsSumulation()
 		{
-			if (!(ConnectionViewModel is IPAddressOnlyConncetViewModel yoko))
+			if (!(ConnectionViewModel is IPAddressOnlyConncetViewModel dyno3))
 				return true;
 
-			return yoko.IsUdpSimulation;
+			return dyno3.IsUdpSimulation;
 		}
 	}
 }

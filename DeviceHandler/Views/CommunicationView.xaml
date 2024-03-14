@@ -23,8 +23,8 @@
             <local:TcpConncetView DataContext="{Binding }"/>
         </DataTemplate>
 
-        <DataTemplate x:Key="YokogawaWT1804EConnectTemplate">
-            <local:YokogawaWT1804EConncetView DataContext="{Binding }"/>
+        <DataTemplate x:Key="IPAddressOnlyConnectTemplate">
+            <local:IPAddressOnlyConncetView DataContext="{Binding }"/>
         </DataTemplate>
 
         <DataTemplate x:Key="NI6002ConnectTemplate">

@@ -11,7 +11,7 @@ using System.Windows;
 
 namespace DeviceHandler.ViewModels
 {
-	public class YokogawaWT1804EConncetViewModel : ObservableObject, IConnectionViewModel
+	public class IPAddressOnlyConncetViewModel : ObservableObject, IConnectionViewModel
 	{
 		#region Properties
 
@@ -30,7 +30,7 @@ namespace DeviceHandler.ViewModels
 
 		#region Constructor
 
-		public YokogawaWT1804EConncetViewModel()
+		public IPAddressOnlyConncetViewModel()
 		{
 
 			LoggerService.Inforamtion(this, "Starting YokogawaWT1804EConnctViewModel");
