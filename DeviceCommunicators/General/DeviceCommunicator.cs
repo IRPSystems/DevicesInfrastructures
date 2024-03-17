@@ -24,7 +24,10 @@ namespace DeviceCommunicators.General
 
 
 
-		protected BlockingCollection<CommunicatorIOData> _parameterQueue;
+		protected BlockingCollection<CommunicatorIOData> _parameterQueue_Get;
+		protected BlockingCollection<CommunicatorIOData> _parameterQueue_Set;
+
+		protected object _lockObj;
 
 		#endregion Fields
 
@@ -47,7 +50,9 @@ namespace DeviceCommunicators.General
 		public DeviceCommunicator()
 		{
 
-			_parameterQueue = new BlockingCollection<CommunicatorIOData>();
+			_parameterQueue_Get = new BlockingCollection<CommunicatorIOData>();
+			_parameterQueue_Set = new BlockingCollection<CommunicatorIOData>();
+			_lockObj = new object();
 
 			InitErrorsDictionary();
 
@@ -62,7 +67,8 @@ namespace DeviceCommunicators.General
 			_cancellationTokenSource = new CancellationTokenSource();
 			_cancellationToken = _cancellationTokenSource.Token;
 
-			HandleInputs();
+			HandleInputs(_parameterQueue_Get);
+			HandleInputs(_parameterQueue_Set);
 		}
 
 		protected virtual void InitErrorsDictionary()
@@ -95,7 +101,7 @@ namespace DeviceCommunicators.General
 					Value = value,
 					Callback = callback,
 				};
-				_parameterQueue.Add(data, _cancellationToken);
+				_parameterQueue_Set.Add(data, _cancellationToken);
 			}
 			catch (OperationCanceledException)
 			{
@@ -113,7 +119,7 @@ namespace DeviceCommunicators.General
 					Parameter = param,
 					Callback = callback,
 				};
-				_parameterQueue.Add(data, _cancellationToken);
+				_parameterQueue_Get.Add(data, _cancellationToken);
 			}
 			catch (OperationCanceledException)
 			{
@@ -125,7 +131,7 @@ namespace DeviceCommunicators.General
 
 
 
-		protected void HandleInputs()
+		protected void HandleInputs(BlockingCollection<CommunicatorIOData> parameterQueue)
 		{
 			Task.Run(() =>
 			{
@@ -141,7 +147,7 @@ namespace DeviceCommunicators.General
 
 						try
 						{
-							data = _parameterQueue.Take(_cancellationToken);
+							data = parameterQueue.Take(_cancellationToken);
 						}
 						catch (OperationCanceledException)
 						{
@@ -154,12 +160,12 @@ namespace DeviceCommunicators.General
 
 						CommunicatorResultEnum result = HandleRequests(data);
 						if (result == CommunicatorResultEnum.NoResponse &&
-							_parameterQueue.Count >= 100)
+							_parameterQueue_Get.Count >= 100)
 						{
-							while (_parameterQueue.Count > 50)
+							while (_parameterQueue_Get.Count > 50)
 							{
 								CommunicatorIOData item;
-								_parameterQueue.TryTake(out item);
+								_parameterQueue_Get.TryTake(out item);
 							}
 						}
 

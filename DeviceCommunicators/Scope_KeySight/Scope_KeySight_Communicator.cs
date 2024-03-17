@@ -244,7 +244,10 @@ namespace DeviceCommunicators.Scope_KeySight
 
 			cmd += "\n";
 
-			TCPCommService.Send(cmd);
+			lock (_lockObj)
+			{
+				TCPCommService.Send(cmd);
+			}
 
 			//double Value = 0;
 			//Value= Convert .ToDouble(parameter.Value);
@@ -350,18 +353,19 @@ namespace DeviceCommunicators.Scope_KeySight
 
         private void SaveCommand(Scope_KeySight_ParamData parameter, double dVal)
         {
-            
-            if (dVal == 0)
+			lock (_lockObj)
 			{
-				TCPCommService.Send(":SAVE:IMAGe:FORMat PNG\n");
-				TCPCommService.Send(":SAVE:IMAGe:STARt \"" + parameter.data + "\"\n");
+				if (dVal == 0)
+				{
+					TCPCommService.Send(":SAVE:IMAGe:FORMat PNG\n");
+					TCPCommService.Send(":SAVE:IMAGe:STARt \"" + parameter.data + "\"\n");
+				}
+				else
+				{
+					TCPCommService.Send(":SAVE:WAVeform:FORMat CSV\n");
+					TCPCommService.Send(":SAVE:WAVeform:STAR \"" + file_name + "\"\n");
+				}
 			}
-			else
-			{
-				TCPCommService.Send(":SAVE:WAVeform:FORMat CSV\n");
-				TCPCommService.Send(":SAVE:WAVeform:STAR \"" + file_name + "\"\n");
-			}
-
 
 			Thread.Sleep(500);
             
@@ -387,7 +391,10 @@ namespace DeviceCommunicators.Scope_KeySight
 			else
 				cmd = cmd.Insert(index, "?");
 
-			TCPCommService.Send(cmd + "\n");
+			lock (_lockObj)
+			{
+				TCPCommService.Send(cmd + "\n");
+			}
 
 			string response;
 			TCPCommService.Read(out response);

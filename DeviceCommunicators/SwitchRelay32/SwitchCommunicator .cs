@@ -21,7 +21,7 @@ namespace DeviceCommunicators.SwitchRelay32
 
 		#region Properties
 
-		private ITcpStaticService _switch_communiction32
+		private ITcpStaticService TcpStaticService
         {
             get => CommService as ITcpStaticService;
         }
@@ -169,7 +169,10 @@ namespace DeviceCommunicators.SwitchRelay32
         
         private void send(string data)
         {
-            _switch_communiction32.Send(data);
+			lock (_lockObj)
+			{
+				TcpStaticService.Send(data);
+			}
         }
 
 
@@ -179,7 +182,7 @@ namespace DeviceCommunicators.SwitchRelay32
             SwitchRelay_ParamData param,
 			Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
         {
-            if (_switch_communiction32 == null)
+            if (TcpStaticService == null)
             {
 				callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
 				return;
@@ -188,7 +191,10 @@ namespace DeviceCommunicators.SwitchRelay32
 			for (int i = 0; i < 5; i++)
 			{
 				string data;
-				_switch_communiction32.Read(out data);
+				lock (_lockObj)
+				{
+					TcpStaticService.Read(out data);
+				}
 				if (data == null)
 				{
 					System.Threading.Thread.Sleep(1);

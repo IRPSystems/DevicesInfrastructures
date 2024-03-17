@@ -221,7 +221,10 @@ namespace DeviceCommunicators.Dyno
 			value = (value - value % 256) / 256;
 			buffer[index++] = Convert.ToByte(value);
 
-			CanService.Send(buffer, 0x600 + _nodeId, false);
+			lock (_lockObj)
+			{
+				CanService.Send(buffer, 0x600 + _nodeId, false);
+			}
 
 
 
@@ -262,9 +265,10 @@ namespace DeviceCommunicators.Dyno
 			buffer[index] = dynoParam.SubIndex;
 			index++;
 
-
-			CanService.Send(buffer, 0x600 + _nodeId, false);
-
+			lock (_lockObj)
+			{
+				CanService.Send(buffer, 0x600 + _nodeId, false);
+			}
 
 
 
@@ -314,9 +318,10 @@ namespace DeviceCommunicators.Dyno
 					if (_isTimeout)
 						break;
 
-
-					CanService.Read(out readBuffer, out readNode);
-
+					lock (_lockObj)
+					{
+						CanService.Read(out readBuffer, out readNode);
+					}
 
 
 					if (readBuffer != null)

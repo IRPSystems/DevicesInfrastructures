@@ -197,8 +197,10 @@ namespace DeviceCommunicators.MCU
 
 				byte[] buffer = _buffersPool.Take(_cancellationToken);
 				ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
-				CommService.Send(buffer);
-
+				lock (_lockObj)
+				{
+					CommService.Send(buffer);
+				}
 
 				try
 				{
@@ -336,9 +338,10 @@ namespace DeviceCommunicators.MCU
 			timeout.Start();
 			while (readBuffer == null && (timeout.ElapsedMilliseconds < _getResponsesTime))
 			{
-
-				CanService.Read(out readBuffer, out readNode);
-
+				lock (_lockObj)
+				{
+					CanService.Read(out readBuffer, out readNode);
+				}
 
 				if (readBuffer != null)
 				{
@@ -560,7 +563,7 @@ namespace DeviceCommunicators.MCU
 					Buffer = buffer,
 					Callback = callback,
 				};
-				_parameterQueue.Add(data, _cancellationToken);
+				_parameterQueue_Get.Add(data, _cancellationToken);
 			}
 			catch (OperationCanceledException)
 			{
@@ -570,7 +573,11 @@ namespace DeviceCommunicators.MCU
 
 		private void SendCANMessage(CommunicatorIOData_SendMessage sendMessage)
 		{
-			CanService.Send(sendMessage.Buffer, sendMessage.ID, sendMessage.IsExtented);
+			lock (_lockObj)
+			{
+				CanService.Send(sendMessage.Buffer, sendMessage.ID, sendMessage.IsExtented);
+			}
+
 			sendMessage.Callback?.Invoke(null, CommunicatorResultEnum.OK, null);
 		}
 

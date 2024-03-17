@@ -28,7 +28,7 @@ namespace DeviceCommunicators.TorqueKistler
 		#region Properties
 
 
-		private ISerialService _serial_port
+		private ISerialService SerialService
 		{
 			get => CommService as ISerialService;
 		}
@@ -108,7 +108,10 @@ namespace DeviceCommunicators.TorqueKistler
 				string buffer = null;
 				for (int i = 0; i < 5; i++)
 				{
-					_serial_port.Send(cmd);
+					lock (_lockObj)
+					{
+						SerialService.Send(cmd);
+					}
 
 					buffer = WaitForResponse(tk_ParamData);
 					if (!string.IsNullOrEmpty(buffer) && !buffer.Contains("ERR-"))
@@ -154,7 +157,10 @@ namespace DeviceCommunicators.TorqueKistler
 				string buffer = null;
 				for (int i = 0; i < 20; i++)
 				{
-					_serial_port.Send(cmd);
+					lock (_lockObj)
+					{
+						SerialService.Send(cmd);
+					}
 
 					buffer = WaitForResponse(tk_ParamData);
 
@@ -226,7 +232,11 @@ namespace DeviceCommunicators.TorqueKistler
 				if (_isTimeout)
 					break;
 
-				_serial_port.Read(out buffer);
+				lock (_lockObj)
+				{
+					SerialService.Read(out buffer);
+				}
+
 				if (string.IsNullOrEmpty(buffer) == false)
 					break;
 

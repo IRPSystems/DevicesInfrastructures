@@ -24,7 +24,7 @@ namespace DeviceCommunicators.PowerSupplayBK
 
 		#region Properties
 
-		private ISerialService _serial_port
+		private ISerialService SerialService
         {
             get => CommService as ISerialService;
         }
@@ -36,7 +36,7 @@ namespace DeviceCommunicators.PowerSupplayBK
 
 		public PowerSupplayBK_Communicator()
 		{
-			_parameterQueue = new BlockingCollection<CommunicatorIOData>();
+			
 		}
 
 		#endregion Constructor
@@ -59,10 +59,15 @@ namespace DeviceCommunicators.PowerSupplayBK
             else
 				CommService = new SerialService(comName, baudtate);
             
-            _serial_port.Init(false);
+            SerialService.Init(false);
 
-            if(_serial_port.IsInitialized)
-                _serial_port.Send("SYST:REM\n");
+            if (SerialService.IsInitialized)
+            {
+                lock (_lockObj)
+                {
+                    SerialService.Send("SYST:REM\n");
+                }
+            }
 
 
 
@@ -72,10 +77,15 @@ namespace DeviceCommunicators.PowerSupplayBK
 
 		public override void Dispose()
 		{
-            if (_serial_port != null)
+            if (SerialService != null)
             {
-                if(_serial_port.IsInitialized)
-                    _serial_port.Send("SYST:LOC\n");
+                if (SerialService.IsInitialized)
+                {
+                    lock (_lockObj)
+                    {
+                        SerialService.Send("SYST:LOC\n");
+                    }
+                }
             }
 
 			base.Dispose();
@@ -155,86 +165,98 @@ namespace DeviceCommunicators.PowerSupplayBK
 
 		private void send_comand_to_supply(string command, double value)
         {
-            if (_serial_port == null)
+            if (SerialService == null)
                 return;
 
-            if (command == "Remote command")
+            lock (_lockObj)
             {
-                if (value == 1)
+
+                if (command == "Remote command")
                 {
-					_serial_port.Send("SYST:REM");
+                    if (value == 1)
+                    {
+                        SerialService.Send("SYST:REM");
+                    }
+                    else if (value == 0)
+                    {
+                        SerialService.Send("SYST:LOC");
+                    }
                 }
-                else if (value == 0)
+                else if (command == "Choose channel")
                 {
-					_serial_port.Send("SYST:LOC");
+                    if (value == 1)
+                    {
+                        SerialService.Send("INST CH1");
+                    }
+                    else if (value == 2)
+                    {
+                        SerialService.Send("INST CH2");
+                    }
+                    else if (value == 3)
+                    {
+                        SerialService.Send("INST CH3");
+                    }
                 }
-            }
-            else if (command == "Choose channel")
-            {
-                if (value == 1)
+                else if (command == "Turn ON channel")
                 {
-					_serial_port.Send("INST CH1");
+                    if (value == 0)
+                    {
+                        SerialService.Send("CHANnel:OUTPut OFF");
+                    }
+                    else if (value == 1)
+                    {
+                        SerialService.Send("CHANnel:OUTPut ON");
+                    }
                 }
-                else if (value == 2)
+                else if (command == "Voltage")
                 {
-					_serial_port.Send("INST CH2");
+                    SerialService.Send("VOLTage " + value);
                 }
-                else if (value == 3)
+                else if (command == "Current")
                 {
-					_serial_port.Send("INST CH3");
+                    SerialService.Send("Current " + value);
                 }
-            }
-            else if (command == "Turn ON channel")
-            {
-                if (value == 0)
-                {
-					_serial_port.Send("CHANnel:OUTPut OFF");
-                }
-                else if (value == 1)
-                {
-					_serial_port.Send("CHANnel:OUTPut ON");
-                }
-            }
-            else if (command == "Voltage")
-            {
-				_serial_port.Send("VOLTage "+ value);
-            }
-            else if (command == "Current")
-            {
-				_serial_port.Send("Current " + value);
             }
         }
 
 		private void request_commad_from_supply(string name)
         {
-            if (_serial_port == null)
+            if (SerialService == null)
                 return;
 
-            if (name == "MEASure voltage in supply")
+            lock (_lockObj)
             {
-                _serial_port.Send("MEASure:SCALar:VOLTage:ALL:DC?");
+
+                if (name == "MEASure voltage in supply")
+                {
+                    SerialService.Send("MEASure:SCALar:VOLTage:ALL:DC?");
+                }
+                if (name == "Voltage in supply")
+                {
+                    SerialService.Send("VAPPLY:VOLTage:LEVel?");
+                }
+                if (name == "Current status")
+                {
+                    SerialService.Send("APPLY:OUTput?");
+                }
+                else if (name == "Current value")
+                {
+                    SerialService.Send("APPLY:CURRent:LEVel?");
+                }
             }
-            if (name == "Voltage in supply")
-            {
-                _serial_port.Send("VAPPLY:VOLTage:LEVel?");
-            }
-            if (name == "Current status")
-			{
-				_serial_port.Send("APPLY:OUTput?");
-			}
-            else if(name == "Current value")
-            {
-				_serial_port.Send("APPLY:CURRent:LEVel?");
-			}
         }
 
 		private string receive_value_from_supply(string name)
 		{
-            if(_serial_port == null)
+            if(SerialService == null)
                 return null;
 
 			string internal_buffer;
-			_serial_port.Read(out internal_buffer);
+
+            lock (_lockObj)
+            {
+                SerialService.Read(out internal_buffer);
+            }
 
             if (string.IsNullOrEmpty(internal_buffer))
                 return null;
