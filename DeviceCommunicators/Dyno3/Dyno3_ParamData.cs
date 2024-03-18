@@ -10,7 +10,8 @@ namespace DeviceCommunicators.Dyno3
     { 
         
         public string command_to_device { set; get; }
+        public string Status_paramter { set; get; }
 
-        public List<DropDownParamData> DropDown { get; set; }
+		public List<DropDownParamData> DropDown { get; set; }
     }
 }
