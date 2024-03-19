@@ -102,7 +102,7 @@ namespace DeviceCommunicators.NI_6002
         {
             try
             {
-                if (!(param is Dyno3ParamData niParamData))
+                if (!(param is NI6002_ParamData niParamData))
                     return;
                 //need add to send data
                 bool res = Send_command(niParamData);
@@ -124,7 +124,7 @@ namespace DeviceCommunicators.NI_6002
         {
             try
             {
-                if (!(param is Dyno3ParamData niParamData))
+                if (!(param is NI6002_ParamData niParamData))
                     return;
 
                 // need change to send data
@@ -151,7 +151,7 @@ namespace DeviceCommunicators.NI_6002
 
 
 
-        public  bool Send_command(Dyno3ParamData niParamData)
+        public  bool Send_command(NI6002_ParamData niParamData)
         {
             if (niParamData == null)
                 return false;
@@ -419,7 +419,7 @@ namespace DeviceCommunicators.NI_6002
 
 
 
-        public string Read_command(Dyno3ParamData niParamData)
+        public string Read_command(NI6002_ParamData niParamData)
         {
             if (niParamData == null)
                 return "";
@@ -534,7 +534,7 @@ namespace DeviceCommunicators.NI_6002
         }
      
 
-        private string port_0_to_digitalal_out(int number_port, Dyno3ParamData niParamData)
+        private string port_0_to_digitalal_out(int number_port, NI6002_ParamData niParamData)
         {
             string data = "";
             string curent_port = "";
@@ -546,7 +546,7 @@ namespace DeviceCommunicators.NI_6002
             return data;
         }
 
-        private string  port_1_to_digitalal_out(int number_port, Dyno3ParamData niParamData)
+        private string  port_1_to_digitalal_out(int number_port, NI6002_ParamData niParamData)
         {
             string data = "";
             string curent_port = "";
@@ -558,7 +558,7 @@ namespace DeviceCommunicators.NI_6002
             return data;
         }
 
-        private string port_2_to_digitalal_out(int number_port, Dyno3ParamData niParamData)
+        private string port_2_to_digitalal_out(int number_port, NI6002_ParamData niParamData)
         {
             string data = "";
             string curent_port = "";
