@@ -119,7 +119,7 @@ namespace DeviceCommunicators.General
 					Parameter = param,
 					Callback = callback,
 				};
-				_parameterQueue_Set.Add(data, _cancellationToken);
+				_parameterQueue_Get.Add(data, _cancellationToken);
 			}
 			catch (OperationCanceledException)
 			{
@@ -137,7 +137,7 @@ namespace DeviceCommunicators.General
 			{
 				while (!_cancellationToken.IsCancellationRequested)
 				{
-					lock (_lockObject)
+				//	lock (_lockObject)
 					{
 						DateTime startTime = DateTime.Now;
 
@@ -160,7 +160,9 @@ namespace DeviceCommunicators.General
 							if (data == null)
 								continue;
 
-							CommunicatorResultEnum result = HandleRequests(data);
+							CommunicatorResultEnum result = CommunicatorResultEnum.None;
+							lock (_lockObject)
+								result = HandleRequests(data);
 							if (result == CommunicatorResultEnum.NoResponse &&
 								parameterQueue.Count >= 100)
 							{

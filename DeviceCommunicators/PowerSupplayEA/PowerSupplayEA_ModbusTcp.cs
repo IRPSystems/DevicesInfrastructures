@@ -148,7 +148,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 						ModbusTCPSevice.fctWriteSingleCoil,
 						1,
 						eaParam.ModbusAddress,
-						onOff);				
+						onOff);		
 			}
 			else
 			{
@@ -190,8 +190,23 @@ namespace DeviceCommunicators.PowerSupplayEA
 				}
 			}
 
-			if(data.Callback != null) 
-				data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
+			_waitForResponse.WaitOne(1000);
+
+			if (_data == null)
+			{
+				if (data.Callback != null)
+				{
+					if (_error != null)
+						data.Callback(data.Parameter, CommunicatorResultEnum.Error, _error);
+					else
+						data.Callback(data.Parameter, CommunicatorResultEnum.NoResponse, _error);
+				}
+			}
+			else
+			{
+				if (data.Callback != null)
+					data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
+			}
 
 		}
 
