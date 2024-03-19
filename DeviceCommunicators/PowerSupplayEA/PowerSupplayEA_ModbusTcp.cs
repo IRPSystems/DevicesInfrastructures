@@ -2,6 +2,7 @@
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceCommunicators.Models;
+using Services.Services;
 using System;
 using System.Linq;
 using System.Text;
@@ -93,31 +94,38 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		private void GetNominals(DeviceData easpDevice)
 		{
-			CommunicatorIOData iOData = null;
+			try
+			{
+				CommunicatorIOData iOData = null;
 
-			PowerSupplayEA_ParamData nominalVoltageParam =
-				easpDevice.ParemetersList.ToList().Find((p) => ((PowerSupplayEA_ParamData)p).Cmd == "SYSTem:NOMinal:VOLTage")
-					as PowerSupplayEA_ParamData;
-			iOData = new CommunicatorIOData() { Parameter = nominalVoltageParam };
-			Get(iOData);
-			if (nominalVoltageParam.Value != null)
-				_nominalVoltage = (float)nominalVoltageParam.Value;
+				PowerSupplayEA_ParamData nominalVoltageParam =
+					easpDevice.ParemetersList.ToList().Find((p) => ((PowerSupplayEA_ParamData)p).Cmd == "SYSTem:NOMinal:VOLTage")
+						as PowerSupplayEA_ParamData;
+				iOData = new CommunicatorIOData() { Parameter = nominalVoltageParam };
+				Get(iOData);
+				if (nominalVoltageParam.Value != null)
+					_nominalVoltage = (float)nominalVoltageParam.Value;
 
-			PowerSupplayEA_ParamData nominalCurrentParam =
-				easpDevice.ParemetersList.ToList().Find((p) => ((PowerSupplayEA_ParamData)p).Cmd == "SYSTem:NOMinal:CURRent")
-					as PowerSupplayEA_ParamData;
-			iOData = new CommunicatorIOData() { Parameter = nominalCurrentParam };
-			Get(iOData);
-			if (nominalCurrentParam.Value != null)
-				_nominalCurrent = (float)nominalCurrentParam.Value;
+				PowerSupplayEA_ParamData nominalCurrentParam =
+					easpDevice.ParemetersList.ToList().Find((p) => ((PowerSupplayEA_ParamData)p).Cmd == "SYSTem:NOMinal:CURRent")
+						as PowerSupplayEA_ParamData;
+				iOData = new CommunicatorIOData() { Parameter = nominalCurrentParam };
+				Get(iOData);
+				if (nominalCurrentParam.Value != null)
+					_nominalCurrent = (float)nominalCurrentParam.Value;
 
-			PowerSupplayEA_ParamData nominalPowerParam =
-				easpDevice.ParemetersList.ToList().Find((p) => ((PowerSupplayEA_ParamData)p).Cmd == "SYSTem:NOMinal:POWer")
-					as PowerSupplayEA_ParamData;
-			iOData = new CommunicatorIOData() { Parameter = nominalPowerParam };
-			Get(iOData);
-			if (nominalPowerParam.Value != null)
-				_nominalPower = (float)nominalPowerParam.Value;
+				PowerSupplayEA_ParamData nominalPowerParam =
+					easpDevice.ParemetersList.ToList().Find((p) => ((PowerSupplayEA_ParamData)p).Cmd == "SYSTem:NOMinal:POWer")
+						as PowerSupplayEA_ParamData;
+				iOData = new CommunicatorIOData() { Parameter = nominalPowerParam };
+				Get(iOData);
+				if (nominalPowerParam.Value != null)
+					_nominalPower = (float)nominalPowerParam.Value;
+			}
+			catch(Exception ex) 
+			{
+				LoggerService.Error(this, "Failed to init EA PS Modbus TCP communication", ex);
+			}
 		}
 
 		#region Set
@@ -193,53 +201,62 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		private void Get(CommunicatorIOData data)
 		{
-			if (!(data.Parameter is PowerSupplayEA_ParamData eaParam))
-				return;
-
-			if (eaParam.Cmd == "*IDN")
+			try
 			{
-				GetIdentification(eaParam);
-				return;
-			}
+				if (!(data.Parameter is PowerSupplayEA_ParamData eaParam))
+					return;
 
-			if (eaParam.Cmd == "SYST:ERR" ||
-				eaParam.Cmd == "SYSTEM:LOCK:OWNER" ||
-				eaParam.Cmd == "OUTPut" ||
-				eaParam.Cmd == "SYSTem:MS:LINK")
-			{
-				GetState(eaParam);
-				return;
-			}
-
-			_data = null;
-			_error = null;
-
-
-			_modbusTCPSevice.ReadHoldingRegister(
-				ModbusTCPSevice.fctReadHoldingRegister,
-				1,
-				eaParam.ModbusAddress,
-				eaParam.NumOfRegisters);
-
-
-			_waitForResponse.WaitOne(1000);
-
-			if (_data == null)
-			{
-				if (data.Callback != null)
+				if (eaParam.Cmd == "*IDN")
 				{
-					if (_error != null)
-						data.Callback(data.Parameter, CommunicatorResultEnum.Error, _error);
-					else
-						data.Callback(data.Parameter, CommunicatorResultEnum.NoResponse, _error);
+					GetIdentification(eaParam);
+					return;
+				}
+
+				if (eaParam.Cmd == "SYST:ERR" ||
+					eaParam.Cmd == "SYSTEM:LOCK:OWNER" ||
+					eaParam.Cmd == "OUTPut" ||
+					eaParam.Cmd == "SYSTem:MS:LINK" ||
+					eaParam.Cmd == "STAT:OPER:COND")
+				{
+					GetState(eaParam);
+					return;
+				}
+
+				_data = null;
+				_error = null;
+
+
+				_modbusTCPSevice.ReadHoldingRegister(
+					ModbusTCPSevice.fctReadHoldingRegister,
+					1,
+					eaParam.ModbusAddress,
+					eaParam.NumOfRegisters);
+
+
+				_waitForResponse.WaitOne(1000);
+
+				if (_data == null)
+				{
+					if (data.Callback != null)
+					{
+						if (_error != null)
+							data.Callback(data.Parameter, CommunicatorResultEnum.Error, _error);
+						else
+							data.Callback(data.Parameter, CommunicatorResultEnum.NoResponse, _error);
+					}
+				}
+				else
+				{
+					HandleData(eaParam);
+
+					if (data.Callback != null)
+						data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
 				}
 			}
-			else
+			catch(Exception ex) 
 			{
-				HandleData(eaParam);
-
-				if (data.Callback != null)
-					data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
+				LoggerService.Error(this, "Failed to get value", ex);
+				data.Callback(data.Parameter, CommunicatorResultEnum.Error, "Exception");
 			}
 		}
 
@@ -486,30 +503,37 @@ namespace DeviceCommunicators.PowerSupplayEA
 			if (param.Cmd == "SYSTEM:LOCK:OWNER")
 			{
 				bool isRemot = (state & 2048) == 2048;
-				eaParam.Value = 0;
+				param.Value = 0;
 				if (isRemot)
-					eaParam.Value = 1;
+					param.Value = 1;
 			}
 			else if (param.Cmd == "OUTPut")
 			{
 				bool isOutput = (state & 128) == 128;
-				eaParam.Value = 0;
+				param.Value = 0;
 				if (isOutput)
-					eaParam.Value = 1;
+					param.Value = 1;
 			}
 			else if (param.Cmd == "SYST:ERR")
 			{
 				bool isAlarm = (state & 32768) == 32768;
-				eaParam.Value = 0;
+				param.Value = 0;
 				if (isAlarm)
-					eaParam.Value = 1;
+					param.Value = 1;
 			}
 			else if (param.Cmd == "SYSTem:MS:LINK")
 			{
 				bool isMS = (state & 64) == 64;
-				eaParam.Value = 0;
+				param.Value = 0;
 				if (isMS)
-					eaParam.Value = 1;
+					param.Value = 1;
+			}
+			else if (param.Cmd == "STAT:OPER:COND")
+			{
+				bool isOp = (state & 4096) == 4096;
+				param.Value = 0;
+				if (isOp)
+					param.Value = 1;
 			}
 		}
 
