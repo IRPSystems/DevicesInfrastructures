@@ -18,7 +18,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
         #region Properties
 
         public DeviceData Device { get; set; }
-        public DeviceCommunicator DeviceCommunicator { get; set; }
+        public virtual DeviceCommunicator DeviceCommunicator { get; set; }
         public CheckCommunicationService CheckCommunication { get; set; }
         public IConnectionViewModel ConnectionViewModel { get; set; }
         public ParametersRepositoryService ParametersRepository { get; set; }

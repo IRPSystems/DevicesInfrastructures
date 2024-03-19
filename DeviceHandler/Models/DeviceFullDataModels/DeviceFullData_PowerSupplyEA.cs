@@ -1,8 +1,10 @@
 ﻿
 using DeviceCommunicators.Dyno;
+using DeviceCommunicators.General;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using DeviceCommunicators.PowerSupplayEA;
+using DeviceHandler.Interfaces;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
@@ -12,6 +14,25 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 {
 	public class DeviceFullData_PowerSupplyEA : DeviceFullData
 	{
+
+		public override DeviceCommunicator DeviceCommunicator 
+		{ 
+			get
+			{
+				if (ConnectionViewModel == null)
+					return null;
+
+				if ((ConnectionViewModel as SerialAndTCPViewModel).SelectedCommType == "Serial")
+					return _eapsCommunicator;
+				else
+					return _eapsModbusTcp;
+			}
+
+		}
+
+		private PowerSupplayEA_Communicator _eapsCommunicator;
+		private PowerSupplayEA_ModbusTcp _eapsModbusTcp;
+
 		public DeviceFullData_PowerSupplyEA(DeviceData deviceData) :
 			base(deviceData)
 		{
@@ -31,19 +52,32 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			string jsonString,
 			JsonSerializerSettings settings)
 		{
-			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialAndTCPViewModel;
+			SerialAndTCPViewModel connectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialAndTCPViewModel;
+			ConstructConnectionViewModel();
+			if(connectionViewModel!= null) 
+			{
+				(ConnectionViewModel as SerialAndTCPViewModel).Copy(connectionViewModel);
+			}
+
+			ConnectionViewModel.RefreshProperties();
+
+			_eapsCommunicator = new PowerSupplayEA_Communicator();
+			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp();
 		}
 
 		protected override void ConstructConnectionViewModel()
 		{
 			ConnectionViewModel = new SerialAndTCPViewModel(
 				115200, "COM1", 14323, 14320,
-				502, "192168.10.38", "Serial");
+				502, "192.168.10.28", "Serial");
+
+			_eapsCommunicator = new PowerSupplayEA_Communicator();
+			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp();
 		}
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as DeviceParameterData).Name == "Identification");
+			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => p.Name == "Max Voltage");
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
@@ -56,14 +90,14 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		{
 			if ((ConnectionViewModel as SerialAndTCPViewModel).SelectedCommType == "Serial")
 			{
-				(DeviceCommunicator as PowerSupplayEA_Communicator).Init(
+				_eapsCommunicator.Init(
 					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.IsUdpSimulation,
 					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedCOM,
 					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedBaudrate);
 			}
 			else
 			{
-				(DeviceCommunicator as PowerSupplayEA_ModbusTcp).Init(
+				_eapsModbusTcp.Init(
 					(ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.IsUdpSimulation,
 					(ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.Address,
 					Device);
@@ -74,13 +108,13 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		{
 			if ((ConnectionViewModel as SerialAndTCPViewModel).SelectedCommType == "Serial")
 			{
-				(DeviceCommunicator as PowerSupplayEA_Communicator).Init(
-				(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.IsUdpSimulation,
-				(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedCOM,
-				(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedBaudrate,
-				(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.RxPort,
-				(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.TxPort,
-				(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.Address);
+				_eapsCommunicator.Init(
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.IsUdpSimulation,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedCOM,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedBaudrate,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.RxPort,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.TxPort,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.Address);
 			}
 		}
 

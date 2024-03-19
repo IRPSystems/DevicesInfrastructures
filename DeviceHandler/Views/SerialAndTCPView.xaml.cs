@@ -24,5 +24,5 @@ namespace DeviceHandler.Views
 		{
 			InitializeComponent();
 		}
-	}
+    }
 }

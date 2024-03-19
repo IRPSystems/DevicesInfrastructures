@@ -6,20 +6,26 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:local="clr-namespace:DeviceHandler.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    
+             d:DesignHeight="450" d:DesignWidth="800" >
+
+    <UserControl.Resources>
+
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+    </UserControl.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="10"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="{Binding SerialHeight, Mode=TwoWay}"/>
+            <RowDefinition Height="{Binding TCPHeight, Mode=TwoWay}"/>
         </Grid.RowDefinitions>
 
         <ComboBox Grid.Row="0"
                   HorizontalAlignment="Left"
                   Width="100"
-                  SelectedItem="{Binding SelectedCommType}"
+                  SelectedItem="{Binding SelectedCommType, Mode=TwoWay}"
                   ItemsSource="{Binding CommTypesList}">
 
             <i:Interaction.Triggers>
@@ -35,12 +41,10 @@
         </ComboBox>
 
         <local:SerialConncetView Grid.Row="2"
-                                 DataContext="{Binding SerialConncetVM}"
-                                 Height="{Binding SerialConncetVisibility}" />
+                                 DataContext="{Binding SerialConncetVM}"/>
 
         <local:TcpConncetView Grid.Row="3"
-                              DataContext="{Binding TcpConncetVM}"
-                              Height="{Binding TcpConncetVisibility}" />
+                              DataContext="{Binding TcpConncetVM}"/>
 
     </Grid>
 </UserControl>

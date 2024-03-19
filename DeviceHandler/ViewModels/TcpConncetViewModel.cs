@@ -105,6 +105,15 @@ namespace DeviceHandler.ViewModels
 			DisconnectEvent?.Invoke();
 		}
 
+		public void Copy(TcpConncetViewModel source)
+		{
+			Port = source.Port;
+			Address = source.Address;
+			RxPort = source.RxPort;
+			TxPort = source.TxPort;
+			IsUdpSimulation = source.IsUdpSimulation;
+		}
+
 		#endregion Methods
 
 		#region Commands

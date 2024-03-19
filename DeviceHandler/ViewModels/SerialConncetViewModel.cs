@@ -136,6 +136,17 @@ namespace DeviceHandler.ViewModels
 			FindCOMs();
 		}
 
+
+		public void Copy(SerialConncetViewModel source)
+		{
+			SelectedCOM = source.SelectedCOM;
+			SelectedBaudrate = source.SelectedBaudrate;
+			Address = source.Address;
+			RxPort = source.RxPort;
+			TxPort = source.TxPort;
+			IsUdpSimulation = source.IsUdpSimulation;
+		}
+
 		#endregion Methods
 
 		#region Commands

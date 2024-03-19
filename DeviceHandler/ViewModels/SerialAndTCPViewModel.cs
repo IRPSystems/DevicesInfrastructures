@@ -5,6 +5,7 @@ using DeviceHandler.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -17,16 +18,49 @@ namespace DeviceHandler.ViewModels
 		public SerialConncetViewModel SerialConncetVM { get; set; }
 		public TcpConncetViewModel TcpConncetVM { get; set; }
 
-		public Visibility SerialConncetVisibility { get; set; }
-		public Visibility TcpConncetVisibility { get; set; }
+
+		public GridLength SerialHeight { get; set; }
+		public GridLength TCPHeight { get; set; }
 
 		public List<string> CommTypesList { get; set; }
 		public string SelectedCommType { get; set; }
 
-		public bool IsConnectButtonEnabled { get; set; }
-		public bool IsDisconnectButtonEnabled { get; set; }
+		public bool IsConnectButtonEnabled 
+		{
+			get => _isConnectButtonEnabled;
+			set
+			{
+				_isConnectButtonEnabled = value;
+				if (SelectedCommType == "Serial")
+					SerialConncetVM.IsConnectButtonEnabled = value;
+				else
+					TcpConncetVM.IsConnectButtonEnabled = value;
+			}
+
+		}
+
+		public bool IsDisconnectButtonEnabled
+		{
+			get => _isDisconnectButtonEnabled;
+			set
+			{
+				_isDisconnectButtonEnabled = value;
+				if (SelectedCommType == "Serial")
+					SerialConncetVM.IsDisconnectButtonEnabled = value;
+				else
+					TcpConncetVM.IsDisconnectButtonEnabled = value;
+			}
+
+		}
 
 		#endregion Properties
+
+		#region Fields
+
+		private bool _isConnectButtonEnabled;
+		private bool _isDisconnectButtonEnabled;
+
+		#endregion Fields
 
 		#region Constructor
 
@@ -37,11 +71,14 @@ namespace DeviceHandler.ViewModels
 		{
 
 			ComType_SelectionChangedCommand = new RelayCommand<SelectionChangedEventArgs>(ComType_SelectionChanged);
-			ConnectCommand = new RelayCommand(Connect);
-			DisconnectCommand = new RelayCommand(Disconnect);
 
 			SerialConncetVM = new SerialConncetViewModel(baudRate, com, rxPort, txPort);
+			SerialConncetVM.ConnectEvent += Connect;
+			SerialConncetVM.DisconnectEvent += Disconnect;
+
 			TcpConncetVM = new TcpConncetViewModel(port, rxPort, txPort);
+			TcpConncetVM.ConnectEvent += Connect;
+			TcpConncetVM.DisconnectEvent += Disconnect;
 			TcpConncetVM.Address = address;
 
 			CommTypesList = new List<string>()
@@ -50,21 +87,27 @@ namespace DeviceHandler.ViewModels
 			};
 
 			SelectedCommType = selectedCommType;
+
+			ComType_SelectionChanged(null);
 		}
 
 		#endregion Constructor
 
 		#region Methods
 
+
 		private void ComType_SelectionChanged(SelectionChangedEventArgs e)
 		{
-			SerialConncetVisibility = Visibility.Collapsed;
-			TcpConncetVisibility = Visibility.Collapsed;
+			SerialHeight = new GridLength(0);
+			TCPHeight = new GridLength(0);
 
-			if(SelectedCommType == "Serial")
-				SerialConncetVisibility = Visibility.Visible;
+			if (SelectedCommType == "Serial")
+				SerialHeight = new GridLength(1, GridUnitType.Auto);
 			else if (SelectedCommType == "TCP")
-				TcpConncetVisibility = Visibility.Visible;
+				TCPHeight = new GridLength(1, GridUnitType.Auto);
+
+			OnPropertyChanged(nameof(SerialHeight));
+			OnPropertyChanged(nameof(TCPHeight));
 		}
 
 		public void RefreshProperties() { }
@@ -79,16 +122,21 @@ namespace DeviceHandler.ViewModels
 			DisconnectEvent?.Invoke();
 		}
 
+		public void Copy(SerialAndTCPViewModel source)
+		{
+			SerialConncetVM.Copy(source.SerialConncetVM);
+			TcpConncetVM.Copy(source.TcpConncetVM);
+			SelectedCommType = source.SelectedCommType;
+
+			ComType_SelectionChanged(null);
+		}
+
 		#endregion Methods
 
 		#region Commands
 
 		[JsonIgnore]
 		public RelayCommand<SelectionChangedEventArgs> ComType_SelectionChangedCommand { get; private set; }
-		[JsonIgnore]
-		public RelayCommand ConnectCommand { get; private set; }
-		[JsonIgnore]
-		public RelayCommand DisconnectCommand { get; private set; }
 
 		#endregion Commands
 

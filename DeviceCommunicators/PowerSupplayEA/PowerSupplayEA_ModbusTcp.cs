@@ -81,11 +81,11 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 			if (data.IsSet)
 			{
-				Set(data.Parameter);
+				Set(data);
 			}
 			else
 			{
-				Get(data.Parameter);
+				Get(data);
 			}
 
 			return CommunicatorResultEnum.OK;
@@ -93,37 +93,41 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		private void GetNominals(DeviceData easpDevice)
 		{
+			CommunicatorIOData iOData = null;
 
 			PowerSupplayEA_ParamData nominalVoltageParam =
 				easpDevice.ParemetersList.ToList().Find((p) => ((PowerSupplayEA_ParamData)p).Cmd == "SYSTem:NOMinal:VOLTage")
 					as PowerSupplayEA_ParamData;
-			Get(nominalVoltageParam);
+			iOData = new CommunicatorIOData() { Parameter = nominalVoltageParam };
+			Get(iOData);
 			if (nominalVoltageParam.Value != null)
 				_nominalVoltage = (float)nominalVoltageParam.Value;
 
 			PowerSupplayEA_ParamData nominalCurrentParam =
 				easpDevice.ParemetersList.ToList().Find((p) => ((PowerSupplayEA_ParamData)p).Cmd == "SYSTem:NOMinal:CURRent")
 					as PowerSupplayEA_ParamData;
-			Get(nominalCurrentParam);
+			iOData = new CommunicatorIOData() { Parameter = nominalCurrentParam };
+			Get(iOData);
 			if (nominalCurrentParam.Value != null)
 				_nominalCurrent = (float)nominalCurrentParam.Value;
 
 			PowerSupplayEA_ParamData nominalPowerParam =
 				easpDevice.ParemetersList.ToList().Find((p) => ((PowerSupplayEA_ParamData)p).Cmd == "SYSTem:NOMinal:POWer")
 					as PowerSupplayEA_ParamData;
-			Get(nominalPowerParam);
+			iOData = new CommunicatorIOData() { Parameter = nominalPowerParam };
+			Get(iOData);
 			if (nominalPowerParam.Value != null)
 				_nominalPower = (float)nominalPowerParam.Value;
 		}
 
 		#region Set
 
-		private void Set(DeviceParameterData e)
+		private void Set(CommunicatorIOData data)
 		{
-			if (e.Value == null)
+			if (data.Parameter.Value == null)
 				return;
 
-			if (!(e is PowerSupplayEA_ParamData eaParam))
+			if (!(data.Parameter is PowerSupplayEA_ParamData eaParam))
 				return;
 
 			if (eaParam.Cmd == "SYST:LOCK" || eaParam.Cmd == "OUTP")
@@ -178,15 +182,18 @@ namespace DeviceCommunicators.PowerSupplayEA
 				}
 			}
 
+			if(data.Callback != null) 
+				data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
+
 		}
 
 		#endregion Set
 
 		#region Get
 
-		private void Get(DeviceParameterData e)
+		private void Get(CommunicatorIOData data)
 		{
-			if (!(e is PowerSupplayEA_ParamData eaParam))
+			if (!(data.Parameter is PowerSupplayEA_ParamData eaParam))
 				return;
 
 			if (eaParam.Cmd == "*IDN")
@@ -219,14 +226,20 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 			if (_data == null)
 			{
-				if (_error != null)
-					MessageBox.Show(_error, "Error");
-				else
-					MessageBox.Show("No message received", "Error");
+				if (data.Callback != null)
+				{
+					if (_error != null)
+						data.Callback(data.Parameter, CommunicatorResultEnum.Error, _error);
+					else
+						data.Callback(data.Parameter, CommunicatorResultEnum.NoResponse, _error);
+				}
 			}
 			else
 			{
 				HandleData(eaParam);
+
+				if (data.Callback != null)
+					data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
 			}
 		}
 
@@ -278,6 +291,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 		private void GetIdentification(PowerSupplayEA_ParamData idenParam)
 		{
 			PowerSupplayEA_ParamData eaParam = null;
+			CommunicatorIOData iOData = null;
 
 			#region Get Manufacturer
 
@@ -287,7 +301,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 				NumOfRegisters = 20,
 				ValueType = "string",
 			};
-			Get(eaParam);
+			iOData = new CommunicatorIOData() { Parameter = eaParam };
+			Get(iOData);
 
 
 			StringBuilder sb = new StringBuilder();
@@ -317,7 +332,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 				NumOfRegisters = 20,
 				ValueType = "string",
 			};
-			Get(eaParam);
+			iOData = new CommunicatorIOData() { Parameter = eaParam };
+			Get(iOData);
 
 			data = eaParam.Value as byte[];
 			if (data == null)
@@ -345,7 +361,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 				NumOfRegisters = 20,
 				ValueType = "string",
 			};
-			Get(eaParam);
+			iOData = new CommunicatorIOData() { Parameter = eaParam };
+			Get(iOData);
 
 			data = eaParam.Value as byte[];
 			if (data == null)
@@ -373,7 +390,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 				NumOfRegisters = 20,
 				ValueType = "string",
 			};
-			Get(eaParam);
+			iOData = new CommunicatorIOData() { Parameter = eaParam };
+			Get(iOData);
 
 			data = eaParam.Value as byte[];
 			if (data == null)
@@ -401,7 +419,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 				NumOfRegisters = 20,
 				ValueType = "string",
 			};
-			Get(eaParam);
+			iOData = new CommunicatorIOData() { Parameter = eaParam };
+			Get(iOData);
 
 			data = eaParam.Value as byte[];
 			if (data == null)
@@ -429,7 +448,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 				NumOfRegisters = 20,
 				ValueType = "string",
 			};
-			Get(eaParam);
+			iOData = new CommunicatorIOData() { Parameter = eaParam };
+			Get(iOData);
 
 			data = eaParam.Value as byte[];
 			if (data == null)
@@ -458,7 +478,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 				NumOfRegisters = 2,
 				ValueType = "uint",
 			};
-			Get(eaParam);
+			CommunicatorIOData iOData = new CommunicatorIOData() { Parameter = eaParam };
+			Get(iOData);
 
 			uint state = Convert.ToUInt32(eaParam.Value);
 
