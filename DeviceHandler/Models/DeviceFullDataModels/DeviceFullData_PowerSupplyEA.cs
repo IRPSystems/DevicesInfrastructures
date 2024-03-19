@@ -24,19 +24,21 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		}
 		protected override void ConstructCommunicator()
 		{
-			DeviceCommunicator = new PowerSupplayEA_Communicator();
+			//DeviceCommunicator = new PowerSupplayEA_Communicator();
 		}
 
 		protected override void DeserializeConnectionViewModel(
 			string jsonString,
 			JsonSerializerSettings settings)
 		{
-			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
+			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialAndTCPViewModel;
 		}
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new SerialConncetViewModel(115200, "COM1", 14323, 14320);
+			ConnectionViewModel = new SerialAndTCPViewModel(
+				115200, "COM1", 14323, 14320,
+				502, "192168.10.38", "Serial");
 		}
 
 		protected override void ConstructCheckConnection()
@@ -52,29 +54,42 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void InitRealCommunicator()
 		{
-			(DeviceCommunicator as PowerSupplayEA_Communicator).Init(
-				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
-				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
-				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate);
+			if ((ConnectionViewModel as SerialAndTCPViewModel).SelectedCommType == "Serial")
+			{
+				(DeviceCommunicator as PowerSupplayEA_Communicator).Init(
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.IsUdpSimulation,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedCOM,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedBaudrate);
+			}
+			else
+			{
+				(DeviceCommunicator as PowerSupplayEA_ModbusTcp).Init(
+					(ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.IsUdpSimulation,
+					(ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.Address,
+					Device);
+			}
 		}
 
 		protected override void InitSimulationCommunicator()
 		{
-			(DeviceCommunicator as PowerSupplayEA_Communicator).Init(
-				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
-				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
-				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate,
-				(ConnectionViewModel as SerialConncetViewModel).RxPort,
-				(ConnectionViewModel as SerialConncetViewModel).TxPort,
-				(ConnectionViewModel as SerialConncetViewModel).Address);
+			if ((ConnectionViewModel as SerialAndTCPViewModel).SelectedCommType == "Serial")
+			{
+				(DeviceCommunicator as PowerSupplayEA_Communicator).Init(
+				(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.IsUdpSimulation,
+				(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedCOM,
+				(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedBaudrate,
+				(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.RxPort,
+				(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.TxPort,
+				(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.Address);
+			}
 		}
 
 		protected override bool IsSumulation()
 		{
-			if (!(ConnectionViewModel is SerialConncetViewModel serialConncet))
+			if (!(ConnectionViewModel is SerialAndTCPViewModel serialConncet))
 				return true;
 
-			return serialConncet.IsUdpSimulation;
+			return serialConncet.SerialConncetVM.IsUdpSimulation;
 		}
 	}
 }

@@ -22,7 +22,7 @@
 
                         <TextBlock Text="{Binding Name}" Grid.Column="0" VerticalAlignment="Center"/>
                         <TextBlock Text="{Binding Units}" Grid.Column="2" VerticalAlignment="Center"/>
-                        <TextBox Text="{Binding Value}" Grid.Column="4" />
+                        <TextBox Text="{Binding Value}" Grid.Column="4" ToolTip="{Binding Value}"/>
 
                         <Button Grid.Column="6" 
                                 Command="{Binding DataContext.SetCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=controls:EmptyListView}}" 

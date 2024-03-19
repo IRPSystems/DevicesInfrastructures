@@ -26,6 +26,8 @@ namespace DeviceHandler.Selectors
 				return element.FindResource("ModbusTCPConnectTemplate") as DataTemplate;
 			if (item is ModbusRTUConnectViewModel)
 				return element.FindResource("ModbusRTUConnectTemplate") as DataTemplate;
+			if (item is SerialAndTCPViewModel)
+				return element.FindResource("SerialAndTCPTemplate") as DataTemplate;
 
 			return null;
 		}
