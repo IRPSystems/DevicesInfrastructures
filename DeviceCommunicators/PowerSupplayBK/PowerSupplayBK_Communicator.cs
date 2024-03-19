@@ -36,7 +36,7 @@ namespace DeviceCommunicators.PowerSupplayBK
 
 		public PowerSupplayBK_Communicator()
 		{
-			_parameterQueue = new BlockingCollection<CommunicatorIOData>();
+			
 		}
 
 		#endregion Constructor

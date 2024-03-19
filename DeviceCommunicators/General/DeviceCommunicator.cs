@@ -24,7 +24,10 @@ namespace DeviceCommunicators.General
 
 
 
-		protected BlockingCollection<CommunicatorIOData> _parameterQueue;
+		protected BlockingCollection<CommunicatorIOData> _parameterQueue_Set;
+		protected BlockingCollection<CommunicatorIOData> _parameterQueue_Get;
+
+		protected object _lockObject;
 
 		#endregion Fields
 
@@ -47,7 +50,9 @@ namespace DeviceCommunicators.General
 		public DeviceCommunicator()
 		{
 
-			_parameterQueue = new BlockingCollection<CommunicatorIOData>();
+			_parameterQueue_Set = new BlockingCollection<CommunicatorIOData>();
+			_parameterQueue_Get = new BlockingCollection<CommunicatorIOData>();
+			_lockObject = new object();
 
 			InitErrorsDictionary();
 
@@ -62,7 +67,8 @@ namespace DeviceCommunicators.General
 			_cancellationTokenSource = new CancellationTokenSource();
 			_cancellationToken = _cancellationTokenSource.Token;
 
-			HandleInputs();
+			HandleInputs(_parameterQueue_Set);
+			HandleInputs(_parameterQueue_Get);
 		}
 
 		protected virtual void InitErrorsDictionary()
@@ -95,7 +101,7 @@ namespace DeviceCommunicators.General
 					Value = value,
 					Callback = callback,
 				};
-				_parameterQueue.Add(data, _cancellationToken);
+				_parameterQueue_Set.Add(data, _cancellationToken);
 			}
 			catch (OperationCanceledException)
 			{
@@ -113,7 +119,7 @@ namespace DeviceCommunicators.General
 					Parameter = param,
 					Callback = callback,
 				};
-				_parameterQueue.Add(data, _cancellationToken);
+				_parameterQueue_Set.Add(data, _cancellationToken);
 			}
 			catch (OperationCanceledException)
 			{
@@ -125,49 +131,53 @@ namespace DeviceCommunicators.General
 
 
 
-		protected void HandleInputs()
+		protected void HandleInputs(BlockingCollection<CommunicatorIOData> parameterQueue)
 		{
 			Task.Run(() =>
 			{
 				while (!_cancellationToken.IsCancellationRequested)
 				{
-					DateTime startTime = DateTime.Now;
-
-					CommunicatorIOData data = null;
-
-					try
+					lock (_lockObject)
 					{
+						DateTime startTime = DateTime.Now;
 
+						CommunicatorIOData data = null;
 
 						try
 						{
-							data = _parameterQueue.Take(_cancellationToken);
-						}
-						catch (OperationCanceledException)
-						{
-							break;
-						}
 
 
-						if (data == null)
-							continue;
-
-						CommunicatorResultEnum result = HandleRequests(data);
-						if (result == CommunicatorResultEnum.NoResponse &&
-							_parameterQueue.Count >= 100)
-						{
-							while (_parameterQueue.Count > 50)
+							try
 							{
-								CommunicatorIOData item;
-								_parameterQueue.TryTake(out item);
+								data = parameterQueue.Take(_cancellationToken);
 							}
+							catch (OperationCanceledException)
+							{
+								break;
+							}
+
+
+							if (data == null)
+								continue;
+
+							CommunicatorResultEnum result = HandleRequests(data);
+							if (result == CommunicatorResultEnum.NoResponse &&
+								parameterQueue.Count >= 100)
+							{
+								while (parameterQueue.Count > 50)
+								{
+									CommunicatorIOData item;
+									parameterQueue.TryTake(out item);
+								}
+							}
+
+						}
+						catch (Exception ex)
+						{
+							LoggerService.Error(this, "Failed to handle get/set", ex);
+							data.Callback?.Invoke(data.Parameter, CommunicatorResultEnum.Error, "Exception on get/set");
 						}
 
-					}
-					catch (Exception ex)
-					{
-						LoggerService.Error(this, "Failed to handle get/set", ex);
-						data.Callback?.Invoke(data.Parameter, CommunicatorResultEnum.Error, "Exception on get/set");
 					}
 
 					System.Threading.Thread.Sleep(1);

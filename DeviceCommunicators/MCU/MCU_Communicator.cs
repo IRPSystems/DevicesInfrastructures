@@ -506,11 +506,6 @@ namespace DeviceCommunicators.MCU
 			return 0;
 		}
 
-		private void ErrorEventHandler(string errorMessage)
-		{
-
-		}
-
 		private void PoolBuildTimerElapsed(object sender, ElapsedEventArgs e)
 		{
 			while (_buffersPool.Count < _maxNumOfBuffers)
@@ -560,7 +555,7 @@ namespace DeviceCommunicators.MCU
 					Buffer = buffer,
 					Callback = callback,
 				};
-				_parameterQueue.Add(data, _cancellationToken);
+				_parameterQueue_Set.Add(data, _cancellationToken);
 			}
 			catch (OperationCanceledException)
 			{
