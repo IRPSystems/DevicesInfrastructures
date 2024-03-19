@@ -148,7 +148,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 						ModbusTCPSevice.fctWriteSingleCoil,
 						1,
 						eaParam.ModbusAddress,
-						onOff);
+						onOff);				
 			}
 			else
 			{
