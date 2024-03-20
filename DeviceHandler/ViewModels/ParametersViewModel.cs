@@ -26,8 +26,6 @@ namespace DeviceHandler.ViewModel
 
 		public ObservableCollection<DeviceData> DevicesList { get; set; }
 
-		public Syncfusion.UI.Xaml.TreeView.SelectionMode SourceSelectionMode { get; set; }
-
 		#endregion Properties
 
 		#region Fields
@@ -53,11 +51,6 @@ namespace DeviceHandler.ViewModel
 			_designDragDropData = designDragDropData;
 			_devicesContainer = devicesContainer;
 			_isHideEvvaDevice = isHideEvvaDevice;
-
-			if(isMultipleSourceSelection)
-				SourceSelectionMode = Syncfusion.UI.Xaml.TreeView.SelectionMode.Multiple;
-			else
-				SourceSelectionMode = Syncfusion.UI.Xaml.TreeView.SelectionMode.Single;
 
 			ExpandAllCommand = new RelayCommand(ExpandAll);
 			CollapseAllCommand = new RelayCommand(CollapseAll);
