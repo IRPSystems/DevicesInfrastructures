@@ -30,7 +30,7 @@ namespace DeviceHandler.Services
 			set
 			{
 				_acquisitionRate = value;
-				if (_communicationTimer != null)
+				if (_communicationTimer != null && _acquisitionRate != 0)
 				{
 					_communicationTimer.Stop();
 					_communicationTimer.Interval = 1000 / _acquisitionRate;
