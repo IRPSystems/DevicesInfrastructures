@@ -150,7 +150,16 @@ namespace DeviceCommunicators.MCU
 
 	public class ParamGroup: DeviceParameterData
 	{
-		public string GroupName { get; set; }
+		private string _groupName;
+		public string GroupName 
+		{ 
+			get => _groupName; 
+			set
+			{
+				_groupName = value;
+				Name = value;
+			}
+		}
 
 		public string GroupDescription { get; set; }
 
