@@ -128,84 +128,102 @@ namespace DeviceCommunicators.PowerSupplayEA
 			}
 		}
 
+
 		#region Set
 
 		private void Set(CommunicatorIOData data)
 		{
-			if (data.Parameter.Value == null)
-				return;
-
-			if (!(data.Parameter is PowerSupplayEA_ParamData eaParam))
-				return;
-
-			if (eaParam.Cmd == "SYST:LOCK" || eaParam.Cmd == "OUTP")
+			try
 			{
-				bool onOff = false;
-				int value = Convert.ToInt32(eaParam.Value);
-				if (value == 1)
-					onOff = true;
-				_modbusTCPSevice.WriteSingleCoils(
-						ModbusTCPSevice.fctWriteSingleCoil,
-						1,
-						eaParam.ModbusAddress,
-						onOff);		
-			}
-			else
-			{
-				double d = Convert.ToDouble((string)eaParam.Value);
+				
 
+				if (!(data.Parameter is PowerSupplayEA_ParamData eaParam))
+					return;
 
-				ushort value = 0;
-				if (eaParam.Cmd == "SOUR:VOLTAGE") // Limit Voltage
+				LoggerService.Inforamtion(this, eaParam.Name + "; value=" + data.Value);
+
+				if (eaParam.Cmd == "SYST:LOCK" || eaParam.Cmd == "OUTP")
 				{
-					value = (ushort)((d * (double)_actualValuesFactor) / _nominalVoltage);
-				}
-				else if (eaParam.Cmd == "SOUR:CURRENT" || eaParam.Cmd == "SINK:CURRENT") // Limit PS/EL Current
-				{
-					value = (ushort)((d * (double)_actualValuesFactor) / _nominalCurrent);
-				}
-				else if (eaParam.Cmd == "SOUR:POW" || eaParam.Cmd == "SINK:POW") // Limit PS/EL Power
-				{
-					value = (ushort)((d * (double)_actualValuesFactor) / _nominalPower);
-				}
+					
 
-				byte[] bytes = BitConverter.GetBytes(value);
-
-				if (eaParam.NumOfRegisters > 1)
-				{
-
-					_modbusTCPSevice.WriteMultipleRegister(
-							ModbusTCPSevice.fctWriteMultipleRegister,
+					bool onOff = false;
+					
+					if (data.Value == 1)
+						onOff = true;
+					_modbusTCPSevice.WriteSingleCoils(
+							ModbusTCPSevice.fctWriteSingleCoil,
 							1,
 							eaParam.ModbusAddress,
-							bytes);
+							onOff);
 				}
 				else
 				{
-					_modbusTCPSevice.WriteSingleRegister(
-							ModbusTCPSevice.fctWriteSingleRegister,
-							1,
-							eaParam.ModbusAddress,
-							bytes);
-				}
-			}
+					
+					
+					ushort value = 0;
+					if (eaParam.Cmd == "SOUR:VOLTAGE") // Limit Voltage
+					{
+						value = (ushort)((data.Value * (double)_actualValuesFactor) / _nominalVoltage);
+					}
+					else if (eaParam.Cmd == "SOUR:CURRENT" || eaParam.Cmd == "SINK:CURRENT") // Limit PS/EL Current
+					{
+						value = (ushort)((data.Value * (double)_actualValuesFactor) / _nominalCurrent);
+					}
+					else if (eaParam.Cmd == "SOUR:POW" || eaParam.Cmd == "SINK:POW") // Limit PS/EL Power
+					{
+						value = (ushort)((data.Value * (double)_actualValuesFactor) / _nominalPower);
+					}
 
-			_waitForResponse.WaitOne(1000);
+					byte[] bytes = BitConverter.GetBytes(value);
 
-			if (_data == null)
-			{
-				if (data.Callback != null)
-				{
-					if (_error != null)
-						data.Callback(data.Parameter, CommunicatorResultEnum.Error, _error);
+					if (eaParam.NumOfRegisters > 1)
+					{
+						_modbusTCPSevice.WriteMultipleRegister(
+								ModbusTCPSevice.fctWriteMultipleRegister,
+								1,
+								eaParam.ModbusAddress,
+								bytes);
+					}
 					else
-						data.Callback(data.Parameter, CommunicatorResultEnum.NoResponse, _error);
+					{
+						_modbusTCPSevice.WriteSingleRegister(
+								ModbusTCPSevice.fctWriteSingleRegister,
+								1,
+								eaParam.ModbusAddress,
+								bytes);
+					}
+				}
+
+				_waitForResponse.WaitOne(1000);
+				
+				if (_data == null)
+				{
+					if(eaParam.Cmd == "OUTPut")
+					{
+						data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
+						return;
+					}
+
+					if (data.Callback != null)
+					{
+						if (_error != null)
+							data.Callback(data.Parameter, CommunicatorResultEnum.Error, _error);
+						else
+							data.Callback(data.Parameter, CommunicatorResultEnum.NoResponse, _error);
+					}
+				}
+				else
+				{
+					if (data.Callback != null)
+						data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
 				}
 			}
-			else
+			catch(Exception ex) 
 			{
-				if (data.Callback != null)
-					data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
+				LoggerService.Inforamtion(this, "8");
+				LoggerService.Error(this, "Failed to set parameter \"" + data.Parameter.Name + "\"", ex);
+				string error = "Failed to set parameter \"" + data.Parameter.Name + "\"; Value=" + data.Parameter.Value + "\r\n" + ex;
+				data.Callback(data.Parameter, CommunicatorResultEnum.Error, error);
 			}
 
 		}
