@@ -17,7 +17,7 @@ namespace DeviceHandler.ParamGetSetList
 		#region Properties
 
 		public bool IsShowButtons { get; set; }
-		public ObservableCollection<MCU_ParamData> ParamsList { get; set; }
+		public ObservableCollection<DeviceParameterData> ParamsList { get; set; }
 
 		#endregion Properties
 
@@ -32,8 +32,33 @@ namespace DeviceHandler.ParamGetSetList
 			ObservableCollection<MCU_ParamData> paramsList,
 			bool isShowButtons)
 		{
+			IsShowButtons = isShowButtons;
+
+			ParamsList = new ObservableCollection<DeviceParameterData>();
+			foreach(MCU_ParamData param in paramsList)
+				ParamsList.Add(param);
+
+			Init();
+		}
+
+		public ParamGetSetListViewModel(
+			ObservableCollection<DeviceParameterData> paramsList,
+			bool isShowButtons)
+		{
 			ParamsList = paramsList;
 			IsShowButtons = isShowButtons;
+
+			Init();
+		}
+
+
+
+		#endregion Constructor
+
+		#region Methods
+
+		private void Init()
+		{
 
 			GetCommand = new RelayCommand<DeviceParameterData>(Get);
 			SetCommand = new RelayCommand<DeviceParameterData>(Set);
@@ -41,10 +66,6 @@ namespace DeviceHandler.ParamGetSetList
 
 			SetAllBackForeGround();
 		}
-
-		#endregion Constructor
-
-		#region Methods
 
 		private void Get(DeviceParameterData param)
 		{
