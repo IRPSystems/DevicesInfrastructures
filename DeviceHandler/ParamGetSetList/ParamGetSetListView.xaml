@@ -13,11 +13,6 @@
     
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/TrueDriveManager;component/Styles/ToolsStyle.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-
-
 
             <local:BracketedUnitsConverter x:Key="BracketedUnitsConverter" />
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
