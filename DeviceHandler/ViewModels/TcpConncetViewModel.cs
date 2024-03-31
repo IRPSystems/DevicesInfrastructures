@@ -37,8 +37,9 @@ namespace DeviceHandler.ViewModels
 
 		#region Constructor
 
-		public TcpConncetViewModel(int port, int rxPort, int txPort)
+		public TcpConncetViewModel(int port, int rxPort, int txPort, string address = null)
 		{
+			Address = address;
 			Port = port;	
 			RxPort = rxPort;
 			TxPort = txPort;
@@ -51,7 +52,8 @@ namespace DeviceHandler.ViewModels
 			IsConnectButtonEnabled = true;
 			IsDisconnectButtonEnabled = false;
 
-			GetIpAddress();
+			if(string.IsNullOrEmpty(Address))
+				GetIpAddress();
 
 			HandleSelectedAddapter();
 

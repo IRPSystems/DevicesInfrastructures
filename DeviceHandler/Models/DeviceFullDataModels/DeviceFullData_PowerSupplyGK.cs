@@ -29,12 +29,14 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			string jsonString,
 			JsonSerializerSettings settings)
 		{
-			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as ModbusTCPConnectViewModel;
+			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as TcpConncetViewModel;
+			if (ConnectionViewModel == null)
+				ConstructConnectionViewModel();
 		}
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new ModbusTCPConnectViewModel("192.168.2.250", 502, 255);
+			ConnectionViewModel = new TcpConncetViewModel(502, 255, 255, "192.168.2.250");
 		}
 
 		protected override void ConstructCheckConnection()
@@ -52,9 +54,9 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		protected override void InitRealCommunicator()
 		{
 			(DeviceCommunicator as PowerSupplayGK_Communicator).Init(
-				(ConnectionViewModel as ModbusTCPConnectViewModel).IsUdpSimulation,
-				(ConnectionViewModel as ModbusTCPConnectViewModel).IPAddress,
-				(ConnectionViewModel as ModbusTCPConnectViewModel).Port);
+				(ConnectionViewModel as TcpConncetViewModel).IsUdpSimulation,
+				(ConnectionViewModel as TcpConncetViewModel).Address,
+				(ushort)(ConnectionViewModel as TcpConncetViewModel).Port);
 		}
 
 		protected override void InitSimulationCommunicator()
@@ -64,7 +66,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override bool IsSumulation()
 		{
-			if (!(ConnectionViewModel is ModbusTCPConnectViewModel modbusConncet))
+			if (!(ConnectionViewModel is TcpConncetViewModel modbusConncet))
 				return true;
 
 			return modbusConncet.IsUdpSimulation;
