@@ -47,5 +47,5 @@ namespace DeviceHandler.ParamGetSetList
 
 			comboBox.IsDropDownOpen = false;
 		}
-	}
+    }
 }

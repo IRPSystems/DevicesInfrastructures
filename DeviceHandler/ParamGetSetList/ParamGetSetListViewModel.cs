@@ -9,6 +9,7 @@ using System;
 using System.Windows;
 using System.Collections.ObjectModel;
 using DeviceCommunicators.MCU;
+using Entities.Models;
 
 namespace DeviceHandler.ParamGetSetList
 {
@@ -17,6 +18,7 @@ namespace DeviceHandler.ParamGetSetList
 		#region Properties
 
 		public bool IsShowButtons { get; set; }
+		public bool IsShowHelpTool { get; set; }
 		public ObservableCollection<DeviceParameterData> ParamsList { get; set; }
 
 		#endregion Properties
@@ -33,6 +35,7 @@ namespace DeviceHandler.ParamGetSetList
 			bool isShowButtons)
 		{
 			IsShowButtons = isShowButtons;
+			IsShowHelpTool = true;
 
 			ParamsList = new ObservableCollection<DeviceParameterData>();
 			foreach(MCU_ParamData param in paramsList)
@@ -43,15 +46,15 @@ namespace DeviceHandler.ParamGetSetList
 
 		public ParamGetSetListViewModel(
 			ObservableCollection<DeviceParameterData> paramsList,
-			bool isShowButtons)
+			bool isShowButtons,
+			bool isShowHelpTool)
 		{
 			ParamsList = paramsList;
 			IsShowButtons = isShowButtons;
+			IsShowHelpTool = isShowHelpTool;
 
 			Init();
 		}
-
-
 
 		#endregion Constructor
 
@@ -92,6 +95,12 @@ namespace DeviceHandler.ParamGetSetList
 
 			if (!(comboBox.DataContext is DeviceParameterData param))
 				return;
+
+			if(param is IParamWithDropDown dropDown && 
+				(dropDown.DropDown == null || dropDown.DropDown.Count == 0))
+			{
+				return;
+			}
 
 			SetBackForeGround(
 						Application.Current.FindResource("MahApps.Brushes.Accent2") as SolidColorBrush,

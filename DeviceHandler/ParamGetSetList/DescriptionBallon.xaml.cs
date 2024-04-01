@@ -31,6 +31,9 @@ namespace DeviceHandler.ParamGetSetList
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
+			if (Parameter == null)
+				return;
+
 			if (Parameter.Name != null)
 			{
 				NameText.Text = Parameter.Name;

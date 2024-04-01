@@ -26,7 +26,7 @@
 
     <Grid>
 
-        <DataGrid ItemsSource="{Binding ParamsList}"
+        <DataGrid ItemsSource="{Binding ParamsList}" 
                   HeadersVisibility="None"
                   GridLinesVisibility="None"
                   BorderThickness="0"
@@ -93,7 +93,10 @@
                                 <Border Grid.Column="0"
                                         VerticalAlignment="Center"
                                         Background="Transparent"
-                                        ToolTipService.InitialShowDelay="1">
+                                        ToolTipService.InitialShowDelay="1"
+                                        Visibility="{Binding DataContext.IsShowHelpTool, 
+                                                            Converter={StaticResource BooleanToVisibilityConverter},
+                                                            RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}">
 
                                     <iconPacks:Material Kind="HelpCircleOutline" />
 
@@ -108,7 +111,7 @@
 
                                     <controls_view:HexTextBoxView Background="{Binding Background}"
                                                           Foreground="{Binding Foreground}"
-                                                          Visibility="{Binding Format, Converter={StaticResource ShowHexPerfixConverter}}"
+                                                          Visibility="{Binding Converter={StaticResource ShowHexPerfixConverter}}"
                                                           Text="{Binding Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                           TextBoxKeyUpCommand="{Binding DataContext.TextBox_KeyUpCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
 
