@@ -241,7 +241,11 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 				if (eaParam.Cmd == "*IDN")
 				{
-					GetIdentification(eaParam);
+					bool isOK = GetIdentification(eaParam);
+					if (isOK)
+						data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
+					else
+						data.Callback(data.Parameter, CommunicatorResultEnum.Error, _error);
 					return;
 				}
 
@@ -252,8 +256,11 @@ namespace DeviceCommunicators.PowerSupplayEA
 					eaParam.Cmd == "STAT:OPER:COND")
 				{
 					GetState(eaParam);
+					data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
 					return;
 				}
+
+				if(eaParam.Cmd == "SYSTem:NOMinal:VOLTage") { }
 
 				_data = null;
 				_error = null;
@@ -268,7 +275,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 				_waitForResponse.WaitOne(1000);
 
-				if (_data == null)
+				if (_data == null || _data.Length == 0)
 				{
 					if (data.Callback != null)
 					{
@@ -338,7 +345,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 			}
 		}
 
-		private void GetIdentification(PowerSupplayEA_ParamData idenParam)
+		private bool GetIdentification(PowerSupplayEA_ParamData idenParam)
 		{
 			PowerSupplayEA_ParamData eaParam = null;
 			CommunicatorIOData iOData = null;
@@ -358,7 +365,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 			StringBuilder sb = new StringBuilder();
 			byte[] data = eaParam.Value as byte[];
 			if (data == null)
-				return;
+				return false;
 
 			Array.Reverse(data);
 			foreach (byte b in data)
@@ -387,7 +394,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 			data = eaParam.Value as byte[];
 			if (data == null)
-				return;
+				return false;
 
 			Array.Reverse(data);
 			foreach (byte b in data)
@@ -416,7 +423,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 			data = eaParam.Value as byte[];
 			if (data == null)
-				return;
+				return false;
 
 			Array.Reverse(data);
 			foreach (byte b in data)
@@ -445,7 +452,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 			data = eaParam.Value as byte[];
 			if (data == null)
-				return;
+				return false;
 
 			Array.Reverse(data);
 			foreach (byte b in data)
@@ -474,7 +481,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 			data = eaParam.Value as byte[];
 			if (data == null)
-				return;
+				return false;
 
 			Array.Reverse(data);
 			foreach (byte b in data)
@@ -503,7 +510,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 			data = eaParam.Value as byte[];
 			if (data == null)
-				return;
+				return false;
 
 			Array.Reverse(data);
 			foreach (byte b in data)
@@ -518,6 +525,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 			#endregion Get FW version DR
 
 			idenParam.Value = sb.ToString();
+
+			return true;
 		}
 
 		private void GetState(PowerSupplayEA_ParamData param)
@@ -536,16 +545,16 @@ namespace DeviceCommunicators.PowerSupplayEA
 			if (param.Cmd == "SYSTEM:LOCK:OWNER")
 			{
 				bool isRemot = (state & 2048) == 2048;
-				param.Value = 0;
+				param.Value = "NONE";
 				if (isRemot)
-					param.Value = 1;
+					param.Value = "REMOTE";
 			}
 			else if (param.Cmd == "OUTPut")
 			{
 				bool isOutput = (state & 128) == 128;
-				param.Value = 0;
+				param.Value = "OFF";
 				if (isOutput)
-					param.Value = 1;
+					param.Value = "ON";
 			}
 			else if (param.Cmd == "SYST:ERR")
 			{

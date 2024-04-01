@@ -37,14 +37,10 @@ namespace DeviceHandler.ViewModels
 
 		#region Constructor
 
-		public TcpConncetViewModel(
-			int port,
-			string address,
-			int rxPort,
-			int txPort)
+		public TcpConncetViewModel(int port, int rxPort, int txPort, string address = null)
 		{
-			Port = port;
 			Address = address;
+			Port = port;	
 			RxPort = rxPort;
 			TxPort = txPort;
 

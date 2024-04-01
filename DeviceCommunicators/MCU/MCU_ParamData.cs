@@ -15,6 +15,7 @@ namespace DeviceCommunicators.MCU
 	
 	public class MCU_ParamData : DeviceParameterData, IParamWithDropDown
 	{
+		public Action ValueChanged;
 
 		public void GetMessageID(ref byte[] id)
 		{
@@ -47,6 +48,9 @@ namespace DeviceCommunicators.MCU
 			}
 			set
 			{
+				if(_value != value)
+					ValueChanged?.Invoke();
+
 				_value = value;
 				if (_isSettingSelectedDropDown)
 					return;
@@ -146,7 +150,16 @@ namespace DeviceCommunicators.MCU
 
 	public class ParamGroup: DeviceParameterData
 	{
-		public string GroupName { get; set; }
+		private string _groupName;
+		public string GroupName 
+		{ 
+			get => _groupName; 
+			set
+			{
+				_groupName = value;
+				Name = value;
+			}
+		}
 
 		public string GroupDescription { get; set; }
 
@@ -184,6 +197,8 @@ namespace DeviceCommunicators.MCU
 			else
 				Visibility = Visibility.Collapsed;
 		}
+
+		
 	}
 
 	public enum GroupType
