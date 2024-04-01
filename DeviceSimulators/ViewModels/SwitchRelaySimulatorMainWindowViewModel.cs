@@ -40,7 +40,7 @@ namespace DeviceSimulators.ViewModels
 			base(deviceData)
 		{
 
-			ConnectVM = new TcpConncetViewModel(4196, null, 16323, 16320);
+			ConnectVM = new TcpConncetViewModel(4196, 16323, 16320);
 			ConnectVM.ConnectEvent += Connect;
 			ConnectVM.DisconnectEvent += Disconnect;
 

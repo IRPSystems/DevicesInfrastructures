@@ -76,7 +76,7 @@ namespace DeviceHandler.ViewModels
 			SerialConncetVM.ConnectEvent += Connect;
 			SerialConncetVM.DisconnectEvent += Disconnect;
 
-			TcpConncetVM = new TcpConncetViewModel(port, address, rxPort, txPort);
+			TcpConncetVM = new TcpConncetViewModel(port, rxPort, txPort, address);
 			TcpConncetVM.ConnectEvent += Connect;
 			TcpConncetVM.DisconnectEvent += Disconnect;
 			TcpConncetVM.Address = address;

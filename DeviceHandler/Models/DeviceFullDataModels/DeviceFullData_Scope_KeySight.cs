@@ -34,7 +34,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new TcpConncetViewModel(5025, "192.168.10.148", 21323, 21320);
+			ConnectionViewModel = new TcpConncetViewModel(5025, 21323, 21320, "192.168.10.148");
 		}
 
 		protected override void ConstructCheckConnection()
