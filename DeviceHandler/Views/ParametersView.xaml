@@ -136,6 +136,9 @@
                 <HierarchicalDataTemplate DataType="{x:Type mcu_modles:MCU_DeviceData}" ItemsSource="{Binding MCU_GroupList}" >
                     <TextBlock Text="{Binding Path=Name}" Margin="0,2" />
                 </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type dbc_modles:DBC_DeviceData}" ItemsSource="{Binding ParemetersList}" >
+                    <TextBlock Text="{Binding Path=Name}" Margin="0,2" ToolTip="{Binding DBCFilePath}"/>
+                </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type device_comm_models:DeviceData}" ItemsSource="{Binding ParemetersList}">
                     <TextBlock Text="{Binding Path=Name}" Margin="0,2"/>
                 </HierarchicalDataTemplate>
