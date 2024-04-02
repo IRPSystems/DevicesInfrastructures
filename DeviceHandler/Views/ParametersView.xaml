@@ -7,6 +7,7 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"   
              xmlns:device_comm_models="clr-namespace:DeviceCommunicators.Models;assembly=DeviceCommunicators" 
              xmlns:mcu_modles="clr-namespace:DeviceCommunicators.MCU;assembly=DeviceCommunicators"
+             xmlns:dbc_modles="clr-namespace:DeviceCommunicators.DBC;assembly=DeviceCommunicators"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" 
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" MinWidth="200">
@@ -141,6 +142,10 @@
                 <HierarchicalDataTemplate DataType="{x:Type mcu_modles:ParamGroup}" ItemsSource="{Binding ParamList}">
                     <TextBlock Text="{Binding Path=GroupName}" Margin="0,2" />
                 </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type dbc_modles:DBC_ParamGroup}" ItemsSource="{Binding ParamsList}">
+                    <TextBlock Text="{Binding Path=Name}" Margin="0,2"/>
+                </HierarchicalDataTemplate>
+                
                 <DataTemplate DataType="{x:Type device_comm_models:DeviceParameterData}" >
                     <Grid>
                         <Grid.ColumnDefinitions>
