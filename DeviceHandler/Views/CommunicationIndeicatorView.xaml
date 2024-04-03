@@ -61,6 +61,10 @@
                                         <Setter TargetName="tb" Property="Foreground" Value="White"/>
                                     </DataTrigger>
 
+                                    <DataTrigger Binding="{Binding Device.DeviceType}" Value="DBC">
+                                        <Setter TargetName="bd" Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+
                                 </ControlTemplate.Triggers>
 
                             </ControlTemplate>
