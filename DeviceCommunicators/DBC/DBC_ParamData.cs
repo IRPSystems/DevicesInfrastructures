@@ -7,16 +7,8 @@ namespace DeviceCommunicators.DBC
 {
 	public class DBC_ParamData: DeviceParameterData
 	{
-		public ushort StartBit { get; set; }
-		public ushort Length { get; set; }
-
-		public double Factor { get; set; } = 1;
-		public double Offset { get; set; }
-
-		public double Minimum { get; set; }
-		public double Maximum { get; set; }
-
 		public Signal Signal { get; set; }
+		public Message ParentMessage { get; set; }
 	}
 
 	public class DBC_ParamGroup : DeviceParameterData

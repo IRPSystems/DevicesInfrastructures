@@ -107,8 +107,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
             ConnectionViewModel.RefreshProperties();
 
-            ParametersRepository = new ParametersRepositoryService(DeviceCommunicator);
-            ParametersRepository.Name = Device.DeviceType.ToString();
+            GetRepository();
 
             BuildCheckConnection();
         }
@@ -259,6 +258,11 @@ namespace DeviceHandler.Models.DeviceFullDataModels
             }
         }
 
+        protected virtual void GetRepository()
+        {
+			ParametersRepository = new ParametersRepositoryService(DeviceCommunicator);
+			ParametersRepository.Name = Device.DeviceType.ToString();
+		}
 
         protected abstract string GetConnectionFileName();
 		protected abstract void ConstructCommunicator();

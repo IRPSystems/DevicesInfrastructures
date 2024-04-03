@@ -116,7 +116,7 @@ namespace DeviceHandler.Services
 
 		#region Add/Remove
 
-		public void Add(
+		public virtual void Add(
 			DeviceParameterData parameter,
 			RepositoryPriorityEnum priority,
 			Action<DeviceParameterData, CommunicatorResultEnum,string> receivedMessageCallback)
@@ -149,7 +149,7 @@ namespace DeviceHandler.Services
 			repositoryParam.Counter++;
 		}
 
-		public void Remove(
+		public virtual void Remove(
 			DeviceParameterData parameter,
 			Action<DeviceParameterData, CommunicatorResultEnum,string> receivedMessageCallback) 
 		{
@@ -195,27 +195,13 @@ namespace DeviceHandler.Services
 			if (_isDisposed)
 				return;
 
-			if (_isGetMedium)
-			{
-				GetParams(RepositoryPriorityEnum.Medium);
-			}
-
-
-
+			GetParams(RepositoryPriorityEnum.Medium);
+			
 			if (_isDisposed)
 				return;
 
-			_lowGetCounter++;
-			if (_lowGetCounter == 3)
-			{
-				_lowGetCounter = 0;
-
-				GetParams(RepositoryPriorityEnum.Low);
-			}
-
-
-
-			_isGetMedium = !_isGetMedium;
+			GetParams(RepositoryPriorityEnum.Low);
+			
 		}
 
 		private object _lockObj = new object();
@@ -231,9 +217,11 @@ namespace DeviceHandler.Services
 				foreach (RepositoryParam param in repositoryParamsList)
 				{
 
-
 					if (_isDisposed)
 						return;
+
+					if (param.Parameter.DeviceType == Entities.Enums.DeviceTypesEnum.DBC)
+						continue;
 
 					if(param.Parameter is ICalculatedParamete calculated)
 					{
@@ -243,18 +231,6 @@ namespace DeviceHandler.Services
 
 					param.IsReceived = CommunicatorResultEnum.None;
 					_communicator.GetParamValue(param.Parameter, GetValueCallback);
-					//int eventThatSignaledIndex =
-					//	WaitHandle.WaitAny(
-					//		new WaitHandle[] { _waitGetCallback, _cancellationToken.WaitHandle },
-					//		new TimeSpan(0, 0, 0, 0, 500));
-					//_waitGetCallback.Reset();
-					//if (_cancellationToken.IsCancellationRequested)
-					//	break;
-					//if (eventThatSignaledIndex == WaitHandle.WaitTimeout)
-					//{
-					//	param.IsReceived = CommunicatorResultEnum.NoResponse;
-					//	param.RaisEvent(CommunicatorResultEnum.NoResponse, "Timeout");
-					//}
 
 					System.Threading.Thread.Sleep(1);
 

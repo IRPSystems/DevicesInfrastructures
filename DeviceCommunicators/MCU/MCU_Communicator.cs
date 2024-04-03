@@ -110,7 +110,7 @@ namespace DeviceCommunicators.MCU
 
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, hwId, syncID, asyncID);
+				CommService = new CanPCanService(baudrate, hwId, syncID, 0x1FFFFFFF);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{

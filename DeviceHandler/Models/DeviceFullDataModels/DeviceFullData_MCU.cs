@@ -33,6 +33,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				ConnectionViewModel = new CanConnectViewModel(500000, 0xAB, 0xAA, 12223, 12220);
 			if ((ConnectionViewModel as CanConnectViewModel).SyncNodeID == 0)
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID = 0xAB;
+
 		}
 
 		protected override void ConstructConnectionViewModel()
@@ -86,6 +87,12 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				return true;
 
 			return false;
+		}
+
+		protected override void GetRepository()
+		{
+			ParametersRepository = new MCU_ParametersRepositoryService(DeviceCommunicator);
+			ParametersRepository.Name = Device.DeviceType.ToString();
 		}
 	}
 }
