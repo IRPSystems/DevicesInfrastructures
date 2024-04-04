@@ -8,7 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Timers;
+using System.Windows.Markup;
 
 namespace DeviceCommunicators.PowerSupplayGK
 {
@@ -21,6 +23,10 @@ namespace DeviceCommunicators.PowerSupplayGK
 
 		private string _ipAdderss;
 		private ushort _port;
+
+		private AutoResetEvent _waitForResponse;
+		private byte[] _data; 
+		private string _error;
 
 		#endregion Fields
 
@@ -39,7 +45,8 @@ namespace DeviceCommunicators.PowerSupplayGK
 		#region Constructor
 
 		public PowerSupplayGK_Communicator()
-        {
+		{
+			_waitForResponse = new AutoResetEvent(false);
 		}
 
 		#endregion Constructor
@@ -62,7 +69,10 @@ namespace DeviceCommunicators.PowerSupplayGK
             else
 			    CommService = new ModbusTCPSevice(_ipAdderss, _port, 255);
 
-			CommService.Init(false);
+
+			CommService.MessageReceivedEvent += _modbusTCPSevice_MessageReceivedEvent;
+			CommService.ErrorEvent += _modbusTCPSevice_ErrorEvent;
+			CommService.Init(true);
 
 			InitBase();
 		}
@@ -122,26 +132,50 @@ namespace DeviceCommunicators.PowerSupplayGK
 				if (!(param is PowerSupplayGK_ParamData gk_ParamData))
 					return;
 
-				byte[] buffer = null;
-				ModbusTCP.ReadInputRegister(4, 255, gk_ParamData.ReadAddress, 1, ref buffer);
+				ModbusTCP.ReadInputRegister(4, 255, gk_ParamData.ReadAddress, 1);
 
-				if(buffer == null || buffer.Length < 2)
-				{
-					callback?.Invoke(param, CommunicatorResultEnum.Error, "Exception when sending");
-					return;
+
+
+				_waitForResponse.WaitOne(1000);
+
+				if (_data == null)
+				{				
+
+					if (callback != null)
+					{
+						if (_error != null)
+							callback(param, CommunicatorResultEnum.Error, _error);
+						else
+							callback(param, CommunicatorResultEnum.NoResponse, _error);
+					}
 				}
+				else
+				{
+					double val = BitConverter.ToUInt16(_data, 0);
+					param.Value = val * gk_ParamData.Scale;
 
-				double val = BitConverter.ToUInt16(buffer, 0);
-				param.Value = val * gk_ParamData.Scale;
-
-				callback?.Invoke(param, CommunicatorResultEnum.OK, "");
-
+					if (callback != null)
+						callback(param, CommunicatorResultEnum.OK, null);
+				}
 			}
             catch(Exception ex) 
             { 
                 LoggerService.Error(this, "Failed to receive value for parameter: " + param.Name, ex);
 				callback?.Invoke(param, CommunicatorResultEnum.Error, "Exception when sending");
 			}
+		}
+
+		private void _modbusTCPSevice_MessageReceivedEvent(byte[] data)
+		{
+			_waitForResponse.Set();
+			_data = data;
+		}
+
+
+		private void _modbusTCPSevice_ErrorEvent(string error)
+		{
+			_waitForResponse.Set();
+			_error = error;
 		}
 
 		#endregion Methods

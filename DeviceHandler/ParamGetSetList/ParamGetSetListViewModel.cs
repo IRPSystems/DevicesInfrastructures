@@ -18,6 +18,7 @@ namespace DeviceHandler.ParamGetSetList
 		#region Properties
 
 		public bool IsShowButtons { get; set; }
+		public bool IsShowSave { get; set; }
 		public bool IsShowHelpTool { get; set; }
 		public ObservableCollection<DeviceParameterData> ParamsList { get; set; }
 
@@ -32,13 +33,15 @@ namespace DeviceHandler.ParamGetSetList
 
 		public ParamGetSetListViewModel(
 			ObservableCollection<MCU_ParamData> paramsList,
-			bool isShowButtons)
+			bool isShowButtons,
+			bool isShowSave)
 		{
 			IsShowButtons = isShowButtons;
 			IsShowHelpTool = true;
+			IsShowSave = isShowSave;
 
 			ParamsList = new ObservableCollection<DeviceParameterData>();
-			foreach(MCU_ParamData param in paramsList)
+			foreach (MCU_ParamData param in paramsList)
 				ParamsList.Add(param);
 
 			Init();
@@ -47,11 +50,13 @@ namespace DeviceHandler.ParamGetSetList
 		public ParamGetSetListViewModel(
 			ObservableCollection<DeviceParameterData> paramsList,
 			bool isShowButtons,
-			bool isShowHelpTool)
+			bool isShowHelpTool,
+			bool isShowSave)
 		{
 			ParamsList = paramsList;
 			IsShowButtons = isShowButtons;
 			IsShowHelpTool = isShowHelpTool;
+			IsShowSave = isShowSave;
 
 			Init();
 		}

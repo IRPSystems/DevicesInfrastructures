@@ -305,9 +305,16 @@
                             </Grid>
 
                             <DataTemplate.Triggers>
+
+                                <DataTrigger Binding="{Binding DataContext.IsShowSave, 
+                                                                RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" Value="False">
+                                    <Setter TargetName="save" Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+
                                 <DataTrigger Binding="{Binding Save}" Value="False">
                                     <Setter TargetName="save" Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
+                                
                             </DataTemplate.Triggers>
 
                         </DataTemplate>
