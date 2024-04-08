@@ -200,6 +200,12 @@ namespace DeviceCommunicators.Services
 			if(path.Contains(originalDir) == false)
 				FixJson(path);
 
+			if(File.Exists(path) == false)
+			{
+				LoggerService.Error(this, "The file \"" + path + "\" was not found");
+				return;
+			}
+
 			string jsonString = File.ReadAllText(path);
 
 			JsonSerializerSettings settings = new JsonSerializerSettings();
@@ -339,24 +345,24 @@ namespace DeviceCommunicators.Services
 		private void FixJson(string filePath)
 		{
 
-			string fileData = null;
-			using (StreamReader sr = new StreamReader(filePath))
-			{
-				fileData = sr.ReadToEnd();
-			}
+			//string fileData = null;
+			//using (StreamReader sr = new StreamReader(filePath))
+			//{
+			//	fileData = sr.ReadToEnd();
+			//}
 
-			fileData = fileData.Replace(
-				"Entities.Models.DeviceData, Entities",
-				"DeviceCommunicators.Models.DeviceData, DeviceCommunicators");
+			//fileData = fileData.Replace(
+			//	"Entities.Models.DeviceData, Entities",
+			//	"DeviceCommunicators.Models.DeviceData, DeviceCommunicators");
 
-			fileData = fileData.Replace(
-				"Entities.Models.DeviceParameterData, Entities",
-				"DeviceCommunicators.Models.DeviceParameterData, DeviceCommunicators");
+			//fileData = fileData.Replace(
+			//	"Entities.Models.DeviceParameterData, Entities",
+			//	"DeviceCommunicators.Models.DeviceParameterData, DeviceCommunicators");
 
-			using (StreamWriter sw = new StreamWriter(filePath))
-			{
-				sw.Write(fileData);
-			}
+			//using (StreamWriter sw = new StreamWriter(filePath))
+			//{
+			//	sw.Write(fileData);
+			//}
 
 
 
