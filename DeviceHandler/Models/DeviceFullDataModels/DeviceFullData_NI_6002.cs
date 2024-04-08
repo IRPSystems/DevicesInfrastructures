@@ -43,7 +43,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => p.Name == "Read Anolog input 0");
+			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => ((NI6002_ParamData)p).command_to_device == "Read Anolog input 0");
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
