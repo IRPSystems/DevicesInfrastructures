@@ -3,8 +3,7 @@ using NationalInstruments.DAQmx;
 using System;
 using DeviceCommunicators.Enums;
 using Task = NationalInstruments.DAQmx.Task;
-
-
+using Services.Services;
 
 namespace DeviceCommunicators.NI_6002
 {
@@ -104,17 +103,12 @@ namespace DeviceCommunicators.NI_6002
         public string Anolog_input(IO_Pin input)
         {
             double sample;
-
-            using (Task task2 = new Task())
+			
+			using (Task task2 = new Task())
             {
-                // task2.AIChannels.CreateVoltageChannel($"{deviceName}/ai0", "", AITerminalConfiguration.Rse, -10.0, 10.0, AIVoltageUnits.Volts);
-                //Plot Multiple Channels to the table
+				
 
-                //Verify the Task
-
-                //AITerminalConfiguration.Rse
-
-                string commannd_to_device = "";
+				string commannd_to_device = "";
 
                 commannd_to_device = _deviceName + "/" + "ai" + (int)input;
                 try
@@ -126,12 +120,14 @@ namespace DeviceCommunicators.NI_6002
                     double[] data = reader.ReadSingleSample();
                     sample = data[0];
                 }
-                catch
+                catch(Exception ex)
                 {
-                    return "Error";
+					LoggerService.Error(this, "Failed to get analog input", ex);
+					return "Error";
                 }
             }
-            return sample.ToString();
+			
+			return sample.ToString();
         }
 
       

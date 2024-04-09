@@ -52,6 +52,11 @@ namespace DeviceHandler.Services
 			_parameter = parameter;
 			Name = name;
 
+			if(_parameter == null) 
+			{
+				LoggerService.Error(this, "Parameter is null");
+			}
+
 			prevStatus = CommunicationStateEnum.None;
 
 			_isFirstMessageReceived = false;
