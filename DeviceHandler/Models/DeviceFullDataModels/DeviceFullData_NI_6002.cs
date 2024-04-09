@@ -45,6 +45,15 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		{
 			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => ((NI6002_ParamData)p).command_to_device == "Read Anolog input 0");
 
+			if(data == null) 
+			{
+				data = new NI6002_ParamData()
+				{
+					command_to_device = "Read Anolog input 0",
+					Name = "Read Anolog input 0"
+				};
+			}
+
 			CheckCommunication = new CheckCommunicationService(
 				this,
 				data,
