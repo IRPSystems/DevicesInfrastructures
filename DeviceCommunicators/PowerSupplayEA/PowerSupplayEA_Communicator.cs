@@ -110,7 +110,7 @@ namespace DeviceCommunicators.PowerSupplayEA
                 string cmd = ea_ParamData.Cmd + " " + value;
 				if(_onOffCommands.IndexOf(ea_ParamData.Cmd) >= 0)
 				{
-					if (value == 0)
+					if (value == 1)
 					{
 						cmd = ea_ParamData.Cmd + " ON";
 
@@ -122,7 +122,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 						task.Wait();
 						return;
 					}
-					else if (value == 1)
+					else if (value == 0)
 					{
 						cmd = ea_ParamData.Cmd + " OFF";
 
@@ -173,9 +173,9 @@ namespace DeviceCommunicators.PowerSupplayEA
 				if (_onOffCommands.IndexOf(ea_ParamData.Cmd) >= 0)
 				{
 					if (buffer.ToLower() == "ON")
-						param.Value = 0;
-					else if (buffer == "OFF")
 						param.Value = 1;
+					else if (buffer == "OFF")
+						param.Value = 0;
 					else
 					{
 						callback?.Invoke(param, CommunicatorResultEnum.Error, "Invalid value");
