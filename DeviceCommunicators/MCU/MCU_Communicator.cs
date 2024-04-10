@@ -420,6 +420,19 @@ namespace DeviceCommunicators.MCU
 				}
 			}
 
+			//if (mcuParam.Name != null && mcuParam.Name.Contains("LSB"))
+			//	mcuParam.Value = 0;
+			if (mcuParam.DropDown != null && mcuParam.DropDown.Count > 0)
+			{
+
+				DropDownParamData dd =
+					mcuParam.DropDown.Find((i) => i.Value == mcuParam.Value.ToString());
+				if (dd != null) 
+				{
+					mcuParam.Value = dd.Name;
+				}
+			}
+
 
 			return CommunicatorResultEnum.OK;
 
