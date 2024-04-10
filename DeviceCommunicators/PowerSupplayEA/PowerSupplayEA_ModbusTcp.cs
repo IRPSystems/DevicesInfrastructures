@@ -147,15 +147,15 @@ namespace DeviceCommunicators.PowerSupplayEA
 				{
 					
 
-					bool onOff = false;
+					bool isOn = false;
 					
-					if (data.Value == 0)
-						onOff = true;
+					if (data.Value == 1)
+						isOn = true;
 					_modbusTCPSevice.WriteSingleCoils(
 							ModbusTCPSevice.fctWriteSingleCoil,
 							1,
 							eaParam.ModbusAddress,
-							onOff);
+							isOn);
 				}
 				else
 				{

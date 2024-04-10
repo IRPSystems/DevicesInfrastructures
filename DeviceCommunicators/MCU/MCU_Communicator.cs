@@ -138,11 +138,9 @@ namespace DeviceCommunicators.MCU
 
 			_poolBuildTimer.Stop();
 
-
+			base.Dispose();
 
 			FireConnectionEvent();
-
-			base.Dispose();
 
 #if _SAVE_TIME
 			try
