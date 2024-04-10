@@ -58,7 +58,7 @@ namespace DeviceCommunicators.MCU
 				_isSettingValue = true;
 				if (DropDown != null)
 				{
-					SelectedDropDown = DropDown.Find((dd) => dd.Value == _value.ToString());
+					SelectedDropDown = DropDown.Find((dd) => dd.Name == (_value as string));
 				}
 				_isSettingValue = false;
 
