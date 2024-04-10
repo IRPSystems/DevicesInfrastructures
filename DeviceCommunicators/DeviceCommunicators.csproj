@@ -28,7 +28,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Infrastructure\Communication\Communication.csproj" />
-    <ProjectReference Include="..\..\Infrastructure\DBCFileParser\DBCFileParser.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Entities\Entities.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Services\Services.csproj" />
   </ItemGroup>
