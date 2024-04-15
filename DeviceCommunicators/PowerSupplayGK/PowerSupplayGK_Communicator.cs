@@ -183,18 +183,11 @@ namespace DeviceCommunicators.PowerSupplayGK
 					if (!(param is PowerSupplayGK_ParamData gk_ParamData))
 						return;
 
-
-					if (gk_ParamData.WriteAddress != 0)
-					{
-						string errorDescription =
-							"Get value failed.\r\n" +
-							"Write only parameter.";
-						callback(param, CommunicatorResultEnum.Error, errorDescription);
-						return;
-					}
-
 					_data = null;
-					ModbusTCP.ReadInputRegister(4, 255, gk_ParamData.ReadAddress, 1);
+					if (gk_ParamData.WriteAddress != 0)
+						ModbusTCP.ReadHoldingRegister(3, 255, gk_ParamData.WriteAddress, 1);
+					else					
+						ModbusTCP.ReadInputRegister(4, 255, gk_ParamData.ReadAddress, 1);
 
 
 
@@ -215,7 +208,7 @@ namespace DeviceCommunicators.PowerSupplayGK
 					}
 					else
 					{
-
+						Array.Reverse(_data);
 						double val = BitConverter.ToUInt16(_data, 0);
 						_data = null;
 						param.Value = val * gk_ParamData.Scale;
