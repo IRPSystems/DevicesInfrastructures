@@ -290,21 +290,23 @@ namespace DeviceCommunicators.YokogawaWT1804E
             try
             {
                 DateTime startTime = DateTime.Now;
-                int ret;
+                
 
                 int rln = 1000;
                 start_time = time.ElapsedMilliseconds;
 
-                // _connct_to_yoko.Send(0, _send_to_yoko);
+				int ret = -1;
+				for (int i = 0; i < 3; i++)
+                {
+                    _connct_to_yoko.Send(0, "NUMeric:NORMal:VALue?");
+                    ret = _connct_to_yoko.Receive(0, _temp, 1000, ref rln);
+                    if (ret != 1)
+                        break;
+                    System.Threading.Thread.Sleep(1);
+                }
 
-                _connct_to_yoko.Send(0, "NUMeric:NORMal:VALue?");
-
-               // System.Threading.Thread.Sleep(250);
-
-                ret = _connct_to_yoko.Receive(0, _temp, 1000, ref rln);
                 if (ret == 1)
                 {
-
                     for (int i = 0; i < paramers_from_dump.Values.Count; i++)
                     {
                         YokogawaWT1804E_parameters_to_dump param = paramers_from_dump.Values.ElementAt(i);
