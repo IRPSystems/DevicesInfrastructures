@@ -1,4 +1,6 @@
 ﻿
+using DeviceCommunicators.Enums;
+using DeviceCommunicators.Interfaces;
 using DeviceCommunicators.Models;
 using Entities.Models;
 using Newtonsoft.Json;
@@ -7,13 +9,13 @@ using System.Collections.Generic;
 
 namespace DeviceCommunicators.PowerSupplayGK
 {
-	public class PowerSupplayGK_ParamData : DeviceParameterData, IParamWithDropDown
+	public class PowerSupplayGK_ParamData : DeviceParameterData, IPSParamData
 	{
 		public ushort ReadAddress { get; set; }
 		public ushort WriteAddress { get; set; }
 		public ushort WriteTriggerAddress { get; set; }
 		public double Scale { get; set; }
-
+		public ParamTypeEnum ParamType { get; set; }
 
 
 
