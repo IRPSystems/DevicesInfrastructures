@@ -192,6 +192,9 @@ namespace DeviceHandler.ParamGetSetList
 			Brush foreground,
 			DeviceParameterData param)
 		{
+			if (Application.Current == null)
+				return;
+
 			Application.Current.Dispatcher.Invoke(() =>
 			{
 				param.Background = background;
