@@ -254,6 +254,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				case DeviceTypesEnum.FieldLogger: return new DeviceFullData_FieldLogger(deviceData);
 				case DeviceTypesEnum.PowerSupplyGK: return new DeviceFullData_PowerSupplyGK(deviceData);
 				case DeviceTypesEnum.BrainChild: return new DeviceFullData_BrainChild(deviceData);
+				case DeviceTypesEnum.Dyno3: return new DeviceFullData_Dyno3(deviceData);
 				default: return null;
             }
         }
