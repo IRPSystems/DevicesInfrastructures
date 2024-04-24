@@ -134,6 +134,9 @@ namespace DeviceCommunicators.MCU
 				if (_isSettingValue)
 					return;
 
+				if (_selectedDropDown == null)
+					return;
+
 				_isSettingSelectedDropDown = true;
 				int nVal;
 				bool res = int.TryParse(_selectedDropDown.Value, out nVal);
