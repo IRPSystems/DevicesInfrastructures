@@ -46,7 +46,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			CheckCommunication = new CheckCommunicationService(
 				this,
 				data,
-				"Dyno");
+				"Dyno3");
 		}
 
 
