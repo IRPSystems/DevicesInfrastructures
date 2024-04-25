@@ -10,18 +10,40 @@
              xmlns:local="clr-namespace:DeviceHandler.ParamGetSetList"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    
+
     <UserControl.Resources>
-        <ResourceDictionary>
 
-            <local:BracketedUnitsConverter x:Key="BracketedUnitsConverter" />
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-            <local:ShowHexPerfixConverter x:Key="ShowHexPerfixConverter" />
-            <local:ShowRegularTextBoxConverter x:Key="ShowRegularTextBoxConverter" />
-            <local:ShowComboBoxConverter x:Key="ShowComboBoxConverter" />
-            <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+        <local:BracketedUnitsConverter x:Key="BracketedUnitsConverter" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <local:ShowHexPerfixConverter x:Key="ShowHexPerfixConverter" />
+        <local:ShowRegularTextBoxConverter x:Key="ShowRegularTextBoxConverter" />
+        <local:ShowComboBoxConverter x:Key="ShowComboBoxConverter" />
+        <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
 
-        </ResourceDictionary>
+        <Style TargetType="ListViewItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <local:SingleParameterView MCUParam="{Binding}" 
+                                                   HelpToolVisibility="{Binding DataContext.HelpToolVisibility,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"                                               
+                                                   ButtonsVisibility="{Binding DataContext.ButtonsVisibility,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"                                             
+                                                   SaveVisibility="{Binding DataContext.SaveVisibility,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                   TextBoxKeyUpEvent="{Binding DataContext.TextBox_KeyUpEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                   ComboBox_DropDownClosedEvent="{Binding DataContext.ComboBox_DropDownClosedEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                   HexTextBox_EnterEvent="{Binding DataContext.HexTextBox_EnterEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                   HexTextBox_KeyDownEvent="{Binding DataContext.HexTextBox_HexKeyDownEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                   HexTextBox_KeyUpEvent="{Binding DataContext.HexTextBox_HexKeyUpEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                   Margin="0,2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            
+            <Style.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+            </Style.Resources>
+        </Style>
+
     </UserControl.Resources>
 
     <Grid>
@@ -32,19 +54,6 @@
                   VirtualizingPanel.IsVirtualizing="True"
                   ScrollViewer.CanContentScroll="True">
             
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <local:SingleParameterView MCUParam="{Binding}" 
-                                               HelpToolVisibility="{Binding DataContext.HelpToolVisibility,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"                                               
-                                               ButtonsVisibility="{Binding DataContext.ButtonsVisibility,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"                                             
-                                               SaveVisibility="{Binding DataContext.SaveVisibility,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                               TextBoxKeyUpEvent="{Binding DataContext.TextBox_KeyUpEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                               ComboBox_DropDownClosedEvent="{Binding DataContext.ComboBox_DropDownClosedEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                               HexTextBox_EnterEvent="{Binding DataContext.HexTextBox_EnterEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                               HexTextBox_KeyDownEvent="{Binding DataContext.HexTextBox_HexKeyDownEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                               HexTextBox_KeyUpEvent="{Binding DataContext.HexTextBox_HexKeyUpEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"/>
-                </DataTemplate>
-            </ListView.ItemTemplate>
             
         </ListView>
 
