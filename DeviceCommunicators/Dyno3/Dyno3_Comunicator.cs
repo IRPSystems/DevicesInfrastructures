@@ -34,7 +34,7 @@ namespace DeviceCommunicators.Dyno3
                 new Dyno3_ParamData() { Name = "speed set point",   DeviceType = DeviceTypesEnum.Dyno3,   Status_paramter="Rw"  },
                 new Dyno3_ParamData() { Name = "Acc\\Dec rate",     DeviceType = DeviceTypesEnum.Dyno3,   Status_paramter="Rw"  },
                 new Dyno3_ParamData() { Name = "Torque load",       DeviceType = DeviceTypesEnum.Dyno3,   Status_paramter="Rw"  },
-                new Dyno3_ParamData() { Name = "spin directiont",   DeviceType = DeviceTypesEnum.Dyno3,   Status_paramter="Rw"  },
+                new Dyno3_ParamData() { Name = "spin direction",   DeviceType = DeviceTypesEnum.Dyno3,   Status_paramter="Rw" ,DropDown=new List<DropDownParamData>(){ new DropDownParamData() {Name= "FW", Value = "1"}, new DropDownParamData() {Name= "REV", Value="0" } } },
                  new Dyno3_ParamData() { Name = "Speed",            DeviceType = DeviceTypesEnum.Dyno3,   Status_paramter="R"  },
                  new Dyno3_ParamData() { Name = "Torque",           DeviceType = DeviceTypesEnum.Dyno3,   Status_paramter="R"  },
 
@@ -46,7 +46,7 @@ namespace DeviceCommunicators.Dyno3
             settings.Formatting = Formatting.Indented;
             settings.TypeNameHandling = TypeNameHandling.All;
             var sz = JsonConvert.SerializeObject(device, settings);
-            File.WriteAllText(@"C:\dev\Project EVVA\ Dyno3.json", sz);
+            File.WriteAllText(@"C:\Dev\Dyno3.json", sz);
 
         }
 
@@ -91,8 +91,8 @@ namespace DeviceCommunicators.Dyno3
                     _Command_to_Dyno = new CommandDyno3(IP);
                 //else
                 //    _Command_to_Dyno = new NI6002_CommandSimulation();
-
-
+                _Command_to_Dyno.config_system_before_start();
+                _Command_to_Dyno.TurnON(false);
                 InitBase();
             }
             catch (Exception ex)
@@ -153,7 +153,7 @@ namespace DeviceCommunicators.Dyno3
 
             catch (Exception ex)
             {
-                LoggerService.Error(this, "Failed to set Command for Ni" + param.Name, ex);
+                LoggerService.Error(this, "Failed to set Command for Dyno 3" + param.Name, ex);
             }
         }
 
@@ -167,7 +167,7 @@ namespace DeviceCommunicators.Dyno3
 
                 // need change to send data
                 string message = Read_command(niParamData);
-                if (string.IsNullOrEmpty(message) || message == "Error")
+                if (string.IsNullOrEmpty(message) || message == "Error") 
                 {
                     callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
                     return;
@@ -191,9 +191,20 @@ namespace DeviceCommunicators.Dyno3
 
         public bool Send_command(Dyno3_ParamData niParamData)
         { 
+           string value = Convert.ToString(niParamData.Value);
+            bool value_b = false;
             if (niParamData.Name.ToLower() == "Enable".ToLower()) // ON or OFF 
             {
-                bool value_b = Convert.ToBoolean(niParamData.Value);
+                if (value == "1")
+                {
+                    value_b = true;
+                }
+                else 
+                { 
+                    value_b = false;
+                }
+
+                //bool value_b = Convert.ToBoolean(value);
                 _Command_to_Dyno.TurnON(value_b);
             }
             else if (niParamData.Name.ToLower() == "speed set point".ToLower())
@@ -212,11 +223,26 @@ namespace DeviceCommunicators.Dyno3
                 _Command_to_Dyno.Torque_load(Value_int);
             }
             else if(niParamData.Name.ToLower() == "spin direction".ToLower()) //Forward or  Revers
-            { 
-                string Data_string =Convert.ToString(niParamData.Value);
-                _Command_to_Dyno.Set_direct(Data_string); 
+            {
+
+                if (value == "1")
+                {
+                    value_b = true;
+                }
+                else if (value=="0")
+                {
+                    value_b = false;
+                }
+                ///string Data_string =Convert.ToString(niParamData.Value);
+                _Command_to_Dyno.Set_direct(value_b); 
             }
-            return true;
+            else if (niParamData.Name.ToLower() == "Start".ToLower()) // not include in json
+            {
+                string Data_string = Convert.ToString(niParamData.Value);
+                _Command_to_Dyno.config_system_before_start();
+            }
+
+             return true;
 
         }
 
@@ -237,6 +263,7 @@ namespace DeviceCommunicators.Dyno3
                 data_return = _Command_to_Dyno.read_parameter("Torque");
                 return data_return;
             }
+
 
 
             return "";
