@@ -1,8 +1,6 @@
 ﻿using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
-using DeviceCommunicators.Interfaces;
 using DeviceCommunicators.Models;
-using DeviceCommunicators.NI_6002;
 using Entities.Enums;
 using Entities.Models;
 using Newtonsoft.Json;
@@ -10,12 +8,7 @@ using Services.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Media.Animation;
 using System.IO;
 
 
@@ -90,24 +83,22 @@ namespace DeviceCommunicators.Dyno3
             string IP,
             bool simulation = false)
         {
-           _Command_to_Dyno = new CommandDyno3(IP); ///("10.0.0.100")
+          
 
-           
-
-            //try
-            //{
-            //    if (!simulation)
-            //        _commmand_to_device = new NI6002_Command(IP);
-            //    else
-            //        _commmand_to_device = new NI6002_CommandSimulation();
+            try
+            {
+                if (!simulation)
+                    _Command_to_Dyno = new CommandDyno3(IP);
+                //else
+                //    _Command_to_Dyno = new NI6002_CommandSimulation();
 
 
-            //    InitBase();
-            //}
-            //catch (Exception ex)
-            //{
-            //    LoggerService.Error(this, "Failed to init the NI", ex);
-            //}
+                InitBase();
+            }
+            catch (Exception ex)
+            {
+                LoggerService.Error(this, "Failed to init the NI", ex);
+            }
 
 
             _isInitialized = true;
@@ -200,27 +191,27 @@ namespace DeviceCommunicators.Dyno3
 
         public bool Send_command(Dyno3_ParamData niParamData)
         { 
-            if ((niParamData.command_to_device).ToLower() == "Enable".ToLower()) // ON or OFF 
+            if (niParamData.Name.ToLower() == "Enable".ToLower()) // ON or OFF 
             {
                 bool value_b = Convert.ToBoolean(niParamData.Value);
                 _Command_to_Dyno.TurnON(value_b);
             }
-            else if ((niParamData.command_to_device).ToLower() == "speed set point".ToLower())
+            else if (niParamData.Name.ToLower() == "speed set point".ToLower())
             {
                 int Value_int = Convert.ToInt16(niParamData.Value);
                 _Command_to_Dyno.speed_command_to_dyno(Value_int);
             }
-            else if ((niParamData.command_to_device).ToLower() == "Acc\\Dec rate".ToLower())
+            else if (niParamData.Name.ToLower() == "Acc\\Dec rate".ToLower())
             {
                 int Value_int = Convert.ToInt16(niParamData.Value);
                 _Command_to_Dyno.AccelerationDeceleration_command_to_dyno(Value_int);
             }
-            else if ((niParamData.command_to_device).ToLower() == "Torque load".ToLower())
+            else if (niParamData.Name.ToLower() == "Torque load".ToLower())
             {
                 int Value_int = Convert.ToInt16(niParamData.Value);
                 _Command_to_Dyno.Torque_load(Value_int);
             }
-            else if((niParamData.command_to_device).ToLower() == "spin direction".ToLower()) //Forward or  Revers
+            else if(niParamData.Name.ToLower() == "spin direction".ToLower()) //Forward or  Revers
             { 
                 string Data_string =Convert.ToString(niParamData.Value);
                 _Command_to_Dyno.Set_direct(Data_string); 
@@ -235,13 +226,13 @@ namespace DeviceCommunicators.Dyno3
         {
             string data_return = "";
 
-             if ((niParamData.command_to_device).ToLower() == "Speed".ToLower())
+             if (niParamData.Name.ToLower() == "Speed".ToLower())
             {
                 data_return = _Command_to_Dyno.read_parameter("speed");
                 return data_return;
 
             }
-            else if ((niParamData.command_to_device).ToLower() == "Torque".ToLower())
+            else if (niParamData.Name.ToLower() == "Torque".ToLower())
             {
                 data_return = _Command_to_Dyno.read_parameter("Torque");
                 return data_return;
