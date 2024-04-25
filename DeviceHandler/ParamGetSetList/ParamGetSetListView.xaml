@@ -10,312 +10,52 @@
              xmlns:local="clr-namespace:DeviceHandler.ParamGetSetList"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    
+
     <UserControl.Resources>
-        <ResourceDictionary>
 
-            <local:BracketedUnitsConverter x:Key="BracketedUnitsConverter" />
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-            <local:ShowHexPerfixConverter x:Key="ShowHexPerfixConverter" />
-            <local:ShowRegularTextBoxConverter x:Key="ShowRegularTextBoxConverter" />
-            <local:ShowComboBoxConverter x:Key="ShowComboBoxConverter" />
-            <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+        <local:BracketedUnitsConverter x:Key="BracketedUnitsConverter" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <local:ShowHexPerfixConverter x:Key="ShowHexPerfixConverter" />
+        <local:ShowRegularTextBoxConverter x:Key="ShowRegularTextBoxConverter" />
+        <local:ShowComboBoxConverter x:Key="ShowComboBoxConverter" />
+        <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
 
-        </ResourceDictionary>
+        <Style TargetType="ListViewItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <local:SingleParameterView MCUParam="{Binding}" 
+                                                   HelpToolVisibility="{Binding DataContext.HelpToolVisibility,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"                                               
+                                                   ButtonsVisibility="{Binding DataContext.ButtonsVisibility,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"                                             
+                                                   SaveVisibility="{Binding DataContext.SaveVisibility,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                   TextBoxKeyUpEvent="{Binding DataContext.TextBox_KeyUpEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                   ComboBox_DropDownClosedEvent="{Binding DataContext.ComboBox_DropDownClosedEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                   HexTextBox_EnterEvent="{Binding DataContext.HexTextBox_EnterEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                   HexTextBox_KeyDownEvent="{Binding DataContext.HexTextBox_HexKeyDownEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                   HexTextBox_KeyUpEvent="{Binding DataContext.HexTextBox_HexKeyUpEvent,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                   Margin="0,2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            
+            <Style.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+            </Style.Resources>
+        </Style>
+
     </UserControl.Resources>
 
     <Grid>
 
-        <DataGrid ItemsSource="{Binding ParamsList}" 
-                  HeadersVisibility="None"
-                  GridLinesVisibility="None"
-                  BorderThickness="0"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  AutoGenerateColumns="False"
-                  Margin="0,10,0,0"
-                  Style="{x:Null}"
-                  Background="Transparent"
-                  RowHeight="30">
-
-            <DataGrid.CellStyle>
-                <Style TargetType="DataGridCell" >
-                    <Setter Property="BorderThickness" Value="0" />
-                    <Setter Property="VerticalAlignment" Value="Center" />
-
-                    <Style.Triggers>
-
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.ThemeForeground}"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                        </Trigger>
-
-                    </Style.Triggers>
-
-                </Style>
-            </DataGrid.CellStyle>
-
-            <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow">
-                    <Setter Property="Margin" Value="0,2" />
-                    <EventSetter Event="KeyDown" Handler="DataGridKeyDown" />
-                </Style>
-            </DataGrid.RowStyle>
-
-            <DataGrid.Columns>
-
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Units" Binding="{Binding Units, Converter={StaticResource BracketedUnitsConverter}}" IsReadOnly="True"/>
-
-
-                <DataGridTemplateColumn Header="Value" >
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-
-                            <Grid Margin="0,0,5,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="25" />
-                                    <ColumnDefinition Width="5" />
-                                    <ColumnDefinition Width="*" MinWidth="75"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Border Grid.Column="0"
-                                        VerticalAlignment="Center"
-                                        Background="Transparent"
-                                        ToolTipService.InitialShowDelay="1"
-                                        Visibility="{Binding DataContext.IsShowHelpTool, 
-                                                            Converter={StaticResource BooleanToVisibilityConverter},
-                                                            RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}">
-
-                                    <iconPacks:Material Kind="HelpCircleOutline" />
-
-                                    <Border.ToolTip>
-                                        <ToolTip Padding="0">
-                                            <local:DescriptionBallon Parameter="{Binding}"/>
-                                        </ToolTip>
-                                    </Border.ToolTip>
-                                </Border>
-
-                                <Grid Grid.Column="2" ToolTip="{Binding ErrorDescription}" ToolTipService.InitialShowDelay="1">
-
-                                    <controls_view:HexTextBoxView Background="{Binding Background}"
-                                                          Foreground="{Binding Foreground}"
-                                                          Visibility="{Binding Converter={StaticResource ShowHexPerfixConverter}}"
-                                                          Text="{Binding Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                          TextBoxKeyUpCommand="{Binding DataContext.TextBox_KeyUpCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
-
-                                        <i:Interaction.Triggers>
-
-                                            <i:EventTrigger EventName="EnterEvent">
-                                                <i:InvokeCommandAction Command="{Binding Path=DataContext.HexTextBox_EnterEventCommand, 
-                                                                                     Mode=OneWay, 
-                                                                                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                                                                       CommandParameter="{Binding}"
-                                                                   PassEventArgsToCommand="False"/>
-                                            </i:EventTrigger>
-
-                                            <i:EventTrigger EventName="HexKeyDownEvent">
-                                                <i:InvokeCommandAction Command="{Binding Path=DataContext.HexTextBox_HexKeyDownEventCommand, 
-                                                                                     Mode=OneWay, 
-                                                                                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                                                                   PassEventArgsToCommand="True"/>
-                                            </i:EventTrigger>
-
-                                        </i:Interaction.Triggers>
-
-
-                                    </controls_view:HexTextBoxView>
-
-                                    <TextBox Name="tb" 
-                                             Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
-                                             Background="{Binding Background}"
-                                             Foreground="{Binding Foreground}"
-                                             Visibility="{Binding Converter={StaticResource ShowRegularTextBoxConverter}}"
-                                             IsReadOnly="{Binding DataContext.IsShowButtons, 
-                                                                 Converter={StaticResource InverseBoolConverter},
-                                                                 RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
-
-                                        <i:Interaction.Triggers>
-
-                                            <i:EventTrigger EventName="KeyUp">
-                                                <i:InvokeCommandAction Command="{Binding Path=DataContext.TextBox_KeyUpCommand, 
-                                                                                     Mode=OneWay, 
-                                                                                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                                                                   PassEventArgsToCommand="True"/>
-                                            </i:EventTrigger>
-
-                                        </i:Interaction.Triggers>
-
-                                    </TextBox>
-
-                                    <Grid Visibility="{Binding Converter={StaticResource ShowComboBoxConverter}}">
-                                        <ComboBox Name="cb"
-                                                  ItemsSource="{Binding DropDown}"
-                                                  SelectedItem="{Binding SelectedDropDown, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                  Background="{Binding Background}"
-                                                  Foreground="{Binding Foreground}"
-                                                  DropDownOpened="cb_DropDownOpened">
-
-                                            <ComboBox.ItemTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding Name}" />
-                                                </DataTemplate>
-                                            </ComboBox.ItemTemplate>
-
-                                            <i:Interaction.Triggers>
-
-                                                <i:EventTrigger EventName="DropDownClosed">
-                                                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ComboBox_DropDownClosedCommand, 
-                                                                                     Mode=OneWay, 
-                                                                                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                                                                   CommandParameter="{Binding ElementName=cb}"
-                                                                   PassEventArgsToCommand="False"/>
-                                                </i:EventTrigger>
-
-                                                <!--<i:EventTrigger EventName="DropDownOpen">
-                                                <i:InvokeCommandAction Command="{Binding Path=DataContext.ComboBox_DropDownOpenCommand, 
-                                                                                     Mode=OneWay, 
-                                                                                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                                                                   CommandParameter="{Binding ElementName=cb}"
-                                                                   PassEventArgsToCommand="False"/>
-                                            </i:EventTrigger>-->
-
-                                                <i:EventTrigger EventName="KeyUp">
-                                                    <i:InvokeCommandAction Command="{Binding Path=DataContext.TextBox_KeyUpCommand, 
-                                                                                     Mode=OneWay, 
-                                                                                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                                                                   PassEventArgsToCommand="True"/>
-                                                </i:EventTrigger>
-
-                                            </i:Interaction.Triggers>
-
-                                            <ComboBox.Resources>
-                                                <Style TargetType="ComboBox" BasedOn="{StaticResource MahApps.Styles.ComboBox}">
-                                                    <Style.Triggers>
-
-                                                        <DataTrigger Binding="{Binding DataContext.IsShowButtons, 
-                                                                                   RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
-                                                                 Value="True">
-
-                                                            <Setter Property="Visibility" Value="Visible"/>
-
-                                                        </DataTrigger>
-
-                                                        <DataTrigger Binding="{Binding DataContext.IsShowButtons, 
-                                                                                   RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
-                                                                 Value="False">
-
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-
-                                                        </DataTrigger>
-
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </ComboBox.Resources>
-
-                                        </ComboBox>
-
-                                        <TextBox Name="tbCombo" 
-                                                 IsReadOnly="True"
-                                                 Text="{Binding SelectedItem.Name, ElementName=cb}">
-
-                                            <TextBox.Resources>
-                                                <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox}">
-                                                    <Style.Triggers>
-
-                                                        <DataTrigger Binding="{Binding DataContext.IsShowButtons, 
-                                                                                   RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
-                                                                 Value="True">
-
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-
-                                                        </DataTrigger>
-
-                                                        <DataTrigger Binding="{Binding DataContext.IsShowButtons, 
-                                                                                   RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
-                                                                 Value="False">
-
-                                                            <Setter Property="Visibility" Value="Visible"/>
-
-                                                        </DataTrigger>
-
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBox.Resources>
-
-                                        </TextBox>
-
-
-
-
-                                    </Grid>
-
-                                </Grid>
-
-                            </Grid>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Header="Buttons">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-
-                            <Grid Visibility="{Binding DataContext.IsShowButtons, 
-                                                       RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid},
-                                                       Converter={StaticResource BooleanToVisibilityConverter}}"
-                                  IsEnabled="{Binding IsEnabled}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="40" />
-                                    <ColumnDefinition Width="2" />
-                                    <ColumnDefinition Width="40" />
-                                    <ColumnDefinition Width="2" />
-                                    <ColumnDefinition Width="40" />
-                                </Grid.ColumnDefinitions>
-
-                                <Button Content="Get" 
-                                        Grid.Column="0"
-                                        Command="{Binding DataContext.GetCommand, 
-                                                          RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                                        CommandParameter="{Binding}"/>
-                                <Button Content="Set" 
-                                        Grid.Column="2"
-                                        Command="{Binding DataContext.SetCommand, 
-                                                          RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                                        CommandParameter="{Binding}"/>
-                                <Button Content="Save" 
-                                        Name="save"
-                                        Grid.Column="4"
-                                        Command="{Binding DataContext.SaveCommand, 
-                                                          RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                                        CommandParameter="{Binding}"/>
-
-                            </Grid>
-
-                            <DataTemplate.Triggers>
-
-                                <DataTrigger Binding="{Binding DataContext.IsShowSave, 
-                                                                RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" Value="False">
-                                    <Setter TargetName="save" Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-
-                                <DataTrigger Binding="{Binding Save}" Value="False">
-                                    <Setter TargetName="save" Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                                
-                            </DataTemplate.Triggers>
-
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-            </DataGrid.Columns>
-
-        </DataGrid>
-
-
+        <ListView ItemsSource="{Binding ParamsList}"
+                  MaxHeight="2000"
+                  VirtualizingPanel.IsContainerVirtualizable="True"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  ScrollViewer.CanContentScroll="True">
+            
+            
+        </ListView>
 
     </Grid>
 </UserControl>

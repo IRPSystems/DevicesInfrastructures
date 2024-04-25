@@ -38,7 +38,7 @@ namespace DeviceHandler.ParamGetSetList
 			if (!(DataContext is ParamGetSetListViewModel vm))
 				return;
 
-			if (vm.IsShowButtons)
+			if (vm.ButtonsVisibility == Visibility.Collapsed)
 				return;
 
 
