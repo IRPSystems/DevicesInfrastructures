@@ -124,20 +124,14 @@
 
             <Button Content="Get" 
                     Grid.Column="0"
-                    Command="{Binding DataContext.GetCommand, 
-                                        RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                    CommandParameter="{Binding}"/>
+                    Click="ButtonGet_Click"/>
             <Button Content="Set" 
                     Grid.Column="2"
-                    Command="{Binding DataContext.SetCommand, 
-                                        RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                    CommandParameter="{Binding}"/>
+                    Click="ButtonSet_Click"/>
             <Button Content="Save" 
                     Name="save"
                     Grid.Column="4"
-                    Command="{Binding DataContext.SaveCommand, 
-                                        RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                    CommandParameter="{Binding}"
+                    Click="ButtonSave_Click"
                     Visibility="{Binding SaveVisibility,
                                          RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"/>
 

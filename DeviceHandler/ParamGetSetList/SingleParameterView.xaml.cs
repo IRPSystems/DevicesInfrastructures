@@ -205,6 +205,45 @@ namespace DeviceHandler.ParamGetSetList
 
 		#endregion HexTextBox_KeyUpEvent
 
+		#region ButtonGet_ClickEvent
+
+		public static readonly DependencyProperty ButtonGet_ClickEventProperty = DependencyProperty.Register(
+			"ButtonGet_ClickEvent", typeof(Action<DeviceParameterData>), typeof(SingleParameterView));
+
+		public Action<DeviceParameterData> ButtonGet_ClickEvent
+		{
+			get => (Action<DeviceParameterData>)GetValue(ButtonGet_ClickEventProperty);
+			set => SetValue(ButtonGet_ClickEventProperty, value);
+		}
+
+		#endregion ButtonGet_ClickEvent
+
+		#region ButtonSet_ClickEvent
+
+		public static readonly DependencyProperty ButtonSet_ClickEventProperty = DependencyProperty.Register(
+			"ButtonSet_ClickEvent", typeof(Action<DeviceParameterData>), typeof(SingleParameterView));
+
+		public Action<DeviceParameterData> ButtonSet_ClickEvent
+		{
+			get => (Action<DeviceParameterData>)GetValue(ButtonSet_ClickEventProperty);
+			set => SetValue(ButtonSet_ClickEventProperty, value);
+		}
+
+		#endregion ButtonSet_ClickEvent
+
+		#region ButtonSave_ClickEvent
+
+		public static readonly DependencyProperty ButtonSave_ClickEventProperty = DependencyProperty.Register(
+			"ButtonSave_ClickEvent", typeof(Action<DeviceParameterData>), typeof(SingleParameterView));
+
+		public Action<DeviceParameterData> ButtonSave_ClickEvent
+		{
+			get => (Action<DeviceParameterData>)GetValue(ButtonSave_ClickEventProperty);
+			set => SetValue(ButtonSave_ClickEventProperty, value);
+		}
+
+		#endregion ButtonSave_ClickEvent
+
 
 
 		#region MCUParam
@@ -336,12 +375,47 @@ namespace DeviceHandler.ParamGetSetList
 			HexTextBox_KeyUpEvent?.Invoke(e);
 		}
 
+		private void ButtonGet_Click(object sender, RoutedEventArgs e)
+		{
+			if (!(sender is Button button))
+				return;
+
+			if (!(button.DataContext is DeviceParameterData param))
+				return;
+
+			ButtonGet_ClickEvent?.Invoke(param);
+		}
+
+		private void ButtonSet_Click(object sender, RoutedEventArgs e)
+		{
+			if (!(sender is Button button))
+				return;
+
+			if (!(button.DataContext is DeviceParameterData param))
+				return;
+
+			ButtonSet_ClickEvent?.Invoke(param);
+		}
+
+		private void ButtonSave_Click(object sender, RoutedEventArgs e)
+		{
+			if (!(sender is Button button))
+				return;
+
+			if (!(button.DataContext is DeviceParameterData param))
+				return;
+
+			ButtonSave_ClickEvent?.Invoke(param);
+		}
+
 		#endregion Methods
 
 		#region Commands
 
 
 		#endregion Commands
+
+
 
 	}
 }
