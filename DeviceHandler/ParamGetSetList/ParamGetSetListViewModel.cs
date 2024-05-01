@@ -29,6 +29,10 @@ namespace DeviceHandler.ParamGetSetList
 		public Action<KeyEventArgs> HexTextBox_HexKeyDownEvent { get; set; }
 		public Action<KeyEventArgs> HexTextBox_HexKeyUpEvent { get; set; }
 
+		public Action<DeviceParameterData> ButtonGet_ClickEvent { get; set; }
+		public Action<DeviceParameterData> ButtonSet_ClickEvent { get; set; }
+		public Action<DeviceParameterData> ButtonSave_ClickEvent { get; set; }
+
 		#endregion Properties
 
 		#region Fields
@@ -83,6 +87,10 @@ namespace DeviceHandler.ParamGetSetList
 			HexTextBox_HexKeyDownEvent = HexTextBox_HexKeyDown;
 			HexTextBox_HexKeyUpEvent = TextBox_KeyUp;
 
+			ButtonGet_ClickEvent = Get;
+			ButtonSet_ClickEvent = Set;
+			ButtonSave_ClickEvent = Save;
+
 			if (isShowHelpTool)
 				HelpToolVisibility = Visibility.Visible;
 			else
@@ -98,15 +106,13 @@ namespace DeviceHandler.ParamGetSetList
 			else
 				SaveVisibility = Visibility.Collapsed;
 
-			GetCommand = new RelayCommand<DeviceParameterData>(Get);
-			SetCommand = new RelayCommand<DeviceParameterData>(Set);
-			SaveCommand = new RelayCommand<DeviceParameterData>(Save);
+			
 
 			SetAllBackForeGround();
 		}
 
 		private void Get(DeviceParameterData param)
-		{
+		{ 
 			GetEvent?.Invoke(param);
 		}
 
@@ -246,10 +252,6 @@ namespace DeviceHandler.ParamGetSetList
 		#endregion Methods
 
 		#region Commands
-
-		public RelayCommand<DeviceParameterData> GetCommand { get; private set; }
-		public RelayCommand<DeviceParameterData> SetCommand { get; private set; }
-		public RelayCommand<DeviceParameterData> SaveCommand { get; private set; }
 
 
 		private RelayCommand<ComboBox> _ComboBox_DropDownClosedCommand;

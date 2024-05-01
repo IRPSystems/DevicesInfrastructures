@@ -1,6 +1,5 @@
 ﻿
 //#define _SAVE_TIME
-using Communication.Interfaces;
 using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
@@ -15,9 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 #endif
 using System.Linq;
-using System.Threading.Tasks;
 using System.Timers;
-using System.Windows.Markup;
 
 namespace DeviceCommunicators.MCU
 {
