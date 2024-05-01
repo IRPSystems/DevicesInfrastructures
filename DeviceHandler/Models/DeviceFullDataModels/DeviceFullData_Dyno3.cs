@@ -41,7 +41,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as DeviceParameterData).Name == "Enable");
+			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as DeviceParameterData).Name == "Speed");
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
