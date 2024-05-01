@@ -85,6 +85,24 @@ namespace DeviceCommunicators.General
 
 			if (_cancellationTokenSource != null)
 				_cancellationTokenSource.Cancel();
+
+			if (_parameterQueue_Get != null)
+			{
+				while (_parameterQueue_Set.Count > 0)
+				{
+					CommunicatorIOData item;
+					_parameterQueue_Set.TryTake(out item);
+				}
+			}
+
+			if (_parameterQueue_Get != null)
+			{
+				while (_parameterQueue_Get.Count > 0)
+				{
+					CommunicatorIOData item;
+					_parameterQueue_Get.TryTake(out item);
+				}
+			}
 		}
 
 
