@@ -1,8 +1,6 @@
 ﻿
 using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.Models;
-using Entities.Enums;
-using Entities.Models;
 using Newtonsoft.Json;
 using Services.Services;
 using System;
@@ -10,7 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Windows.Shapes;
+using System.Text;
 
 namespace DeviceCommunicators.MCU
 {
@@ -31,7 +29,6 @@ namespace DeviceCommunicators.MCU
 			}
 
 			ReaMcuFullList(path, mcu_device);
-		//	ReaMcuShortList(mcu_device);
 		}
 
 		public void ReaMcuFullList(
@@ -43,6 +40,12 @@ namespace DeviceCommunicators.MCU
 				mcu_device.MCU_FullList = new ObservableCollection<DeviceParameterData>();
 
 				string jsonString = File.ReadAllText(path);
+				string extension = Path.GetExtension(path);
+				if(extension.ToString() != ".json") // Encoded file, need decoding
+				{
+					jsonString = DecodFile(jsonString);
+				}
+
 				mcu_device.MCU_GroupList = JsonConvert.DeserializeObject<ObservableCollection<ParamGroup>>(jsonString);
 
 				foreach (ParamGroup group in mcu_device.MCU_GroupList)
@@ -76,7 +79,6 @@ namespace DeviceCommunicators.MCU
 						data.DeviceType = mcu_device.DeviceType;
 
 						mcu_device.MCU_FullList.Add(data);
-						//group.ParamList.Add(data);
 					}
 				}
 			}
@@ -87,7 +89,30 @@ namespace DeviceCommunicators.MCU
 			}
 
 		}
-		
+
+		private string DecodFile(string jsonString)
+		{
+			byte[] fileBytes = Encoding.ASCII.GetBytes(jsonString);
+
+			string encodingPassword = "itay";
+			fileBytes = EncryptDecrypt(fileBytes, encodingPassword);
+			jsonString = Encoding.Default.GetString(fileBytes);
+
+			return jsonString;
+		}
+
+		public byte[] EncryptDecrypt(byte[] data, string password)
+		{
+			byte[] Keys = Encoding.ASCII.GetBytes(password);
+
+			for (int i = 0; i < data.Length; i++)
+			{
+				data[i] = (byte)(data[i] ^ Keys[i % Keys.Length]);
+			}
+
+			return data;
+		}
+
 
 		public static bool IsSameName(
 			string listParam,
@@ -131,18 +156,6 @@ namespace DeviceCommunicators.MCU
 				return true;
 
 			return false;
-		}
-
-
-		private List<string> ReadMCUParam_ShortList(
-			string path)
-		{
-			string jsonString = File.ReadAllText(path);
-
-			List<string> paramsNamesList =
-				JsonConvert.DeserializeObject<List<string>>(jsonString);
-
-			return paramsNamesList;
 		}
 
 		#endregion Methods
