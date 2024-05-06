@@ -1,6 +1,5 @@
 ﻿
 //#define _SAVE_TIME
-using Communication.Interfaces;
 using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
@@ -15,9 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 #endif
 using System.Linq;
-using System.Threading.Tasks;
 using System.Timers;
-using System.Windows.Markup;
 
 namespace DeviceCommunicators.MCU
 {
@@ -415,6 +412,19 @@ namespace DeviceCommunicators.MCU
 					LoggerService.Error(this,
 						mcuParam.Name + ": ValueNotSet: Original=" + value + "; Ack=" + dsetValue);
 					return CommunicatorResultEnum.ValueNotSet;
+				}
+			}
+
+			//if (mcuParam.Name != null && mcuParam.Name.Contains("LSB"))
+			//	mcuParam.Value = 0;
+			if (mcuParam.DropDown != null && mcuParam.DropDown.Count > 0)
+			{
+
+				DropDownParamData dd =
+					mcuParam.DropDown.Find((i) => i.Value == mcuParam.Value.ToString());
+				if (dd != null) 
+				{
+					mcuParam.Value = dd.Name;
 				}
 			}
 

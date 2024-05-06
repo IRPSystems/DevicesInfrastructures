@@ -20,6 +20,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		private AutoResetEvent _waitForResponse;
 		private byte[] _data;
+		private string _error;
 
 		private float _nominalVoltage;
 		private float _nominalCurrent;
@@ -587,7 +588,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 			_data = data;
 		}
 
-		private string _error;
+		
 		private void _modbusTCPSevice_ErrorEvent(string error)
 		{
 			_waitForResponse.Set();

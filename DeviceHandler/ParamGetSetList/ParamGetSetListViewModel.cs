@@ -17,9 +17,21 @@ namespace DeviceHandler.ParamGetSetList
 	{
 		#region Properties
 
-		public bool IsShowButtons { get; set; }
-		public bool IsShowHelpTool { get; set; }
 		public ObservableCollection<DeviceParameterData> ParamsList { get; set; }
+
+		public Visibility HelpToolVisibility { get; set; }
+		public Visibility SaveVisibility { get; set; }
+		public Visibility ButtonsVisibility { get; set; }
+
+		public Action<KeyEventArgs> TextBox_KeyUpEvent { get; set; }
+		public Action<ComboBox> ComboBox_DropDownClosedEvent { get; set; }
+		public Action<DeviceParameterData> HexTextBox_EnterEvent { get; set; }
+		public Action<KeyEventArgs> HexTextBox_HexKeyDownEvent { get; set; }
+		public Action<KeyEventArgs> HexTextBox_HexKeyUpEvent { get; set; }
+
+		public Action<DeviceParameterData> ButtonGet_ClickEvent { get; set; }
+		public Action<DeviceParameterData> ButtonSet_ClickEvent { get; set; }
+		public Action<DeviceParameterData> ButtonSave_ClickEvent { get; set; }
 
 		#endregion Properties
 
@@ -32,46 +44,75 @@ namespace DeviceHandler.ParamGetSetList
 
 		public ParamGetSetListViewModel(
 			ObservableCollection<MCU_ParamData> paramsList,
-			bool isShowButtons)
-		{
-			IsShowButtons = isShowButtons;
-			IsShowHelpTool = true;
+			bool isShowButtons,
+			bool isShowSave)
+		{	
 
 			ParamsList = new ObservableCollection<DeviceParameterData>();
-			foreach(MCU_ParamData param in paramsList)
+			foreach (MCU_ParamData param in paramsList)
 				ParamsList.Add(param);
 
-			Init();
+			Init(
+				isShowButtons,
+				true,
+				isShowSave);
 		}
 
 		public ParamGetSetListViewModel(
 			ObservableCollection<DeviceParameterData> paramsList,
 			bool isShowButtons,
-			bool isShowHelpTool)
+			bool isShowHelpTool,
+			bool isShowSave)
 		{
 			ParamsList = paramsList;
-			IsShowButtons = isShowButtons;
-			IsShowHelpTool = isShowHelpTool;
 
-			Init();
+			Init(
+				isShowButtons,
+				isShowHelpTool,
+				isShowSave);
 		}
 
 		#endregion Constructor
 
 		#region Methods
 
-		private void Init()
+		private void Init(
+			bool isShowButtons,
+			bool isShowHelpTool,
+			bool isShowSave)
 		{
+			TextBox_KeyUpEvent = TextBox_KeyUp;
+			ComboBox_DropDownClosedEvent = ComboBox_DropDownClosed;
+			HexTextBox_EnterEvent = HexTextBox_Enter;
+			HexTextBox_HexKeyDownEvent = HexTextBox_HexKeyDown;
+			HexTextBox_HexKeyUpEvent = TextBox_KeyUp;
 
-			GetCommand = new RelayCommand<DeviceParameterData>(Get);
-			SetCommand = new RelayCommand<DeviceParameterData>(Set);
-			SaveCommand = new RelayCommand<DeviceParameterData>(Save);
+			ButtonGet_ClickEvent = Get;
+			ButtonSet_ClickEvent = Set;
+			ButtonSave_ClickEvent = Save;
+
+			if (isShowHelpTool)
+				HelpToolVisibility = Visibility.Visible;
+			else
+				HelpToolVisibility = Visibility.Collapsed;
+
+			if (isShowButtons)
+				ButtonsVisibility = Visibility.Visible;
+			else
+				ButtonsVisibility = Visibility.Collapsed;
+
+			if (isShowSave)
+				SaveVisibility = Visibility.Visible;
+			else
+				SaveVisibility = Visibility.Collapsed;
+
+			
 
 			SetAllBackForeGround();
 		}
 
 		private void Get(DeviceParameterData param)
-		{
+		{ 
 			GetEvent?.Invoke(param);
 		}
 
@@ -88,9 +129,9 @@ namespace DeviceHandler.ParamGetSetList
 		
 
 
-		private void ComboBox_DropDownClosed(ComboBox comboBox)
+		public void ComboBox_DropDownClosed(ComboBox comboBox)
 		{
-			if (!IsShowButtons)
+			if (ButtonsVisibility == Visibility.Collapsed)
 				return;
 
 			if (!(comboBox.DataContext is DeviceParameterData param))
@@ -110,7 +151,7 @@ namespace DeviceHandler.ParamGetSetList
 
 		private void TextBox_KeyUp(KeyEventArgs e)
 		{
-			if (!IsShowButtons)
+			if (ButtonsVisibility == Visibility.Collapsed)
 				return;
 
 			DeviceParameterData param = null;
@@ -140,7 +181,7 @@ namespace DeviceHandler.ParamGetSetList
 						param);
 		}
 
-		private void HexTextBox_EnterEvent(DeviceParameterData param)
+		private void HexTextBox_Enter(DeviceParameterData param)
 		{
 			Set(param);
 			SetBackForeGround(
@@ -149,7 +190,7 @@ namespace DeviceHandler.ParamGetSetList
 						param);
 		}
 
-		private void HexTextBox_HexKeyDownEvent(KeyEventArgs e)
+		private void HexTextBox_HexKeyDown(KeyEventArgs e)
 		{
 			if (!(e.Source is TextBox textBox))
 				return;
@@ -187,6 +228,9 @@ namespace DeviceHandler.ParamGetSetList
 			Brush foreground,
 			DeviceParameterData param)
 		{
+			if (Application.Current == null)
+				return;
+
 			Application.Current.Dispatcher.Invoke(() =>
 			{
 				param.Background = background;
@@ -208,10 +252,6 @@ namespace DeviceHandler.ParamGetSetList
 		#endregion Methods
 
 		#region Commands
-
-		public RelayCommand<DeviceParameterData> GetCommand { get; private set; }
-		public RelayCommand<DeviceParameterData> SetCommand { get; private set; }
-		public RelayCommand<DeviceParameterData> SaveCommand { get; private set; }
 
 
 		private RelayCommand<ComboBox> _ComboBox_DropDownClosedCommand;

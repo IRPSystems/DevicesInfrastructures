@@ -1,0 +1,141 @@
+﻿<UserControl x:Class="DeviceHandler.ParamGetSetList.SingleParameterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"  
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:controls_view="clr-namespace:Controls.Views;assembly=Controls"
+             xmlns:converters="clr-namespace:Converters;assembly=Converters"
+             xmlns:local="clr-namespace:DeviceHandler.ParamGetSetList"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" 
+             FontSize="14"
+             Loaded="UserControl_Loaded">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="75" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="150" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="250" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Column="0" 
+                   Text="{Binding Name}" 
+                   VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="2" 
+                   Text="{Binding ActualUnits, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                   VerticalAlignment="Center"/>
+
+        <Grid Grid.Column="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="25" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" MinWidth="75"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Background="Transparent"
+                    ToolTipService.InitialShowDelay="1"
+                    Visibility="{Binding HelpToolVisibility, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+
+                <iconPacks:Material Kind="HelpCircleOutline" />
+
+                <Border.ToolTip>
+                    <ToolTip Padding="0">
+                        <local:DescriptionBallon Parameter="{Binding}"/>
+                    </ToolTip>
+                </Border.ToolTip>
+            </Border>
+
+            <Grid Name="grdValues" Grid.Column="2" ToolTip="{Binding ErrorDescription}" ToolTipService.InitialShowDelay="1">
+
+                <controls_view:HexTextBoxView Background="{Binding Background}"
+                                              Foreground="{Binding Foreground}"
+                                              Visibility="{Binding HexTextBoxVisibility,
+                                                                  RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                                              Text="{Binding Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+
+
+                <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                Background="{Binding Background}"
+                         Foreground="{Binding Foreground}"
+                         Visibility="{Binding RegularTextBoxVisibility,
+                                            RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                         IsReadOnly="{Binding IsReadOnly}"
+                         KeyUp="tb_KeyUp"/>
+
+                <Grid>
+                    <ComboBox ItemsSource="{Binding DropDown}"
+                              SelectedItem="{Binding SelectedDropDown, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Background="{Binding Background}"
+                              Foreground="{Binding Foreground}"
+                              DropDownOpened="cb_DropDownOpened"
+                              DropDownClosed="ComboBox_DropDownClosed"
+                              Visibility="{Binding CombotBoxVisibility,
+                                              RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                              KeyUp="tb_KeyUp">
+
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+
+                    </ComboBox>
+
+                    <TextBox Name="tbCombo" 
+                             IsReadOnly="True"
+                             Text="{Binding SelectedItem.Name, ElementName=cb}"
+                             Visibility="{Binding CombotTextBoxVisibility, 
+                                                  RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"/>
+
+
+
+                </Grid>
+
+            </Grid>
+
+        </Grid>
+
+        <Grid Grid.Column="6" Visibility="{Binding ButtonsVisibility, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl} }"
+              IsEnabled="{Binding IsEnabled}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40" />
+                <ColumnDefinition Width="2" />
+                <ColumnDefinition Width="40" />
+                <ColumnDefinition Width="2" />
+                <ColumnDefinition Width="40" />
+            </Grid.ColumnDefinitions>
+
+            <Button Content="Get" 
+                    Grid.Column="0"
+                    Click="ButtonGet_Click"/>
+            <Button Content="Set" 
+                    Grid.Column="2"
+                    Click="ButtonSet_Click"/>
+            <Button Content="Save" 
+                    Name="save"
+                    Grid.Column="4"
+                    Click="ButtonSave_Click"
+                    Visibility="{Binding SaveVisibility,
+                                         RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"/>
+
+        </Grid>
+
+    </Grid>
+</UserControl>

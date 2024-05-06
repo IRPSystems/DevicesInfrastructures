@@ -4,6 +4,7 @@ using System.Windows.Data;
 using System;
 using System.Windows;
 using DeviceCommunicators.MCU;
+using Entities.Models;
 
 namespace DeviceHandler.ParamGetSetList
 {
@@ -12,17 +13,19 @@ namespace DeviceHandler.ParamGetSetList
 
         object IValueConverter.Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(value is MCU_ParamData param))
-                return Visibility.Visible;
-
-            if (string.IsNullOrEmpty(param.Format) == false && param.Format.ToLower() == "x")
+            if (value is MCU_ParamData param &&
+				string.IsNullOrEmpty(param.Format) == false && param.Format.ToLower() == "x")
+            {
                 return Visibility.Collapsed;
+            }
 
-            if(param.DropDown == null || param.DropDown.Count == 0 )
-                return Visibility.Visible;
+            else if (value is IParamWithDropDown dropDown &&
+				dropDown.DropDown != null && dropDown.DropDown.Count > 0)
+            {
+                return Visibility.Collapsed;
+            }
 
-
-			return Visibility.Collapsed;
+			return Visibility.Visible;
 		}
 
         object IValueConverter.ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
