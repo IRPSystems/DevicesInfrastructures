@@ -20,7 +20,7 @@ namespace DeviceCommunicators.Dyno3
     {
         S7Client pls = new S7Client();
         int result = 0;
-        string Derection = "FW";
+        bool Derection = true; //0- rev, 1-FW
         public   int max_acceleration = 500;
         public  int max_speed = 5000;
 
@@ -220,11 +220,58 @@ namespace DeviceCommunicators.Dyno3
             }
         }
 
-
-        public void Set_direct (string direct)
+        public void config_system_before_start()
         {
             var bufer_wr = new byte[2];
-            if (direct.ToLower()== "FW".ToLower())
+            S7.SetBitAt(bufer_wr, 0, 0, true);
+            S7.SetBitAt(bufer_wr, 0, 1, false);
+            S7.SetBitAt(bufer_wr, 0, 2, false);
+            S7.SetBitAt(bufer_wr, 0, 3, false);
+            S7.SetBitAt(bufer_wr, 0, 4, false);
+            S7.SetBitAt(bufer_wr, 0, 5, false);
+            S7.SetBitAt(bufer_wr, 0, 6, false);
+            S7.SetBitAt(bufer_wr, 0, 7, false);
+            result = pls.DBWrite(11, 0, 1, bufer_wr);
+
+
+            S7.SetBitAt(bufer_wr, 0, 0, false);
+            S7.SetBitAt(bufer_wr, 0, 1, false);
+            S7.SetBitAt(bufer_wr, 0, 2, false);
+            S7.SetBitAt(bufer_wr, 0, 3, false);
+            S7.SetBitAt(bufer_wr, 0, 4, false);
+            S7.SetBitAt(bufer_wr, 0, 5, false);
+            S7.SetBitAt(bufer_wr, 0, 6, true);
+            S7.SetBitAt(bufer_wr, 0, 7, false);
+            result = pls.DBWrite(11, 2, 1, bufer_wr);
+
+
+            S7.SetBitAt(bufer_wr, 0, 0, false);
+            S7.SetBitAt(bufer_wr, 0, 1, false);
+            S7.SetBitAt(bufer_wr, 0, 2, false);
+            S7.SetBitAt(bufer_wr, 0, 3, false);
+            S7.SetBitAt(bufer_wr, 0, 4, true);
+            S7.SetBitAt(bufer_wr, 0, 5, false);
+            S7.SetBitAt(bufer_wr, 0, 6, false);
+            S7.SetBitAt(bufer_wr, 0, 7, false);
+            result = pls.DBWrite(11, 9, 1, bufer_wr);
+
+
+            S7.SetBitAt(bufer_wr, 0, 0, false);
+            S7.SetBitAt(bufer_wr, 0, 1, false);
+            S7.SetBitAt(bufer_wr, 0, 2, true);
+            S7.SetBitAt(bufer_wr, 0, 3, false);
+            S7.SetBitAt(bufer_wr, 0, 4, true);
+            S7.SetBitAt(bufer_wr, 0, 5, false);
+            S7.SetBitAt(bufer_wr, 0, 6, false);
+            S7.SetBitAt(bufer_wr, 0, 7, false);
+            result = pls.DBWrite(11, 15, 1, bufer_wr);
+
+        }
+
+        public void Set_direct (bool direct)
+        {
+            var bufer_wr = new byte[2];
+            if (direct== true)
             {
 
 
@@ -233,11 +280,11 @@ namespace DeviceCommunicators.Dyno3
                 S7.SetBitAt(bufer_wr, 0, 1, false);
                 S7.SetBitAt(bufer_wr, 0, 2, false);
                 S7.SetBitAt(bufer_wr, 0, 3, false);
-                S7.SetBitAt(bufer_wr, 0, 4, false);
+                S7.SetBitAt(bufer_wr, 0, 4, true);
                 S7.SetBitAt(bufer_wr, 0, 5, false);
                 S7.SetBitAt(bufer_wr, 0, 6, false);
                 S7.SetBitAt(bufer_wr, 0, 7, false);
-                result = pls.DBWrite(11, 5, 1, bufer_wr); // rev mode  set to  false 
+                result = pls.DBWrite(11, 4, 1, bufer_wr); // FW mode  set to  false 
 
 
 
@@ -246,19 +293,19 @@ namespace DeviceCommunicators.Dyno3
                 S7.SetBitAt(bufer_wr, 0, 1, false);
                 S7.SetBitAt(bufer_wr, 0, 2, false);
                 S7.SetBitAt(bufer_wr, 0, 3, false);
-                S7.SetBitAt(bufer_wr, 0, 4, true);
+                S7.SetBitAt(bufer_wr, 0, 4, false);
                 S7.SetBitAt(bufer_wr, 0, 5, false);
                 S7.SetBitAt(bufer_wr, 0, 6, false);
                 S7.SetBitAt(bufer_wr, 0, 7, false);
-                result = pls.DBWrite(11, 4, 1, bufer_wr); // fw mode 
+                result = pls.DBWrite(11, 5, 1, bufer_wr); // rev mode 
                 
                
 
 
 
-                Derection = "FW";
+                Derection = true;
             }
-            else if (direct.ToLower() =="Rev".ToLower())
+            else if (direct == false)
             {
 
                     S7.SetBitAt(bufer_wr, 0, 0, false);
@@ -283,7 +330,7 @@ namespace DeviceCommunicators.Dyno3
                     S7.SetBitAt(bufer_wr, 0, 7, false);
                     result = pls.DBWrite(11, 5, 1, bufer_wr); // rev mode 
                 
-                Derection = "Rev";
+                Derection = false;
             }
         }
 
@@ -296,19 +343,26 @@ namespace DeviceCommunicators.Dyno3
             {
                 string  a =Console.ReadLine();
                
-               // parameter_from_PLS=Convert.ToString(S7.GetDIntAt(buffer, 0));
-                //return parameter_from_PLS;
+               parameter_from_PLS=Convert.ToString(S7.GetDIntAt(buffer, 0));
+               return parameter_from_PLS;
                 
                 
-                return a;
+                
             }
             else if (Param.ToLower() == "Torque".ToLower())
             {
                 parameter_from_PLS = Convert.ToString(S7.GetDIntAt(buffer, 4));
                 return parameter_from_PLS;
             }
+           
             return "";
+
+
+
         }
+
+
+       
 
         public int speed_command_to_dyno(int speed)
         {
