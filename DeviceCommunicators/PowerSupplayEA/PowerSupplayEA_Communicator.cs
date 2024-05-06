@@ -107,11 +107,17 @@ namespace DeviceCommunicators.PowerSupplayEA
 				if (!(param is PowerSupplayEA_ParamData ea_ParamData))
 					return;
 
+				
+
                 string cmd = ea_ParamData.Cmd + " " + value;
-				if(_onOffCommands.IndexOf(ea_ParamData.Cmd) >= 0)
+
+				LoggerService.Inforamtion(this, "Setting \"" + ea_ParamData.Name + "\" - cmd: " + cmd);
+
+				if (_onOffCommands.IndexOf(ea_ParamData.Cmd) >= 0)
 				{
 					if (value == 1)
 					{
+						LoggerService.Inforamtion(this, "Setting \"" + ea_ParamData.Name + "\" ON");
 						cmd = ea_ParamData.Cmd + " ON";
 
 						Task task = Task.Run(() =>
@@ -120,10 +126,10 @@ namespace DeviceCommunicators.PowerSupplayEA
 						}, _cancellationToken);
 
 						task.Wait();
-						return;
 					}
 					else if (value == 0)
 					{
+						LoggerService.Inforamtion(this, "Setting \"" + ea_ParamData.Name + "\" OFF");
 						cmd = ea_ParamData.Cmd + " OFF";
 
 						Task task = Task.Run(() =>
@@ -132,11 +138,14 @@ namespace DeviceCommunicators.PowerSupplayEA
 						}, _cancellationToken);
 
 						task.Wait();
-						return;
 					}
-				}
 
-				_serial_port.Send(cmd);
+					System.Threading.Thread.Sleep(2000);
+				}
+				else
+				{
+					_serial_port.Send(cmd);
+				}
 
 				callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 			}
@@ -145,7 +154,6 @@ namespace DeviceCommunicators.PowerSupplayEA
 				LoggerService.Error(this, "Failed to set value for parameter: " + param.Name, ex);
 			}
 		}
-		bool isOPMode = false;
 
         private void GetParamValue_Do(DeviceParameterData param, Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
 		{
@@ -158,6 +166,9 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 				string cmd = ea_ParamData.Cmd;
 				cmd = ea_ParamData.Cmd + "?";
+
+				LoggerService.Inforamtion(this, "Getting \"" + ea_ParamData.Name + "\" - cmd: " + cmd);
+
 				_serial_port.Send(cmd);
 
 				string buffer = Read();
