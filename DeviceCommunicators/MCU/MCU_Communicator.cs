@@ -5,6 +5,7 @@ using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceCommunicators.Models;
 using Entities.Models;
+using Newtonsoft.Json.Linq;
 using Services.Services;
 using System;
 using System.Collections.Concurrent;
@@ -360,14 +361,14 @@ namespace DeviceCommunicators.MCU
 		{
 			int? value = null;
 			errDescription = null;
-
+			double dvalue = 0;
 
 			try
 			{
 
 				int isSuccess = IsErr(readBuffer, paramId);
 
-
+				
 				if (isSuccess == 0)
 				{
 					value = readBuffer[4] << 24 | readBuffer[5] << 16 | readBuffer[6] << 8 | readBuffer[7];
@@ -376,16 +377,16 @@ namespace DeviceCommunicators.MCU
 
 					value *= is_negative;
 
-					double dvalue = (double)value / mcuParam.Scale;
+					dvalue = (double)value / mcuParam.Scale;
+					
+					//if (dvalue == 0 &&
+					//	mcuParam.Value is double prevValue &&
+					//	prevValue != 0)
+					//{
+					//	LoggerService.Inforamtion(this, "Value = 0 for " + mcuParam.Name);
+					//}
 
-					if (dvalue == 0 &&
-						mcuParam.Value is double prevValue &&
-						prevValue != 0)
-					{
-						LoggerService.Inforamtion(this, "Value = 0 for " + mcuParam.Name);
-					}
-
-					mcuParam.Value = dvalue;
+					
 
 				}
 				else
@@ -415,19 +416,17 @@ namespace DeviceCommunicators.MCU
 				}
 			}
 
-			//if (mcuParam.Name != null && mcuParam.Name.Contains("LSB"))
-			//	mcuParam.Value = 0;
 			if (mcuParam.DropDown != null && mcuParam.DropDown.Count > 0)
 			{
 
 				DropDownParamData dd =
-					mcuParam.DropDown.Find((i) => i.Value == mcuParam.Value.ToString());
+					mcuParam.DropDown.Find((i) => i.Value == dvalue.ToString());
 				if (dd != null) 
 				{
 					mcuParam.Value = dd.Name;
 				}
 			}
-
+			else mcuParam.Value = dvalue;
 
 			return CommunicatorResultEnum.OK;
 
