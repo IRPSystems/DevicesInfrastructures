@@ -25,6 +25,8 @@ namespace DeviceHandler.ViewModels
 		public List<string> CommTypesList { get; set; }
 		public string SelectedCommType { get; set; }
 
+		public bool IsEnabled { get; set; }
+
 		public bool IsConnectButtonEnabled 
 		{
 			get => _isConnectButtonEnabled;
@@ -69,6 +71,7 @@ namespace DeviceHandler.ViewModels
 			int port, string address,
 			string selectedCommType)
 		{
+			IsEnabled = true;
 
 			ComType_SelectionChangedCommand = new RelayCommand<SelectionChangedEventArgs>(ComType_SelectionChanged);
 

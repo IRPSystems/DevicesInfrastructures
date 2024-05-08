@@ -4,7 +4,11 @@ using DeviceCommunicators.General;
 using DeviceCommunicators.Models;
 using Services.Services;
 using System;
+using System.Buffers;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 using System.Windows;
@@ -71,6 +75,75 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 			InitBase();
 		}
+
+		public List<string> FindEaIPs()
+		{
+
+			DateTime start = DateTime.Now;
+
+			List<string> ipsList = new List<string>();
+
+
+			using (Ping pinger = new Ping())
+			{
+				for (int i = 10; i <= 50; i++)
+				{
+					//if (i == 33)
+					//	continue;
+
+					//if (i == 31) { }
+
+					string ip = "192.168.10." + i;
+					PingReply reply = pinger.Send(ip, 50);
+					if(reply.Status == IPStatus.Success)
+					{
+						bool isEa = InitComm(ip);
+						if (isEa)
+							ipsList.Add(ip);
+
+						CommService.MessageReceivedEvent -= _modbusTCPSevice_MessageReceivedEvent;
+						CommService.ErrorEvent -= _modbusTCPSevice_ErrorEvent;
+						CommService.Dispose();
+						CommService = null;
+
+					}
+				}
+			}
+
+			TimeSpan diff = DateTime.Now - start;
+			return ipsList;
+		}
+
+		private bool InitComm(string address)
+		{
+			CommService = new ModbusTCPSevice(address, 502, 1);
+			CommService.Init(true);
+
+			if (CommService.IsInitialized)
+			{
+				PowerSupplayEA_ParamData eaParam = new PowerSupplayEA_ParamData()
+				{
+					Name = "Max Voltage",
+					Cmd = "SYSTem:NOMinal:VOLTage",
+					ModbusAddress = 121,
+					NumOfRegisters = 2,
+				};
+
+				CommunicatorIOData data = new CommunicatorIOData()
+				{
+					Parameter = eaParam,
+				};
+
+				CommService.MessageReceivedEvent += _modbusTCPSevice_MessageReceivedEvent;
+				CommService.ErrorEvent += _modbusTCPSevice_ErrorEvent;
+
+				bool isOk = Get(data);
+				return isOk;
+			}
+
+			return false;
+		}
+
 
 		public override void Dispose()
 		{
@@ -233,12 +306,12 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		#region Get
 
-		private void Get(CommunicatorIOData data)
+		private bool Get(CommunicatorIOData data)
 		{
 			try
 			{
 				if (!(data.Parameter is PowerSupplayEA_ParamData eaParam))
-					return;
+					return false;
 
 				if (eaParam.Cmd == "*IDN")
 				{
@@ -247,7 +320,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 						data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
 					else
 						data.Callback(data.Parameter, CommunicatorResultEnum.Error, _error);
-					return;
+					return false;
 				}
 
 				if (eaParam.Cmd == "SYST:ERR" ||
@@ -258,10 +331,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 				{
 					GetState(eaParam);
 					data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
-					return;
+					return false;
 				}
-
-				if(eaParam.Cmd == "SYSTem:NOMinal:VOLTage") { }
 
 				_data = null;
 				_error = null;
@@ -285,6 +356,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 						else
 							data.Callback(data.Parameter, CommunicatorResultEnum.NoResponse, _error);
 					}
+
+					return false;
 				}
 				else
 				{
@@ -292,12 +365,16 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 					if (data.Callback != null)
 						data.Callback(data.Parameter, CommunicatorResultEnum.OK, null);
+
+					return true;
 				}
 			}
 			catch(Exception ex) 
 			{
 				LoggerService.Error(this, "Failed to get value", ex);
 				data.Callback(data.Parameter, CommunicatorResultEnum.Error, "Exception");
+
+				return false;
 			}
 		}
 
