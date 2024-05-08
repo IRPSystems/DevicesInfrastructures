@@ -425,6 +425,7 @@ namespace DeviceCommunicators.MCU
 				{
 					mcuParam.Value = dd.Name;
 				}
+				else mcuParam.Value = dvalue;
 			}
 			else mcuParam.Value = dvalue;
 
