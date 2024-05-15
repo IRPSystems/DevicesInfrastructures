@@ -181,7 +181,7 @@ namespace DeviceCommunicators.General
 							CommunicatorResultEnum result = CommunicatorResultEnum.None;
 							lock (_lockObject)
 								result = HandleRequests(data);
-							if (result == CommunicatorResultEnum.NoResponse &&
+							if (/*result == CommunicatorResultEnum.NoResponse &&*/
 								parameterQueue.Count >= 100)
 							{
 								while (parameterQueue.Count > 50)
