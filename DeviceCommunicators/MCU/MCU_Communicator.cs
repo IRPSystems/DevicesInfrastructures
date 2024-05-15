@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.IO;
 #endif
 using System.Linq;
+using System.Text;
 using System.Timers;
 
 namespace DeviceCommunicators.MCU
@@ -193,6 +194,16 @@ namespace DeviceCommunicators.MCU
 
 				byte[] buffer = _buffersPool.Take(_cancellationToken);
 				ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
+
+				//if (mcuParam.Name == "MTPA Vector Angle" ||
+				//		mcuParam.Name == "MTPA Vector Amplitude")
+				//{
+				//	StringBuilder sb = new StringBuilder();
+				//	sb.Append("Send " + mcuParam.Name + ": ");
+				//	foreach (byte b in buffer) sb.Append(b);
+				//	LoggerService.Inforamtion(this, sb.ToString());
+				//}
+
 				CommService.Send(buffer);
 
 
@@ -223,7 +234,7 @@ namespace DeviceCommunicators.MCU
 						out errorDescription,
 						data.IsSet,
 						id,
-						mcuParam.Value);
+						data.Value);
 
 				}
 				catch (Exception ex)
@@ -371,6 +382,15 @@ namespace DeviceCommunicators.MCU
 				
 				if (isSuccess == 0)
 				{
+					//if(mcuParam.Name == "MTPA Vector Angle" ||
+					//	mcuParam.Name == "MTPA Vector Amplitude")
+					//{
+					//	StringBuilder sb = new StringBuilder();
+					//	sb.Append("Ack " + mcuParam.Name + ": ");
+					//	foreach (byte b in readBuffer) sb.Append(b);
+					//	LoggerService.Inforamtion(this, sb.ToString());
+					//}
+
 					value = readBuffer[4] << 24 | readBuffer[5] << 16 | readBuffer[6] << 8 | readBuffer[7];
 
 					var is_negative = ((readBuffer[3] & _negativeMask) >> _negativeShift == 0x01) ? -1 : 1;
@@ -411,7 +431,7 @@ namespace DeviceCommunicators.MCU
 				if (isSet && value != (int?)dsetValue)
 				{
 					LoggerService.Error(this,
-						mcuParam.Name + ": ValueNotSet: Original=" + value + "; Ack=" + dsetValue);
+						mcuParam.Name + ": ValueNotSet: Original=" + dsetValue + "; Ack=" + value);
 					return CommunicatorResultEnum.ValueNotSet;
 				}
 			}
