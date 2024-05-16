@@ -250,7 +250,7 @@ namespace DeviceHandler.ParamGetSetList
 		#region MCUParam
 
 		public static readonly DependencyProperty MCUParamProperty = DependencyProperty.Register(
-			"Param", typeof(DeviceParameterData), typeof(SingleParameterView));
+			"ParamData", typeof(DeviceParameterData), typeof(SingleParameterView));
 
 		public DeviceParameterData ParamData
 		{
