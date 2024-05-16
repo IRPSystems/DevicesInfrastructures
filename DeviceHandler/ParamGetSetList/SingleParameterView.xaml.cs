@@ -2,6 +2,7 @@
 using Controls.Views;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
+using Entities.Models;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -249,11 +250,11 @@ namespace DeviceHandler.ParamGetSetList
 		#region MCUParam
 
 		public static readonly DependencyProperty MCUParamProperty = DependencyProperty.Register(
-			"MCUParam", typeof(MCU_ParamData), typeof(SingleParameterView));
+			"Param", typeof(DeviceParameterData), typeof(SingleParameterView));
 
-		public MCU_ParamData MCUParam
+		public DeviceParameterData ParamData
 		{
-			get => (MCU_ParamData)GetValue(MCUParamProperty);
+			get => (DeviceParameterData)GetValue(MCUParamProperty);
 			set
 			{
 				SetValue(MCUParamProperty, value);
@@ -307,12 +308,14 @@ namespace DeviceHandler.ParamGetSetList
 		private void ParamChanged()
 		{
 
-			if(string.IsNullOrEmpty(MCUParam.Units) == false) 
+			if(string.IsNullOrEmpty(ParamData.Units) == false) 
 			{
-				ActualUnits = "[" + MCUParam.Units + "]";
+				ActualUnits = "[" + ParamData.Units + "]";
 			}
 
-			if (MCUParam.Save)
+			MCU_ParamData mcuParam = ParamData as MCU_ParamData;
+
+			if (mcuParam != null && mcuParam.Save)
 				SaveVisibility = SaveVisibility;
 			else
 				SaveVisibility = Visibility.Collapsed;
@@ -322,9 +325,11 @@ namespace DeviceHandler.ParamGetSetList
 			RegularTextBoxVisibility = Visibility.Collapsed;
 			CombotBoxVisibility = Visibility.Collapsed;
 			CombotTextBoxVisibility = Visibility.Collapsed;
-			if (string.IsNullOrEmpty(MCUParam.Format) == false)
+
+			if (mcuParam != null && string.IsNullOrEmpty(mcuParam.Format) == false)
 				HexTextBoxVisibility = Visibility.Visible;
-			else if (MCUParam.DropDown != null && MCUParam.DropDown.Count != 0)
+
+			else if (ParamData is IParamWithDropDown withDropDown && withDropDown.DropDown != null && withDropDown.DropDown.Count != 0)
 			{
 				if (ButtonsVisibility == Visibility.Visible)
 				{
@@ -362,7 +367,7 @@ namespace DeviceHandler.ParamGetSetList
 
 		private void _hexTextBoxView_EnterEvent(object sender, EventArgs e)
 		{
-			HexTextBox_EnterEvent?.Invoke(MCUParam);
+			HexTextBox_EnterEvent?.Invoke(ParamData);
 		}
 
 		private void _hexTextBoxView_HexKeyDownEvent(object sender, KeyEventArgs e)

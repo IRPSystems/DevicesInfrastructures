@@ -30,7 +30,7 @@
             <ColumnDefinition Width="5" />
             <ColumnDefinition Width="150" />
             <ColumnDefinition Width="5" />
-            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="125" />
         </Grid.ColumnDefinitions>
 
         <TextBlock Grid.Column="0" 
