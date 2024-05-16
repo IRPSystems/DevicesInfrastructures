@@ -493,28 +493,41 @@ namespace DeviceHandler.ViewModels
 		private void MoveGroupOfParam(
 			RecordData droppedOnParam)
 		{
-			List<RecordData> list = new List<RecordData>();
-			foreach (var item in _selectedItemsList)
-				list.Add(item as RecordData);
+			if(_selectedItemsList == null)
+			{
+				return;
+			}
 
-			List<DeviceParameterData> parametersList = ParametersList.ToList();
-			List<RecordData> parametersList_WithIndex = ParametersList_WithIndex.ToList();
-			_selectedParamsList_Move.MoveByDragAndDrop(
-				parametersList,
-				parametersList_WithIndex,
-				list,
-				droppedOnParam);
+			try
+			{
+
+				List<RecordData> list = new List<RecordData>();
+				foreach (var item in _selectedItemsList)
+					list.Add(item as RecordData);
+
+				List<DeviceParameterData> parametersList = ParametersList.ToList();
+				List<RecordData> parametersList_WithIndex = ParametersList_WithIndex.ToList();
+				_selectedParamsList_Move.MoveByDragAndDrop(
+					parametersList,
+					parametersList_WithIndex,
+					list,
+					droppedOnParam);
 
 
-			ParametersList =
-				new ObservableCollection<DeviceParameterData>(parametersList);
-			ParametersList_WithIndex =
-				new ObservableCollection<RecordData>(parametersList_WithIndex);
+				ParametersList =
+					new ObservableCollection<DeviceParameterData>(parametersList);
+				ParametersList_WithIndex =
+					new ObservableCollection<RecordData>(parametersList_WithIndex);
 
 
-			SetIndeces();
+				SetIndeces();
 
-			SendRECORD_LIST_CHANGEDMessage();
+				SendRECORD_LIST_CHANGEDMessage();
+			}
+			catch (Exception ex) 
+			{
+				LoggerService.Error(this, "Failed to drop item", "Error", ex);
+			}
 		}
 
 		
