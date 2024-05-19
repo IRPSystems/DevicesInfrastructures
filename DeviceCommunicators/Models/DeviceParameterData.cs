@@ -40,6 +40,8 @@ namespace DeviceCommunicators.Models
 			}
 		}
 
+		public virtual object EditValue { get; set; }
+
 
 		[JsonIgnore]
 		public DeviceData Device { get; set; }
@@ -50,6 +52,8 @@ namespace DeviceCommunicators.Models
 		public bool IsExpanded { get; set; }
 		[JsonIgnore]
 		public bool IsEnabled { get; set; }
+		[JsonIgnore]
+		public bool IsEditing { get; set; }
 		[JsonIgnore]
 		public bool IsSelected { get; set; }
 		[JsonIgnore]
