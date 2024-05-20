@@ -114,6 +114,8 @@ namespace DeviceHandler.ViewModels
 			AdaptersList = new ObservableCollection<string>()
 			{
 				"PCAN",
+				"Ixxat",
+				"Sloki",
 				"UDP Simulator",
 			};
 		}

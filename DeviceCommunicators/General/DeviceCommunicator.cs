@@ -78,13 +78,15 @@ namespace DeviceCommunicators.General
 
 		public virtual void Dispose()
 		{
-			if (CommService != null)
-			{
-				CommService.Dispose();
-			}
+			
 
 			if (_cancellationTokenSource != null)
 				_cancellationTokenSource.Cancel();
+
+			System.Threading.Thread.Sleep(100);
+
+			if (CommService != null)
+				CommService.Dispose();
 
 			if (_parameterQueue_Get != null)
 			{
