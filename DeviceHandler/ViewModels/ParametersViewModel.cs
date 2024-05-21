@@ -292,7 +292,7 @@ namespace DeviceHandler.ViewModel
 		}
 
 
-		private void BuildDevicesList()
+		public void BuildDevicesList()
 		{
 			DevicesList = new ObservableCollection<DeviceData>();
 
