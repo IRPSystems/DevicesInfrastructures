@@ -174,6 +174,9 @@ namespace DeviceHandler.ViewModel
 				DeviceParameterData actualParam = null;
 				if (param.DeviceType != DeviceTypesEnum.EVVA)
 				{
+					if (_devicesContainer.TypeToDevicesFullData.ContainsKey(param.DeviceType) == false)
+						return;
+
 					DeviceFullData deviceFullData = _devicesContainer.TypeToDevicesFullData[param.DeviceType];
 					if (deviceFullData == null)
 						return;					
