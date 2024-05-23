@@ -404,7 +404,7 @@ namespace DeviceCommunicators.MCU
 				return CommunicatorResultEnum.Error;
 			}
 
-
+			// Make sure the ack value is like the set value
 			if (setValue is double dSetValue)
 			{
 				int dsetValue = (int)Math.Round(dSetValue * mcuParam.Scale);
@@ -416,6 +416,7 @@ namespace DeviceCommunicators.MCU
 				}
 			}
 
+			// If this is a drop down parameter, set the value to the item Name
 			if (mcuParam.DropDown != null && mcuParam.DropDown.Count > 0)
 			{
 
@@ -427,7 +428,12 @@ namespace DeviceCommunicators.MCU
 				}
 				else mcuParam.Value = dvalue;
 			}
-			else mcuParam.Value = dvalue;
+			else if(string.IsNullOrEmpty(mcuParam.Format) == false)
+			{
+				mcuParam.Value = GetFormatedValuesService.GetString(mcuParam.Format, dvalue);
+			}
+			else 
+				mcuParam.Value = dvalue;
 
 			return CommunicatorResultEnum.OK;
 
