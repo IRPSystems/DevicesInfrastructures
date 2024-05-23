@@ -19,7 +19,7 @@ namespace DeviceCommunicators.Models
 		{
 			get
 			{
-				if (IsAbsolute)
+				if (IsAbsolute && _value != null)
 				{
 					double d;
 					bool res = double.TryParse(_value.ToString(), out d);
