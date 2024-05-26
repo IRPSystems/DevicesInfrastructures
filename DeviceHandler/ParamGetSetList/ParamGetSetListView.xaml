@@ -24,7 +24,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
-                        <local:SingleParameterView MCUParam="{Binding}" 
+                        <local:SingleParameterView ParamData="{Binding}" 
                                                    HelpToolVisibility="{Binding DataContext.HelpToolVisibility,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"                                               
                                                    ButtonsVisibility="{Binding DataContext.ButtonsVisibility,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"                                             
                                                    SaveVisibility="{Binding DataContext.SaveVisibility,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"

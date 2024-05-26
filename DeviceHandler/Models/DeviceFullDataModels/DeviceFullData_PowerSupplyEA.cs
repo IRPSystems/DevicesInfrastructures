@@ -1,4 +1,5 @@
 ﻿
+using Communication.Services;
 using DeviceCommunicators.Dyno;
 using DeviceCommunicators.General;
 using DeviceCommunicators.MCU;
@@ -8,7 +9,12 @@ using DeviceHandler.Interfaces;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
@@ -63,7 +69,11 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 			_eapsCommunicator = new PowerSupplayEA_Communicator();
 			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp();
+
+			
 		}
+
+		
 
 		protected override void ConstructConnectionViewModel()
 		{
@@ -73,6 +83,9 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 			_eapsCommunicator = new PowerSupplayEA_Communicator();
 			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp();
+
+			(ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.EASearchIPEvent +=
+				TcpConncetVM_EASearchIPEvent;
 		}
 
 		protected override void ConstructCheckConnection()
@@ -124,6 +137,49 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				return true;
 
 			return serialConncet.SerialConncetVM.IsUdpSimulation;
+		}
+
+		private void TcpConncetVM_EASearchIPEvent()
+		{
+			Task task = Task.Run(() =>
+			{
+				EASearchIP();
+			});
+
+		}
+
+		private void EASearchIP()
+		{ 
+			if (!(DeviceCommunicator is PowerSupplayEA_ModbusTcp eaCommunicator))
+				return;
+
+			if (!(ConnectionViewModel is SerialAndTCPViewModel serialTcpConncet))
+				return;
+
+			Application.Current.Dispatcher.Invoke(() =>
+			{
+				serialTcpConncet.TcpConncetVM.SearchNoticeVisibility =
+					System.Windows.Visibility.Visible;
+				serialTcpConncet.IsEnabled = false;
+			});
+
+			List<string> ipsList = eaCommunicator.FindEaIPs();
+
+
+
+
+			Application.Current.Dispatcher.Invoke(() =>
+			{
+				serialTcpConncet.TcpConncetVM.EAIPsList =
+				new ObservableCollection<string>(ipsList);
+				serialTcpConncet.TcpConncetVM.Address = ipsList[0];
+
+				serialTcpConncet.TcpConncetVM.SearchNoticeVisibility =
+					System.Windows.Visibility.Collapsed;
+				serialTcpConncet.IsEnabled = true;
+			});
+
+			InitCheckConnection();
 		}
 	}
 }

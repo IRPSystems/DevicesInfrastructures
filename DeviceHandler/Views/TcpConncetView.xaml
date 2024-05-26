@@ -25,10 +25,70 @@
             <TextBox Text="{Binding Port}" Margin="0,0,10,0" Width="75" VerticalAlignment="Center"/>
 
             <TextBlock Text="Address" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBox Text="{Binding Address}" Margin="0,0,10,0" Width="90" VerticalAlignment="Center"/>
-            
+            <TextBox Text="{Binding Address}" Margin="0,0,10,0" Width="90" VerticalAlignment="Center"
+                     Visibility="{Binding AddressTBVisibility}"/>
+            <ComboBox ItemsSource="{Binding EAIPsList}" SelectedItem="{Binding Address}" Margin="0,0,10,0"
+                      Visibility="{Binding AddressCBVisibility}" 
+                      Width="120"/>
+            <Button Content="Search IP" Command="{Binding EASearchIPCommand}" Margin="0,0,10,0"
+                      Visibility="{Binding AddressCBVisibility}" />
+
+            <Border Name="bd" Grid.Column="4"
+                    Background="{DynamicResource MahApps.Brushes.Gray6}" 
+                    BorderBrush="{DynamicResource MahApps.Brushes.Gray1}" 
+                    BorderThickness="1"
+                    Visibility="{Binding SearchNoticeVisibility}"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,10,0"
+                    Padding="1">
+
+
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="1"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Name="tb"
+                               Text="Searching..." 
+                               Foreground="White"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" 
+                               FontWeight="DemiBold"
+                               TextWrapping="Wrap"/>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" >
+                        <StackPanel.Triggers>
+                            <EventTrigger RoutedEvent="Rectangle.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard Name="waitingAnimation" RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetName="Dot1" BeginTime="0:0:0.1" Storyboard.TargetProperty="Opacity" From=".1" To="1" AutoReverse="True" Duration="0:0:0.4"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot2" BeginTime="0:0:0.2" Storyboard.TargetProperty="Opacity" From=".1" To="1" AutoReverse="True" Duration="0:0:0.4"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot3" BeginTime="0:0:0.3" Storyboard.TargetProperty="Opacity" From=".1" To="1" AutoReverse="True" Duration="0:0:0.4"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot4" BeginTime="0:0:0.4" Storyboard.TargetProperty="Opacity" From=".1" To="1" AutoReverse="True" Duration="0:0:0.4"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot5" BeginTime="0:0:0.5" Storyboard.TargetProperty="Opacity" From=".1" To="1" AutoReverse="True" Duration="0:0:0.4"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot6" BeginTime="0:0:0.6" Storyboard.TargetProperty="Opacity" From=".1" To="1" AutoReverse="True" Duration="0:0:0.4"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </StackPanel.Triggers>
+                        <Ellipse Name="Dot1" Fill="White" Opacity=".1" Width="8" Height="8"/>
+                        <Ellipse Name="Dot2" Fill="White" Opacity=".1" Width="8" Height="8" Margin="2,0,0,0"/>
+                        <Ellipse Name="Dot3" Fill="White" Opacity=".1" Width="8" Height="8" Margin="2,0,0,0"/>
+                        <Ellipse Name="Dot4" Fill="White" Opacity=".1" Width="8" Height="8" Margin="2,0,0,0"/>
+                        <Ellipse Name="Dot5" Fill="White" Opacity=".1" Width="8" Height="8" Margin="2,0,0,0"/>
+                        <Ellipse Name="Dot6" Fill="White" Opacity=".1" Width="8" Height="8" Margin="2,0,0,0"/>
+                    </StackPanel>
+
+                </Grid>
+
+            </Border>
+
             <CheckBox Content="Is UDP simulation" IsChecked="{Binding IsUdpSimulation,Mode=TwoWay}" Margin="0,0,50,0"
                       Command="{Binding IsUdpSimulationClickCommand}"/>
+
+            
 
         </StackPanel>
 

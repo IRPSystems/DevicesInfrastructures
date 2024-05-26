@@ -65,6 +65,29 @@ namespace DeviceCommunicators.MCU
 			}
 		}
 
+		private object _editValue;
+		public override object EditValue
+		{
+			get => _editValue;
+			set
+			{
+				if (_editValue != value)
+					ValueChanged?.Invoke();
+
+				_editValue = value;
+				if (_isSettingSelectedDropDown)
+					return;
+
+				_isSettingValue = true;
+				if (DropDown != null)
+				{
+					SelectedDropDown = DropDown.Find((dd) => dd.Name == (_editValue as string));
+				}
+				_isSettingValue = false;
+
+			}
+		}
+
 		public string GroupName { get; set; }
 
 		/// <summary>
@@ -121,9 +144,12 @@ namespace DeviceCommunicators.MCU
 		/// </summary>
 		public List<DropDownParamData> DropDown { get; set; }
 
-		private DropDownParamData _selectedDropDown;
+
+
 
 		private bool _isSettingSelectedDropDown;
+
+		private DropDownParamData _selectedDropDown;
 		[JsonIgnore]
 		public DropDownParamData SelectedDropDown 
 		{
@@ -141,6 +167,29 @@ namespace DeviceCommunicators.MCU
 				int nVal;
 				bool res = int.TryParse(_selectedDropDown.Value, out nVal);
 				Value = nVal;
+				_isSettingSelectedDropDown = false;
+			}
+		}
+
+
+		private DropDownParamData _editSelectedDropDown;
+		[JsonIgnore]
+		public DropDownParamData EditSelectedDropDown
+		{
+			get => _editSelectedDropDown;
+			set
+			{
+				_editSelectedDropDown = value;
+				if (_isSettingValue)
+					return;
+
+				if (_editSelectedDropDown == null)
+					return;
+
+				_isSettingSelectedDropDown = true;
+				int nVal;
+				bool res = int.TryParse(_editSelectedDropDown.Value, out nVal);
+				EditValue = nVal;
 				_isSettingSelectedDropDown = false;
 			}
 		}

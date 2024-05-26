@@ -223,7 +223,7 @@ namespace DeviceHandler.ParamGetSetList
 				param.IsEnabled = isEnabled;
 		}
 
-		public void SetBackForeGround(
+		public static void SetBackForeGround(
 			Brush background,
 			Brush foreground,
 			DeviceParameterData param)

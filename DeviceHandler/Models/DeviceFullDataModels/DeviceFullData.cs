@@ -5,11 +5,13 @@ using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
 using DeviceHandler.Interfaces;
 using DeviceHandler.Services;
+using DeviceHandler.ViewModels;
 using Entities.Enums;
 using Newtonsoft.Json;
 using Services.Services;
 using System;
 using System.IO;
+using System.Windows;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
@@ -148,6 +150,16 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
             if (!DeviceCommunicator.IsInitialized)
             {
+                if(Device.DeviceType == DeviceTypesEnum.PowerSupplyEA) 
+                { 
+                    if(ConnectionViewModel is SerialAndTCPViewModel serialTcpConncet)
+                    {
+						serialTcpConncet.TcpConncetVM.AddressTBVisibility = System.Windows.Visibility.Collapsed;
+						serialTcpConncet.TcpConncetVM.AddressCBVisibility = System.Windows.Visibility.Visible;
+						serialTcpConncet.TcpConncetVM.SearchNoticeVisibility = Visibility.Collapsed;
+					}
+                }
+
                 Disconnect();
                 return;
             }
