@@ -119,11 +119,11 @@ namespace DeviceCommunicators.Dyno
 
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, hwId, 0x580 + _nodeId, 0x600 + _nodeId);
+				CommService = new CanPCanService(baudrate, hwId, 0x580 + _nodeId);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
-				CommService = new CanUdpSimulationService(baudrate, 0x580 + _nodeId, 0x600 + _nodeId, rxPort, txPort, address);
+				CommService = new CanUdpSimulationService(baudrate, 0x580 + _nodeId, rxPort, txPort, address);
 			}
 
 			CommService.Init(false);

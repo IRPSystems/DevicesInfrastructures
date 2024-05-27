@@ -100,21 +100,6 @@ namespace DeviceHandler.Services
 			}
 
 			repositoryParam.Counter++;
-
-			if(_mcuCommunicator.CanService.ToFilterID < dbcParam.ParentMessage.ID)
-			{
-				_mcuCommunicator.CanService.SetFilter(
-					_mcuCommunicator.CanService.FromFilterID,
-					dbcParam.ParentMessage.ID);
-			}
-			else if (_mcuCommunicator.CanService.FromFilterID > dbcParam.ParentMessage.ID)
-			{
-				_mcuCommunicator.CanService.SetFilter(
-					dbcParam.ParentMessage.ID,
-					_mcuCommunicator.CanService.ToFilterID);
-			}
-
-			_mcuCommunicator.CanService.AddAsyncID(dbcParam.ParentMessage.ID);
 		}
 
 		public override void Remove(
@@ -156,7 +141,7 @@ namespace DeviceHandler.Services
 					new KeyValuePair<string, RepositoryParam>(parameter.Name, repositoryParam));
 			}
 
-			_mcuCommunicator.CanService.AddAsyncID(dbcParam.ParentMessage.ID);
+			
 		}
 
 		#endregion Add/Remove

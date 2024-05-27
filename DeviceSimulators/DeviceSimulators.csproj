@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Infrastructure\Communication\Communication.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Entities\Entities.csproj" />
+	<ProjectReference Include="..\..\Infrastructure\J2534DotNet\J2534DotNet.csproj" />
     <ProjectReference Include="..\DeviceHandler\DeviceHandler.csproj" />
   </ItemGroup>
 

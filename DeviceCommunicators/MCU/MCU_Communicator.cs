@@ -109,15 +109,15 @@ namespace DeviceCommunicators.MCU
 
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, hwId, syncID, 0x1FFFFFFF);
+				CommService = new CanPCanService(baudrate, hwId, syncID);
 			}
 			else if (canAdapterType == "Sloki")
 			{
-				CommService = new CanSlokiService(baudrate, syncID, 0x1FFFFFFF);
+				CommService = new CanSlokiService(baudrate, syncID);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
-				CommService = new CanUdpSimulationService(baudrate, syncID, asyncID, rxPort, txPort, address);
+				CommService = new CanUdpSimulationService(baudrate, syncID, rxPort, txPort, address);
 			}
 
 
