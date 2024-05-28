@@ -183,9 +183,12 @@ namespace DeviceCommunicators.General
 							CommunicatorResultEnum result = CommunicatorResultEnum.None;
 							lock (_lockObject)
 								result = HandleRequests(data);
+
+							LoggerService.Inforamtion(this, $"Queue={parameterQueue.Count}");
 							if (result == CommunicatorResultEnum.NoResponse &&
 								parameterQueue.Count >= 100)
 							{
+								LoggerService.Inforamtion(this, $"Clearing the queue={parameterQueue.Count}");
 								while (parameterQueue.Count > 50)
 								{
 									CommunicatorIOData item;

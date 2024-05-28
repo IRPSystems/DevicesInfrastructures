@@ -1,4 +1,5 @@
 ﻿
+using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceCommunicators.Models;
@@ -15,7 +16,11 @@ using System.Timers;
 
 namespace DeviceHandler.Services
 {
-	public class ParametersRepositoryService
+	/// <summary>
+	/// ParametersRepositoryService is a class that holds a list of parameters and 
+	/// get their values preiodically.
+	/// </summary>
+	public class ParametersRepositoryService: ObservableObject
 	{
 		#region Properties
 
@@ -24,6 +29,9 @@ namespace DeviceHandler.Services
 			get => _communicator.IsInitialized;
 		}
 
+		/// <summary>
+		/// Thre required acquisition rate
+		/// </summary>
 		public int AcquisitionRate 
 		{
 			get => _acquisitionRate;
@@ -38,6 +46,11 @@ namespace DeviceHandler.Services
 				}
 			}
 		}
+
+		/// <summary>
+		/// Thre actual acquisition rate
+		/// </summary>
+		public int ActualAcquisitionRate { get; set; }
 
 		#endregion Properties
 
@@ -61,6 +74,8 @@ namespace DeviceHandler.Services
 
 		public string Name;
 
+		//private List<string> _parametersValuesList;
+
 		#endregion Fields
 
 		#region Constructor
@@ -73,11 +88,7 @@ namespace DeviceHandler.Services
 			_nameToRepositoryParamList = new ConcurrentDictionary<string, RepositoryParam>();
 
 			AcquisitionRate = 1;
-
-
-			//_cancellationTokenSource = new CancellationTokenSource();
-			//_cancellationToken = _cancellationTokenSource.Token;
-			//_waitGetCallback = new ManualResetEvent(false);
+			//_parametersValuesList = new List<string>();
 
 			_isGetMedium = false;
 			_lowGetCounter = 0;
@@ -190,52 +201,51 @@ namespace DeviceHandler.Services
 
 		private void CommunicationTimerElapsed(object sender, ElapsedEventArgs e)
 		{
-			GetParams(RepositoryPriorityEnum.High);
 
-			if (_isDisposed)
-				return;
-
-			GetParams(RepositoryPriorityEnum.Medium);
-			
-			if (_isDisposed)
-				return;
-
-			GetParams(RepositoryPriorityEnum.Low);
-			
-		}
-
-		private object _lockObj = new object();
-		private void GetParams(RepositoryPriorityEnum priority)
-		{
 			if (_nameToRepositoryParamList == null)
 				return;
 
-			lock (_lockObj)
+			_communicationTimer.Stop();
+
+			DateTime start = DateTime.Now;
+
+			foreach (RepositoryParam param in _nameToRepositoryParamList.Values)
 			{
-				List<RepositoryParam> repositoryParamsList =
-					_nameToRepositoryParamList.Values.Where((rp) => rp.Priority == priority).ToList();
-				foreach (RepositoryParam param in repositoryParamsList)
+
+				if (_isDisposed)
+					return;
+
+				if (param.Parameter.DeviceType == Entities.Enums.DeviceTypesEnum.DBC)
+					continue;
+
+				if (param.Parameter is ICalculatedParamete calculated)
 				{
-
-					if (_isDisposed)
-						return;
-
-					if (param.Parameter.DeviceType == Entities.Enums.DeviceTypesEnum.DBC)
-						continue;
-
-					if(param.Parameter is ICalculatedParamete calculated)
-					{
-						calculated.Calculate();
-						continue;
-					}
-
-					param.IsReceived = CommunicatorResultEnum.None;
-					_communicator.GetParamValue(param.Parameter, GetValueCallback);
-
-					System.Threading.Thread.Sleep(1);
-
+					calculated.Calculate();
+					continue;
 				}
+
+				param.IsReceived = CommunicatorResultEnum.None;
+				_communicator.GetParamValue(param.Parameter, GetValueCallback);
+
+				System.Threading.Thread.Sleep(1);
+
 			}
+
+			TimeSpan diff = DateTime.Now - start;
+			if (diff.TotalMilliseconds > (1000 / AcquisitionRate))
+			{
+				int ActualAcquisitionRate = (int)(1000 / diff.TotalMilliseconds);
+				if (ActualAcquisitionRate < 1)
+					ActualAcquisitionRate = 1;
+				_communicationTimer.Interval = (int)(1000 / ActualAcquisitionRate);
+			}
+			else if (diff.TotalMilliseconds < (1000 / AcquisitionRate))
+			{
+				ActualAcquisitionRate = AcquisitionRate;
+				_communicationTimer.Interval = (int)(1000 / ActualAcquisitionRate);
+			}
+
+			_communicationTimer.Start();
 		}
 
 
@@ -270,7 +280,7 @@ namespace DeviceHandler.Services
 				param.Value = double.NaN;
 			}
 
-			//_waitGetCallback.Set();
+			//_parametersValuesList.Add($"{param.Value} {DateTime.Now.ToString("ss.fff")}");
 		}
 
 
