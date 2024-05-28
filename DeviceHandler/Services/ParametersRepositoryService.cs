@@ -6,14 +6,11 @@ using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
 using DeviceHandler.Interfaces;
 using DeviceHandler.Models;
-using Entities.Models;
 using Services.Services;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Timers;
 
 namespace DeviceHandler.Services
@@ -52,7 +49,7 @@ namespace DeviceHandler.Services
 		/// <summary>
 		/// Thre actual acquisition rate
 		/// </summary>
-		public int ActualAcquisitionRate { get; set; }
+		public double ActualAcquisitionRate { get; set; }
 
 		#endregion Properties
 
@@ -189,7 +186,7 @@ namespace DeviceHandler.Services
 		private void CommunicationTimerElapsed(object sender, ElapsedEventArgs e)
 		{
 
-			if (_nameToRepositoryParamList == null)
+			if (_nameToRepositoryParamList == null || _nameToRepositoryParamList.Count == 0)
 				return;
 
 			_communicationTimer.Stop();
@@ -217,11 +214,10 @@ namespace DeviceHandler.Services
 				System.Threading.Thread.Sleep(1);
 			}
 
+			CallbackHandling();
 
-			//AfterCircle();
 
-
-			_communicationTimer.Start();
+			//_communicationTimer.Start();
 		}
 
 
@@ -257,10 +253,20 @@ namespace DeviceHandler.Services
 			RepositoryParam lastParam =
 				_nameToRepositoryParamList.Values.ElementAt(_nameToRepositoryParamList.Values.Count - 1);
 			if (param == lastParam.Parameter)
-				AfterCircle();
+			{
+				LastCallbackHandling();
+				_communicationTimer.Start();
+			}
+
+			
 		}
 
-		protected virtual void AfterCircle()
+		protected virtual void CallbackHandling()
+		{
+
+		}
+
+		protected virtual void LastCallbackHandling()
 		{
 
 		}
