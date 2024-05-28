@@ -9,9 +9,11 @@ using DeviceHandler.Models;
 using Entities.Models;
 using Services.Services;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace DeviceHandler.Services
@@ -60,21 +62,17 @@ namespace DeviceHandler.Services
 
 		private const int _maxNumOfParams = 3000;
 
-		private ConcurrentDictionary<string, RepositoryParam> _nameToRepositoryParamList;
+		protected ConcurrentDictionary<string, RepositoryParam> _nameToRepositoryParamList;
 
-		private System.Timers.Timer _communicationTimer;
+		protected System.Timers.Timer _communicationTimer;
 
+		protected DateTime _start;
 
 		private DeviceCommunicator _communicator;
-
-		private bool _isGetMedium;
-		private int _lowGetCounter;
 
 		private bool _isDisposed;
 
 		public string Name;
-
-		//private List<string> _parametersValuesList;
 
 		#endregion Fields
 
@@ -88,18 +86,10 @@ namespace DeviceHandler.Services
 			_nameToRepositoryParamList = new ConcurrentDictionary<string, RepositoryParam>();
 
 			AcquisitionRate = 1;
-			//_parametersValuesList = new List<string>();
-
-			_isGetMedium = false;
-			_lowGetCounter = 0;
-
 
 
 			_communicationTimer = new System.Timers.Timer(1000 / AcquisitionRate);
 			_communicationTimer.Elapsed += CommunicationTimerElapsed;
-			
-
-
 
 		}
 
@@ -109,9 +99,6 @@ namespace DeviceHandler.Services
 
 		public void Init()
 		{
-			//_cancellationTokenSource = new CancellationTokenSource();
-			//_cancellationToken = _cancellationTokenSource.Token;
-
 			_isDisposed = false;
 			_communicationTimer.Start();
 
@@ -135,7 +122,7 @@ namespace DeviceHandler.Services
 			if (parameter == null)
 				return;
 
-
+			
 			RepositoryParam repositoryParam;
 
 			if (_nameToRepositoryParamList.ContainsKey(parameter.Name))
@@ -207,7 +194,7 @@ namespace DeviceHandler.Services
 
 			_communicationTimer.Stop();
 
-			DateTime start = DateTime.Now;
+			_start = DateTime.Now;
 
 			foreach (RepositoryParam param in _nameToRepositoryParamList.Values)
 			{
@@ -228,22 +215,11 @@ namespace DeviceHandler.Services
 				_communicator.GetParamValue(param.Parameter, GetValueCallback);
 
 				System.Threading.Thread.Sleep(1);
-
 			}
 
-			TimeSpan diff = DateTime.Now - start;
-			if (diff.TotalMilliseconds > (1000 / AcquisitionRate))
-			{
-				int ActualAcquisitionRate = (int)(1000 / diff.TotalMilliseconds);
-				if (ActualAcquisitionRate < 1)
-					ActualAcquisitionRate = 1;
-				_communicationTimer.Interval = (int)(1000 / ActualAcquisitionRate);
-			}
-			else if (diff.TotalMilliseconds < (1000 / AcquisitionRate))
-			{
-				ActualAcquisitionRate = AcquisitionRate;
-				_communicationTimer.Interval = (int)(1000 / ActualAcquisitionRate);
-			}
+
+			//AfterCircle();
+
 
 			_communicationTimer.Start();
 		}
@@ -256,13 +232,11 @@ namespace DeviceHandler.Services
 
 			if (_nameToRepositoryParamList == null || _nameToRepositoryParamList.Count == 0)
 			{
-			//	_waitGetCallback.Set();
 				return;
 			}
 
 			if (_nameToRepositoryParamList.ContainsKey(param.Name) == false)
 			{
-			//	_waitGetCallback.Set();
 				return;
 			}
 
@@ -275,15 +249,21 @@ namespace DeviceHandler.Services
 				repositoryParam.RaisEvent(result, resultDescription);
 			}
 
-			if(result != CommunicatorResultEnum.OK)
+			if (result != CommunicatorResultEnum.OK)
 			{
 				param.Value = double.NaN;
 			}
 
-			//_parametersValuesList.Add($"{param.Value} {DateTime.Now.ToString("ss.fff")}");
+			RepositoryParam lastParam =
+				_nameToRepositoryParamList.Values.ElementAt(_nameToRepositoryParamList.Values.Count - 1);
+			if (param == lastParam.Parameter)
+				AfterCircle();
 		}
 
+		protected virtual void AfterCircle()
+		{
 
+		}
 
 		#endregion Methods
 	}
