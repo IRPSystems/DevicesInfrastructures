@@ -173,6 +173,13 @@ namespace DeviceHandler.Services
 						new KeyValuePair<string, RepositoryParam>(parameter.Name, repositoryParam));
 					//_repositoryParamList.Remove(repositoryParam);
 				}
+
+				if (_nameToRepositoryParamList.Count == 0)
+				{
+					_communicationTimer.Start();
+					_communicationTimer.Interval = 1000 / AcquisitionRate;
+					ActualAcquisitionRate = 0;
+				}
 			}
 			catch(Exception ex) 
 			{
@@ -187,7 +194,10 @@ namespace DeviceHandler.Services
 		{
 
 			if (_nameToRepositoryParamList == null || _nameToRepositoryParamList.Count == 0)
+			{
+				ActualAcquisitionRate = 0;
 				return;
+			}
 
 			_communicationTimer.Stop();
 
