@@ -1,4 +1,4 @@
-﻿
+﻿#define _SAVE_TIME
 using DeviceCommunicators.Enums;
 using Services.Services;
 using System.Collections.Concurrent;
@@ -7,6 +7,10 @@ using System.Threading;
 using System;
 using Communication.Interfaces;
 using DeviceCommunicators.Models;
+#if _SAVE_TIME
+using System.Collections.Generic;
+using System.IO;
+#endif
 
 namespace DeviceCommunicators.General
 {
@@ -29,6 +33,10 @@ namespace DeviceCommunicators.General
 
 		protected object _lockObject;
 
+#if _SAVE_TIME
+		private List<(TimeSpan, string)> _commTimeList;
+#endif
+
 		#endregion Fields
 
 		#region Properties
@@ -49,6 +57,9 @@ namespace DeviceCommunicators.General
 
 		public DeviceCommunicator()
 		{
+#if _SAVE_TIME
+			_commTimeList = new List<(TimeSpan, string)>();
+#endif
 
 			_parameterQueue_Set = new BlockingCollection<CommunicatorIOData>();
 			_parameterQueue_Get = new BlockingCollection<CommunicatorIOData>();
@@ -105,6 +116,25 @@ namespace DeviceCommunicators.General
 					_parameterQueue_Get.TryTake(out item);
 				}
 			}
+
+#if _SAVE_TIME
+			try
+			{
+				//LoggerService.Inforamtion(this, "MCU time");
+				using (StreamWriter sw = new StreamWriter("Device param Time.txt"))
+				{
+					foreach ((TimeSpan,string) time in _commTimeList)
+					{
+						string name = string.Empty;
+						if(!string.IsNullOrEmpty(time.Item2))
+							name = time.Item2.Replace("\n", "-");
+						sw.WriteLine($"{time.Item1.TotalMilliseconds}\t\t\t{name}");
+						//LoggerService.Debug(this, time.TotalMilliseconds.ToString());
+					}
+				}
+			}
+			catch { }
+#endif
 		}
 
 
@@ -159,8 +189,7 @@ namespace DeviceCommunicators.General
 				{
 				//	lock (_lockObject)
 					{
-						DateTime startTime = DateTime.Now;
-
+						
 						CommunicatorIOData data = null;
 
 						try
@@ -180,6 +209,10 @@ namespace DeviceCommunicators.General
 							if (data == null)
 								continue;
 
+#if _SAVE_TIME
+			DateTime startTime = DateTime.Now;
+#endif
+
 							CommunicatorResultEnum result = CommunicatorResultEnum.None;
 							lock (_lockObject)
 								result = HandleRequests(data);
@@ -196,6 +229,12 @@ namespace DeviceCommunicators.General
 								}
 							}
 
+#if _SAVE_TIME
+							TimeSpan diff = (DateTime.Now - startTime);
+
+							_commTimeList.Add((diff, data.Parameter.Name));
+#endif // _SAVE_TIME
+
 						}
 						catch (Exception ex)
 						{
@@ -204,6 +243,8 @@ namespace DeviceCommunicators.General
 						}
 
 					}
+
+
 
 					System.Threading.Thread.Sleep(1);
 

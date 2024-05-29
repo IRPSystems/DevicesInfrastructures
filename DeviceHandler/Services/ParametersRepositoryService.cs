@@ -214,7 +214,7 @@ namespace DeviceHandler.Services
 
 			_communicationTimer.Stop();
 
-			_start = DateTime.Now;
+			
 
 			foreach (RepositoryParam param in _nameToRepositoryParamList.Values)
 			{
@@ -237,7 +237,7 @@ namespace DeviceHandler.Services
 				System.Threading.Thread.Sleep(1);
 			}
 
-			CallbackHandling();
+			_start = DateTime.Now;
 
 			_timeoutTimer.Start();
 
