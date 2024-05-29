@@ -62,6 +62,7 @@ namespace DeviceHandler.Services
 		protected ConcurrentDictionary<string, RepositoryParam> _nameToRepositoryParamList;
 
 		protected System.Timers.Timer _communicationTimer;
+		protected System.Timers.Timer _timeoutTimer;
 
 		protected DateTime _start;
 
@@ -87,6 +88,9 @@ namespace DeviceHandler.Services
 
 			_communicationTimer = new System.Timers.Timer(1000 / AcquisitionRate);
 			_communicationTimer.Elapsed += CommunicationTimerElapsed;
+
+			_timeoutTimer = new System.Timers.Timer(100);
+			_timeoutTimer.Elapsed += _timeoutTimer_Elapsed;
 
 		}
 
@@ -176,8 +180,8 @@ namespace DeviceHandler.Services
 
 				if (_nameToRepositoryParamList.Count == 0)
 				{
-					_communicationTimer.Start();
 					_communicationTimer.Interval = 1000 / AcquisitionRate;
+					_communicationTimer.Start();
 					ActualAcquisitionRate = 0;
 				}
 			}
@@ -189,6 +193,15 @@ namespace DeviceHandler.Services
 
 		#endregion Add/Remove
 
+		
+		private void _timeoutTimer_Elapsed(object sender, ElapsedEventArgs e)
+		{
+			_timeoutTimer.Stop();
+
+			_communicationTimer.Interval = 1000 / AcquisitionRate;
+			_communicationTimer.Start();
+			ActualAcquisitionRate = 0;
+		}
 
 		private void CommunicationTimerElapsed(object sender, ElapsedEventArgs e)
 		{
@@ -226,6 +239,7 @@ namespace DeviceHandler.Services
 
 			CallbackHandling();
 
+			_timeoutTimer.Start();
 
 			//_communicationTimer.Start();
 		}
@@ -233,6 +247,7 @@ namespace DeviceHandler.Services
 
 		private void GetValueCallback(DeviceParameterData param, CommunicatorResultEnum result, string resultDescription)
 		{
+			_timeoutTimer.Stop();
 			if (_isDisposed)
 				return;
 
