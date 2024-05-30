@@ -199,6 +199,7 @@ namespace DeviceHandler.Services
 		{
 			_timeoutTimer.Stop();
 
+			_communicationTimer.Stop();
 			_communicationTimer.Interval = 1000 / AcquisitionRate;
 			_communicationTimer.Start();
 			ActualAcquisitionRate = 0;
