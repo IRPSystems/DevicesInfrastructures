@@ -1,4 +1,4 @@
-﻿#define _SAVE_TIME
+﻿//#define _SAVE_TIME
 using DeviceCommunicators.Enums;
 using Services.Services;
 using System.Collections.Concurrent;
