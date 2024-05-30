@@ -133,7 +133,9 @@ namespace DeviceCommunicators.MCU
 
 			InitBase();
 
+#if _SAVE_TIME
 			_commTimeList.Add((new TimeSpan(), "Connect", CommunicatorResultEnum.OK));
+#endif
 		}
 
 		public override void Dispose()
@@ -276,7 +278,7 @@ namespace DeviceCommunicators.MCU
 			//		" - Time: " + diffBefore.TotalMilliseconds +
 			//		": " + diff.TotalMilliseconds);
 
-			if(mcuParam.Name == "Runtime")
+			//if(mcuParam.Name == "Runtime")
 				_commTimeList.Add((diff, mcuParam.Name, result));
 #endif // _SAVE_TIME
 
@@ -619,7 +621,7 @@ namespace DeviceCommunicators.MCU
 
 		#endregion DBC
 
-		#endregion Methods
+#endregion Methods
 
 		#region Events
 
