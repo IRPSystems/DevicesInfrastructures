@@ -47,7 +47,7 @@ namespace DeviceCommunicators.MCU
 		private uint _syncID;
 
 #if _SAVE_TIME
-		private List<(TimeSpan, string)> _commTimeList;
+		private List<(TimeSpan, string, CommunicatorResultEnum)> _commTimeList;
 #endif
 
 		#endregion Fields
@@ -73,7 +73,7 @@ namespace DeviceCommunicators.MCU
 			_poolBuildTimer.Elapsed += PoolBuildTimerElapsed;
 
 #if _SAVE_TIME
-			_commTimeList = new List<(TimeSpan, string)>();
+			_commTimeList = new List<(TimeSpan, string, CommunicatorResultEnum)>();
 #endif
 		}
 
@@ -132,6 +132,8 @@ namespace DeviceCommunicators.MCU
 			FireConnectionEvent();
 
 			InitBase();
+
+			_commTimeList.Add((new TimeSpan(), "Connect", CommunicatorResultEnum.OK));
 		}
 
 		public override void Dispose()
@@ -151,15 +153,19 @@ namespace DeviceCommunicators.MCU
 				//LoggerService.Inforamtion(this, "MCU time");
 				using (StreamWriter sw = new StreamWriter("MCU Time.txt"))
 				{
-					foreach ((TimeSpan,string) time in _commTimeList)
+					foreach ((TimeSpan, string, CommunicatorResultEnum) time in _commTimeList)
 					{
-						string name = time.Item2.Replace("\n", "-");
-						sw.WriteLine(time.Item1.TotalMilliseconds.ToString() + "\t\t\t" + name);
+						string name = string.Empty;
+						if(!string.IsNullOrEmpty(time.Item2))
+							name = time.Item2.Replace("\n", "-");
+						sw.WriteLine($"{time.Item1.TotalMilliseconds}\t\t\t{name}\t\t\t{time.Item3}");
 						//LoggerService.Debug(this, time.TotalMilliseconds.ToString());
 					}
 				}
 			}
 			catch { }
+
+			_commTimeList.Add((new TimeSpan(), "Disconnect", CommunicatorResultEnum.OK));
 #endif
 		}
 
@@ -269,7 +275,9 @@ namespace DeviceCommunicators.MCU
 			//		" - Iteration: " + i +
 			//		" - Time: " + diffBefore.TotalMilliseconds +
 			//		": " + diff.TotalMilliseconds);
-			_commTimeList.Add((diff, mcuParam.Name));
+
+			if(mcuParam.Name == "Runtime")
+				_commTimeList.Add((diff, mcuParam.Name, result));
 #endif // _SAVE_TIME
 
 			return result;
