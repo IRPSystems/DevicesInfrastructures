@@ -90,7 +90,7 @@ namespace DeviceHandler.Services
 			_communicationTimer = new System.Timers.Timer(1000 / AcquisitionRate);
 			_communicationTimer.Elapsed += CommunicationTimerElapsed;
 
-			_timeoutTimer = new System.Timers.Timer(100);
+			_timeoutTimer = new System.Timers.Timer(1000);
 			_timeoutTimer.Elapsed += _timeoutTimer_Elapsed;
 
 		}
@@ -181,6 +181,7 @@ namespace DeviceHandler.Services
 
 				if (_nameToRepositoryParamList.Count == 0)
 				{
+					LoggerService.Inforamtion(this, "The list is empty");
 					_communicationTimer.Interval = 1000 / AcquisitionRate;
 					_communicationTimer.Start();
 					ActualAcquisitionRate = 0;
@@ -199,6 +200,8 @@ namespace DeviceHandler.Services
 		{
 			_timeoutTimer.Stop();
 
+			LoggerService.Inforamtion(this, "_timeoutTimer_Elapsed");
+
 			_communicationTimer.Stop();
 			_communicationTimer.Interval = 1000 / AcquisitionRate;
 			_communicationTimer.Start();
@@ -216,7 +219,7 @@ namespace DeviceHandler.Services
 				}
 
 				_communicationTimer.Stop();
-
+				LoggerService.Inforamtion(this, "_communicationTimer stopped");
 
 
 				foreach (RepositoryParam param in _nameToRepositoryParamList.Values)
@@ -257,7 +260,7 @@ namespace DeviceHandler.Services
 		{
 			try
 			{
-				_timeoutTimer.Stop();
+				
 				if (_isDisposed)
 					return;
 
@@ -291,6 +294,8 @@ namespace DeviceHandler.Services
 				{
 					LastCallbackHandling();
 					_communicationTimer.Start();
+					_timeoutTimer.Stop();
+					LoggerService.Inforamtion(this, "_communicationTimer started");
 				}
 
 			}

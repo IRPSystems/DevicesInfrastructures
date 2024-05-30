@@ -217,7 +217,7 @@ namespace DeviceCommunicators.General
 							lock (_lockObject)
 								result = HandleRequests(data);
 
-							LoggerService.Inforamtion(this, $"Queue={parameterQueue.Count}");
+							//LoggerService.Inforamtion(this, $"Queue={parameterQueue.Count}");
 							if (result == CommunicatorResultEnum.NoResponse &&
 								parameterQueue.Count >= 100)
 							{
