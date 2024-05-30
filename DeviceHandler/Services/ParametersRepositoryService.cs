@@ -12,6 +12,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
+using System.Windows;
 
 namespace DeviceHandler.Services
 {
@@ -205,85 +206,97 @@ namespace DeviceHandler.Services
 
 		private void CommunicationTimerElapsed(object sender, ElapsedEventArgs e)
 		{
-
-			if (_nameToRepositoryParamList == null || _nameToRepositoryParamList.Count == 0)
+			try
 			{
-				ActualAcquisitionRate = 0;
-				return;
-			}
-
-			_communicationTimer.Stop();
-
-			
-
-			foreach (RepositoryParam param in _nameToRepositoryParamList.Values)
-			{
-
-				if (_isDisposed)
-					return;
-
-				if (param.Parameter.DeviceType == Entities.Enums.DeviceTypesEnum.DBC)
-					continue;
-
-				if (param.Parameter is ICalculatedParamete calculated)
+				if (_nameToRepositoryParamList == null || _nameToRepositoryParamList.Count == 0)
 				{
-					calculated.Calculate();
-					continue;
+					ActualAcquisitionRate = 0;
+					return;
 				}
 
-				param.IsReceived = CommunicatorResultEnum.None;
-				_communicator.GetParamValue(param.Parameter, GetValueCallback);
+				_communicationTimer.Stop();
 
-				System.Threading.Thread.Sleep(1);
+
+
+				foreach (RepositoryParam param in _nameToRepositoryParamList.Values)
+				{
+
+					if (_isDisposed)
+						return;
+
+					if (param.Parameter.DeviceType == Entities.Enums.DeviceTypesEnum.DBC)
+						continue;
+
+					if (param.Parameter is ICalculatedParamete calculated)
+					{
+						calculated.Calculate();
+						continue;
+					}
+
+					param.IsReceived = CommunicatorResultEnum.None;
+					_communicator.GetParamValue(param.Parameter, GetValueCallback);
+
+					System.Threading.Thread.Sleep(1);
+				}
+
+				_start = DateTime.Now;
+
+				_timeoutTimer.Start();
+
+				//_communicationTimer.Start();
 			}
-
-			_start = DateTime.Now;
-
-			_timeoutTimer.Start();
-
-			//_communicationTimer.Start();
+			catch (Exception ex)
+			{
+				MessageBox.Show($"Failed to handle response\r\n{ex}");
+			}
 		}
 
 
 		private void GetValueCallback(DeviceParameterData param, CommunicatorResultEnum result, string resultDescription)
 		{
-			_timeoutTimer.Stop();
-			if (_isDisposed)
-				return;
-
-			if (_nameToRepositoryParamList == null || _nameToRepositoryParamList.Count == 0)
+			try
 			{
-				return;
-			}
+				_timeoutTimer.Stop();
+				if (_isDisposed)
+					return;
 
-			if (_nameToRepositoryParamList.ContainsKey(param.Name) == false)
+				if (_nameToRepositoryParamList == null || _nameToRepositoryParamList.Count == 0)
+				{
+					return;
+				}
+
+				if (_nameToRepositoryParamList.ContainsKey(param.Name) == false)
+				{
+					return;
+				}
+
+				RepositoryParam repositoryParam =
+						_nameToRepositoryParamList[param.Name];
+				if (repositoryParam != null)
+				{
+					repositoryParam.IsReceived = result;
+					repositoryParam.ErrDescription = resultDescription;
+					repositoryParam.RaisEvent(result, resultDescription);
+				}
+
+				if (result != CommunicatorResultEnum.OK)
+				{
+					param.Value = double.NaN;
+				}
+
+				RepositoryParam lastParam =
+					_nameToRepositoryParamList.Values.ElementAt(_nameToRepositoryParamList.Values.Count - 1);
+				if (param == lastParam.Parameter)
+				{
+					LastCallbackHandling();
+					_communicationTimer.Start();
+				}
+
+			}
+			catch (Exception ex) 
 			{
-				return;
+				MessageBox.Show($"Failed to handle response\r\n{ex}");
 			}
-
-			RepositoryParam repositoryParam =
-					_nameToRepositoryParamList[param.Name];
-			if (repositoryParam != null)
-			{
-				repositoryParam.IsReceived = result;
-				repositoryParam.ErrDescription = resultDescription;
-				repositoryParam.RaisEvent(result, resultDescription);
-			}
-
-			if (result != CommunicatorResultEnum.OK)
-			{
-				param.Value = double.NaN;
-			}
-
-			RepositoryParam lastParam =
-				_nameToRepositoryParamList.Values.ElementAt(_nameToRepositoryParamList.Values.Count - 1);
-			if (param == lastParam.Parameter)
-			{
-				LastCallbackHandling();
-				_communicationTimer.Start();
-			}
-
-			
 		}
 
 		protected virtual void CallbackHandling()
