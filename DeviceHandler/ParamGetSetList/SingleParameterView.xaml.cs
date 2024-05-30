@@ -154,18 +154,18 @@ namespace DeviceHandler.ParamGetSetList
 
 		#endregion TextBoxKeyUpEvent
 
-		#region ComboBox_DropDownClosedEvent
+		#region ComboBox_SelectionChangedEvent
 
-		public static readonly DependencyProperty ComboBox_DropDownClosedEventProperty = DependencyProperty.Register(
-			"ComboBox_DropDownClosedEvent", typeof(Action<ComboBox>), typeof(SingleParameterView));
+		public static readonly DependencyProperty ComboBox_SelectionChangedEventProperty = DependencyProperty.Register(
+			"ComboBox_SelectionChangedEvent", typeof(Action<ComboBox>), typeof(SingleParameterView));
 
-		public Action<ComboBox> ComboBox_DropDownClosedEvent
+		public Action<ComboBox> ComboBox_SelectionChangedEvent
 		{
-			get => (Action<ComboBox>)GetValue(ComboBox_DropDownClosedEventProperty);
-			set => SetValue(ComboBox_DropDownClosedEventProperty, value);
+			get => (Action<ComboBox>)GetValue(ComboBox_SelectionChangedEventProperty);
+			set => SetValue(ComboBox_SelectionChangedEventProperty, value);
 		}
 
-		#endregion ComboBox_DropDownClosedEvent
+		#endregion ComboBox_SelectionChangedEvent
 
 		#region HexTextBox_EnterEvent
 
@@ -290,20 +290,7 @@ namespace DeviceHandler.ParamGetSetList
 
 		#region Methods
 
-		private void cb_DropDownOpened(object sender, EventArgs e)
-		{
-			if (!(DataContext is ParamGetSetListViewModel vm))
-				return;
-
-			if (vm.ButtonsVisibility == Visibility.Collapsed)
-				return;
-
-
-			if (!(sender is ComboBox comboBox))
-				return;
-
-			comboBox.IsDropDownOpen = false;
-		}
+		
 
 		private void ParamChanged()
 		{
@@ -360,9 +347,29 @@ namespace DeviceHandler.ParamGetSetList
 			TextBoxKeyUpEvent?.Invoke(e);
 		}
 
-		private void ComboBox_DropDownClosed(object sender, EventArgs e)
+		//private void ComboBox_DropDownClosed(object sender, EventArgs e)
+		//{
+		//	ComboBox_DropDownClosedEvent?.Invoke(sender as ComboBox);
+		//}
+
+		private void cb_DropDownOpened(object sender, EventArgs e)
 		{
-			ComboBox_DropDownClosedEvent?.Invoke(sender as ComboBox);
+			if (!(DataContext is ParamGetSetListViewModel vm))
+				return;
+
+			if (vm.ButtonsVisibility == Visibility.Collapsed)
+				return;
+
+
+			if (!(sender is ComboBox comboBox))
+				return;
+
+			comboBox.IsDropDownOpen = false;
+		}
+
+		private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			ComboBox_SelectionChangedEvent?.Invoke(sender as ComboBox);
 		}
 
 		private void _hexTextBoxView_EnterEvent(object sender, EventArgs e)
@@ -413,6 +420,8 @@ namespace DeviceHandler.ParamGetSetList
 			ButtonSave_ClickEvent?.Invoke(param);
 		}
 
+
+
 		#endregion Methods
 
 		#region Commands
@@ -420,7 +429,6 @@ namespace DeviceHandler.ParamGetSetList
 
 		#endregion Commands
 
-
-
+		
 	}
 }

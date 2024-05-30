@@ -68,27 +68,30 @@
                                               Foreground="{Binding Foreground}"
                                               Visibility="{Binding HexTextBoxVisibility,
                                                                   RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
-                                              Text="{Binding Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                              Text="{Binding Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                              KeyboardNavigation.TabIndex="1"/>
 
 
                 <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
-                Background="{Binding Background}"
+                         Background="{Binding Background}"
                          Foreground="{Binding Foreground}"
                          Visibility="{Binding RegularTextBoxVisibility,
                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
                          IsReadOnly="{Binding IsReadOnly}"
-                         KeyUp="tb_KeyUp"/>
+                         KeyUp="tb_KeyUp"
+                         KeyboardNavigation.TabIndex="2"/>
 
                 <Grid>
                     <ComboBox ItemsSource="{Binding DropDown}"
                               SelectedItem="{Binding SelectedDropDown, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                               Background="{Binding Background}"
                               Foreground="{Binding Foreground}"
-                              DropDownOpened="cb_DropDownOpened"
-                              DropDownClosed="ComboBox_DropDownClosed"
+                              DropDownOpened="cb_DropDownOpened"                              
+                              SelectionChanged="ComboBox_SelectionChanged"
                               Visibility="{Binding CombotBoxVisibility,
                                               RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
-                              KeyUp="tb_KeyUp">
+                              KeyUp="tb_KeyUp"
+                              KeyboardNavigation.TabIndex="3">
 
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
@@ -124,16 +127,19 @@
 
             <Button Content="Get" 
                     Grid.Column="0"
-                    Click="ButtonGet_Click"/>
+                    Click="ButtonGet_Click"
+                    KeyboardNavigation.TabIndex="4"/>
             <Button Content="Set" 
                     Grid.Column="2"
-                    Click="ButtonSet_Click"/>
+                    Click="ButtonSet_Click"
+                    KeyboardNavigation.TabIndex="5"/>
             <Button Content="Save" 
                     Name="save"
                     Grid.Column="4"
                     Click="ButtonSave_Click"
                     Visibility="{Binding SaveVisibility,
-                                         RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"/>
+                                         RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                    KeyboardNavigation.TabIndex="6"/>
 
         </Grid>
 

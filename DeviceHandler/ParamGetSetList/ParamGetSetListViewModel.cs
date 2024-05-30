@@ -24,7 +24,7 @@ namespace DeviceHandler.ParamGetSetList
 		public Visibility ButtonsVisibility { get; set; }
 
 		public Action<KeyEventArgs> TextBox_KeyUpEvent { get; set; }
-		public Action<ComboBox> ComboBox_DropDownClosedEvent { get; set; }
+		public Action<ComboBox> ComboBox_SelectionChangedEvent { get; set; }
 		public Action<DeviceParameterData> HexTextBox_EnterEvent { get; set; }
 		public Action<KeyEventArgs> HexTextBox_HexKeyDownEvent { get; set; }
 		public Action<KeyEventArgs> HexTextBox_HexKeyUpEvent { get; set; }
@@ -32,6 +32,9 @@ namespace DeviceHandler.ParamGetSetList
 		public Action<DeviceParameterData> ButtonGet_ClickEvent { get; set; }
 		public Action<DeviceParameterData> ButtonSet_ClickEvent { get; set; }
 		public Action<DeviceParameterData> ButtonSave_ClickEvent { get; set; }
+
+
+		public bool IsInitiating { get; set; }
 
 		#endregion Properties
 
@@ -82,7 +85,7 @@ namespace DeviceHandler.ParamGetSetList
 			bool isShowSave)
 		{
 			TextBox_KeyUpEvent = TextBox_KeyUp;
-			ComboBox_DropDownClosedEvent = ComboBox_DropDownClosed;
+			ComboBox_SelectionChangedEvent = ComboBox_SelectionChanged;
 			HexTextBox_EnterEvent = HexTextBox_Enter;
 			HexTextBox_HexKeyDownEvent = HexTextBox_HexKeyDown;
 			HexTextBox_HexKeyUpEvent = TextBox_KeyUp;
@@ -129,8 +132,11 @@ namespace DeviceHandler.ParamGetSetList
 		
 
 
-		public void ComboBox_DropDownClosed(ComboBox comboBox)
+		public void ComboBox_SelectionChanged(ComboBox comboBox)
 		{
+			if(IsInitiating) 
+				return;
+
 			if (ButtonsVisibility == Visibility.Collapsed)
 				return;
 
@@ -152,6 +158,9 @@ namespace DeviceHandler.ParamGetSetList
 		private void TextBox_KeyUp(KeyEventArgs e)
 		{
 			if (ButtonsVisibility == Visibility.Collapsed)
+				return;
+
+			if (e.Key == Key.Tab)
 				return;
 
 			DeviceParameterData param = null;
@@ -260,7 +269,7 @@ namespace DeviceHandler.ParamGetSetList
 			get
 			{
 				return _ComboBox_DropDownClosedCommand ?? (_ComboBox_DropDownClosedCommand =
-					new RelayCommand<ComboBox>(ComboBox_DropDownClosed));
+					new RelayCommand<ComboBox>(ComboBox_SelectionChanged));
 			}
 		}
 
