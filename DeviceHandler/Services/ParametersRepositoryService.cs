@@ -219,7 +219,7 @@ namespace DeviceHandler.Services
 				}
 
 				_communicationTimer.Stop();
-				LoggerService.Inforamtion(this, "_communicationTimer stopped");
+				//LoggerService.Inforamtion(this, "_communicationTimer stopped");
 
 
 				foreach (RepositoryParam param in _nameToRepositoryParamList.Values)
@@ -295,7 +295,7 @@ namespace DeviceHandler.Services
 					LastCallbackHandling();
 					_communicationTimer.Start();
 					_timeoutTimer.Stop();
-					LoggerService.Inforamtion(this, "_communicationTimer started");
+					//LoggerService.Inforamtion(this, "_communicationTimer started");
 				}
 
 			}

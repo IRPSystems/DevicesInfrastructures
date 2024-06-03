@@ -261,6 +261,8 @@ namespace DeviceCommunicators.MCU
 				if (result == CommunicatorResultEnum.OK/* || result == CommunicatorResultEnum.Error*/)
 					break;
 
+				LoggerService.Inforamtion(this, "Retry");
+
 				System.Threading.Thread.Sleep(1);
 			}
 
