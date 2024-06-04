@@ -17,6 +17,8 @@ namespace DeviceCommunicators.Models
 		public byte[] SendBuffer;
 		public System.Timers.Timer SendTimoutTimer;
 
+		public DateTime SendStartTime;
+
 
 		public CommunicatorIOData() 
 		{

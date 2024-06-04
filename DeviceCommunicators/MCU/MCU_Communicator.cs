@@ -153,31 +153,32 @@ namespace DeviceCommunicators.MCU
 
 			_idArrayToData.Clear();
 
-			//#if _SAVE_TIME
-			//			try
-			//			{
-			//				//LoggerService.Inforamtion(this, "MCU time");
-			//				using (StreamWriter sw = new StreamWriter("MCU Time.txt"))
-			//				{
-			//					foreach ((TimeSpan, string, CommunicatorResultEnum) time in _commTimeList)
-			//					{
-			//						string name = string.Empty;
-			//						if(!string.IsNullOrEmpty(time.Item2))
-			//							name = time.Item2.Replace("\n", "-");
-			//						sw.WriteLine($"{time.Item1.TotalMilliseconds}\t\t\t{name}\t\t\t{time.Item3}");
-			//						//LoggerService.Debug(this, time.TotalMilliseconds.ToString());
-			//					}
-			//				}
-			//			}
-			//			catch { }
+#if _SAVE_TIME
+			try
+			{
+				//LoggerService.Inforamtion(this, "MCU time");
+				using (StreamWriter sw = new StreamWriter("MCU Time.txt"))
+				{
+					foreach ((TimeSpan, string, CommunicatorResultEnum) time in _commTimeList)
+					{
+						string name = string.Empty;
+						if (!string.IsNullOrEmpty(time.Item2))
+							name = time.Item2.Replace("\n", "-");
+						sw.WriteLine($"{time.Item1.TotalMilliseconds}\t\t\t{name}\t\t\t{time.Item3}");
+						//LoggerService.Debug(this, time.TotalMilliseconds.ToString());
+					}
+				}
+			}
+			catch { }
 
-			//			_commTimeList.Add((new TimeSpan(), "Disconnect", CommunicatorResultEnum.OK));
-			//#endif
+			_commTimeList.Add((new TimeSpan(), "Disconnect", CommunicatorResultEnum.OK));
+#endif
 		}
 
 
-
-
+#if _SAVE_TIME
+		private DateTime _prevStart;
+#endif
 		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
 		{
 			if (data is CommunicatorIOData_SendMessage sendMessageData)
@@ -190,8 +191,15 @@ namespace DeviceCommunicators.MCU
 				return CommunicatorResultEnum.None;
 
 #if _SAVE_TIME
-			DateTime startTime = DateTime.Now;
+			data.SendStartTime = DateTime.Now;
+			//if(_prevStart.Year != 1)
+			//{
+			//	_commTimeList.Add((data.SendStartTime - _prevStart, data.Parameter.Name, CommunicatorResultEnum.None));
+			//}
+
+			//_prevStart = data.SendStartTime;
 #endif
+
 
 			byte[] id = null;
 			try
@@ -216,6 +224,8 @@ namespace DeviceCommunicators.MCU
 			data.TimeoutEvent += Data_TimeoutEvent;
 			_idArrayToData[idNum].Add(data);
 
+			
+
 			data.SendTimoutTimer.Start();
 			lock (CommService)
 				CommService.Send(buffer);
@@ -225,6 +235,9 @@ namespace DeviceCommunicators.MCU
 
 		private void Data_TimeoutEvent(CommunicatorIOData data)
 		{
+			LoggerService.Inforamtion(this, "Timeout");
+
+			data.SendTimoutTimer.Stop();
 			data.TimeoutEvent -= Data_TimeoutEvent;
 			data.Callback?.Invoke(data.Parameter, CommunicatorResultEnum.NoResponse, "Communication timedout");
 
@@ -286,6 +299,9 @@ namespace DeviceCommunicators.MCU
 				data.Value,
 				out errorDescription);
 
+#if _SAVE_TIME
+			_commTimeList.Add((DateTime.Now - data.SendStartTime, data.Parameter.Name, isSuccess));
+#endif
 
 			if (isSuccess == CommunicatorResultEnum.OK)
 			{
@@ -301,6 +317,8 @@ namespace DeviceCommunicators.MCU
 				data.Callback?.Invoke(data.Parameter, isSuccess, errorDescription);
 				return;
 			}
+
+			LoggerService.Inforamtion(this, "Retry");
 
 			data.SendCounter++;
 			_idArrayToData[idNum].Add(data);
