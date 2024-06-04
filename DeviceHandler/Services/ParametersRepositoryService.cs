@@ -219,6 +219,7 @@ namespace DeviceHandler.Services
 				}
 
 				_communicationTimer.Stop();
+				_start = DateTime.Now;
 				//LoggerService.Inforamtion(this, "_communicationTimer stopped");
 
 
@@ -243,7 +244,7 @@ namespace DeviceHandler.Services
 					System.Threading.Thread.Sleep(1);
 				}
 
-				_start = DateTime.Now;
+				
 
 				_timeoutTimer.Start();
 
