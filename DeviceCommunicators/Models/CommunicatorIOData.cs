@@ -15,6 +15,7 @@ namespace DeviceCommunicators.Models
 
 		public int SendCounter;
 		public byte[] SendBuffer;
+		public uint SendId;
 		public System.Timers.Timer SendTimoutTimer;
 
 		public DateTime SendStartTime;

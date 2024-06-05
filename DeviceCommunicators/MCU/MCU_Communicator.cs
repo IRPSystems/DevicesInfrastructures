@@ -1,11 +1,10 @@
 ﻿
-//#define _SAVE_TIME
+#define _SAVE_TIME
 using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceCommunicators.Models;
 using Entities.Models;
-using NationalInstruments.DataInfrastructure;
 using Services.Services;
 using System;
 using System.Collections.Concurrent;
@@ -202,16 +201,17 @@ namespace DeviceCommunicators.MCU
 
 
 			byte[] id = null;
+			byte[] buffer = null;
 			try
 			{
 				id = _idBuffersPool.Take(_cancellationToken);
+				buffer = _buffersPool.Take(_cancellationToken);
 			}
 			catch (OperationCanceledException)
 			{
 				return CommunicatorResultEnum.OK;
 			}
 
-			byte[] buffer = _buffersPool.Take(_cancellationToken);
 			ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
 
 			uint idNum = (uint)(id[0] + (id[1] << 8) + (id[2] << 16));
@@ -221,13 +221,14 @@ namespace DeviceCommunicators.MCU
 
 			data.SendCounter++;
 			data.SendBuffer = buffer;
+			data.SendId = idNum;
 			data.TimeoutEvent += Data_TimeoutEvent;
 			_idArrayToData[idNum].Add(data);
 
 			
 
 			data.SendTimoutTimer.Start();
-			lock (CommService)
+			//lock (CommService)
 				CommService.Send(buffer);
 
 			return CommunicatorResultEnum.OK;
@@ -239,96 +240,88 @@ namespace DeviceCommunicators.MCU
 
 			data.SendTimoutTimer.Stop();
 			data.TimeoutEvent -= Data_TimeoutEvent;
+
 			data.Callback?.Invoke(data.Parameter, CommunicatorResultEnum.NoResponse, "Communication timedout");
 
-			// Remove the item from the buffer
-
-			if (!(data?.Parameter is MCU_ParamData mcuParam))
+			if (_idArrayToData.Count == 0)
 				return;
 
-			byte[] id = null;
 			try
 			{
-				id = _idBuffersPool.Take(_cancellationToken);
+				_idArrayToData[data.SendId].Take(_cancellationToken);
 			}
 			catch (OperationCanceledException)
 			{
-				return;
+				
 			}
-
-			mcuParam.GetMessageID(ref id);
-			uint idNum = (uint)(id[0] + (id[1] << 8) + (id[2] << 16));
-
-			if (_idArrayToData.ContainsKey(idNum) == false || _idArrayToData[idNum].Count == 0)
-			{
-				return;
-			}
-
-			_idArrayToData[idNum].Take(_cancellationToken);
 		}
 
 		private void CanService_MessageReceivedEvent(byte[] buffer)
 		{
-			byte[] id = null;
 			try
 			{
-				id = _idBuffersPool.Take(_cancellationToken);
-			}
-			catch (OperationCanceledException)
-			{
-				return;
-			}
+				uint idNum = (uint)(buffer[0] + (buffer[1] << 8) + (buffer[2] << 16));
 
-			Array.Copy(buffer, id, 3);
-			uint idNum = (uint)(id[0] + (id[1] << 8) + (id[2] << 16));
+				if (_idArrayToData.ContainsKey(idNum) == false || _idArrayToData[idNum].Count == 0)
+				{
+					LoggerService.Inforamtion(this, "ID of received message not found");
+					return;
+				}
 
-			if (_idArrayToData.ContainsKey(idNum) == false || _idArrayToData[idNum].Count == 0)
-			{
-				return;
-			}
+				CommunicatorIOData data = null;
+				try
+				{
+					data = _idArrayToData[idNum].Take(_cancellationToken);
+				}
+				catch (OperationCanceledException)
+				{
+					return;
+				}
 
-			CommunicatorIOData data = _idArrayToData[idNum].Take(_cancellationToken);
-			data.SendTimoutTimer.Stop();
+				data.SendTimoutTimer.Stop();
 
-			string errorDescription = string.Empty;
-			CommunicatorResultEnum isSuccess = HandleBuffer(
-				id,
-				buffer,
-				data.Parameter as MCU_ParamData,
-				data.IsSet,
-				data.Value,
-				out errorDescription);
+				string errorDescription = string.Empty;
+				CommunicatorResultEnum isSuccess = HandleBuffer(
+					buffer,
+					data.Parameter as MCU_ParamData,
+					data.IsSet,
+					data.Value,
+					out errorDescription);
 
 #if _SAVE_TIME
 			_commTimeList.Add((DateTime.Now - data.SendStartTime, data.Parameter.Name, isSuccess));
 #endif
 
-			if (isSuccess == CommunicatorResultEnum.OK)
-			{
-				data.TimeoutEvent -= Data_TimeoutEvent;
-				data.Callback?.Invoke(data.Parameter, isSuccess, errorDescription);
-				return;
+				if (isSuccess == CommunicatorResultEnum.OK)
+				{
+					data.TimeoutEvent -= Data_TimeoutEvent;
+					data.Callback?.Invoke(data.Parameter, isSuccess, errorDescription);
+					return;
+				}
+
+				// If retrys eanded, return error
+				if (data.SendCounter > _getResponseRepeats)
+				{
+					data.TimeoutEvent -= Data_TimeoutEvent;
+					data.Callback?.Invoke(data.Parameter, isSuccess, errorDescription);
+					return;
+				}
+
+				LoggerService.Inforamtion(this, "Retry");
+
+				data.SendCounter++;
+				_idArrayToData[idNum].Add(data);
+				data.SendTimoutTimer.Start();
+				//lock (CommService)
+					CommService.Send(data.SendBuffer);
 			}
-
-			// If retrys eanded, return error
-			if (data.SendCounter > _getResponseRepeats)
+			catch (Exception ex) 
 			{
-				data.TimeoutEvent -= Data_TimeoutEvent;
-				data.Callback?.Invoke(data.Parameter, isSuccess, errorDescription);
-				return;
+				LoggerService.Error(this, "Failed to handle a received message", ex);
 			}
-
-			LoggerService.Inforamtion(this, "Retry");
-
-			data.SendCounter++;
-			_idArrayToData[idNum].Add(data);
-			data.SendTimoutTimer.Start();
-			lock (CommService)
-				CommService.Send(data.SendBuffer);
 		}
 
 		private CommunicatorResultEnum HandleBuffer(
-			byte[] paramId,
 			byte[] readBuffer,
 			MCU_ParamData mcuParam,
 			bool isSet,
@@ -342,10 +335,10 @@ namespace DeviceCommunicators.MCU
 			try
 			{
 
-				int isSuccess = IsErr(readBuffer, paramId);
+				var err = (readBuffer[3] & _errMask) >> _errShift;
 
 
-				if (isSuccess == 0)
+				if (err == 0)
 				{
 
 					value = readBuffer[4] << 24 | readBuffer[5] << 16 | readBuffer[6] << 8 | readBuffer[7];
@@ -358,9 +351,9 @@ namespace DeviceCommunicators.MCU
 				}
 				else
 				{
-					errDescription = "Unknown error: " + isSuccess;
-					if (_mcuErrorToDescription.ContainsKey((int)isSuccess))
-						errDescription = _mcuErrorToDescription[(int)isSuccess];
+					errDescription = "Unknown error: " + err;
+					if (_mcuErrorToDescription.ContainsKey(err))
+						errDescription = _mcuErrorToDescription[err];
 					return CommunicatorResultEnum.Error;
 				}
 			}
@@ -461,32 +454,6 @@ namespace DeviceCommunicators.MCU
 			return data;
 		}
 
-		private int IsErr(
-			byte[] buffer,
-			byte[] out_id)
-		{
-
-			byte[] in_id = _idBuffersPool.Take(_cancellationToken);
-
-			Array.Copy(buffer, 0, in_id, 0, 3);
-
-			//! Check if id sent is id received
-			if (!Enumerable.SequenceEqual(in_id, out_id))
-			{
-				return 4;
-			}
-
-			//! err bits locates in H nibble in data byte[3]
-			var err = (buffer[3] & _errMask) >> _errShift;
-
-			if (err != 0)
-			{
-				return err;
-			}
-
-			return 0;
-		}
-
 		private void PoolBuildTimerElapsed(object sender, ElapsedEventArgs e)
 		{
 			while (_buffersPool.Count < _maxNumOfBuffers)
@@ -500,6 +467,8 @@ namespace DeviceCommunicators.MCU
 				{
 					break;
 				}
+
+				System.Threading.Thread.Sleep(1);
 			}
 
 			while (_idBuffersPool.Count < _maxNumOfIds)
@@ -513,6 +482,8 @@ namespace DeviceCommunicators.MCU
 				{
 					break;
 				}
+
+				System.Threading.Thread.Sleep(1);
 			}
 		}
 
