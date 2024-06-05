@@ -66,6 +66,7 @@ namespace DeviceCommunicators.MCU
 		}
 
 		private object _editValue;
+		[JsonIgnore]
 		public override object EditValue
 		{
 			get => _editValue;
