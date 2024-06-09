@@ -1,5 +1,5 @@
 ﻿
-#define _SAVE_TIME
+//#define _SAVE_TIME
 using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
@@ -14,6 +14,7 @@ using System.IO;
 #endif
 using System.Linq;
 using System.Timers;
+using System.Windows.Markup;
 
 namespace DeviceCommunicators.MCU
 {
@@ -30,8 +31,8 @@ namespace DeviceCommunicators.MCU
 		private const byte _errMask = 0xF0;
 		private const byte _errShift = 4;
 
-		private const int _getResponseRepeats = 5;
-		private const int _getResponsesTime = 20;
+		private const int _getResponseRepeats = 20;
+		public const int GetResponsesTimeout = 50;
 
 		public ConcurrentDictionary<int, string> _mcuErrorToDescription;
 
@@ -190,7 +191,7 @@ namespace DeviceCommunicators.MCU
 				return CommunicatorResultEnum.None;
 
 #if _SAVE_TIME
-			data.SendStartTime = DateTime.Now;
+			//data.SendStartTime = DateTime.Now;
 			//if(_prevStart.Year != 1)
 			//{
 			//	_commTimeList.Add((data.SendStartTime - _prevStart, data.Parameter.Name, CommunicatorResultEnum.None));
@@ -236,35 +237,48 @@ namespace DeviceCommunicators.MCU
 
 		private void Data_TimeoutEvent(CommunicatorIOData data)
 		{
-			LoggerService.Inforamtion(this, "Timeout");
-
 			data.SendTimoutTimer.Stop();
-			data.TimeoutEvent -= Data_TimeoutEvent;
-
-			data.Callback?.Invoke(data.Parameter, CommunicatorResultEnum.NoResponse, "Communication timedout");
-
-			if (_idArrayToData.Count == 0)
-				return;
 
 			try
 			{
-				_idArrayToData[data.SendId].Take(_cancellationToken);
+				data = _idArrayToData[data.SendId].Take(_cancellationToken);
 			}
 			catch (OperationCanceledException)
 			{
-				
+				return;
 			}
+
+			
+
+			// If retrys eanded, return error
+			if (data.SendCounter > _getResponseRepeats)
+			{
+				data.TimeoutEvent -= Data_TimeoutEvent;
+				data.Callback?.Invoke(data.Parameter, CommunicatorResultEnum.NoResponse, "");
+				return;
+			}
+
+			Retry(data);
 		}
 
 		private void CanService_MessageReceivedEvent(byte[] buffer)
 		{
 			try
 			{
+#if _SAVE_TIME
+				DateTime start = DateTime.Now;
+				//if(_prevStart.Year != 1)
+				//{
+				//	_commTimeList.Add((data.SendStartTime - _prevStart, data.Parameter.Name, CommunicatorResultEnum.None));
+				//}
+
+				//_prevStart = data.SendStartTime;
+#endif
 				uint idNum = (uint)(buffer[0] + (buffer[1] << 8) + (buffer[2] << 16));
 
 				if (_idArrayToData.ContainsKey(idNum) == false || _idArrayToData[idNum].Count == 0)
 				{
-					LoggerService.Inforamtion(this, "ID of received message not found");
+					//LoggerService.Inforamtion(this, $"ID of received message not found: {idNum}");
 					return;
 				}
 
@@ -289,7 +303,7 @@ namespace DeviceCommunicators.MCU
 					out errorDescription);
 
 #if _SAVE_TIME
-			_commTimeList.Add((DateTime.Now - data.SendStartTime, data.Parameter.Name, isSuccess));
+			_commTimeList.Add((DateTime.Now - start, data.Parameter.Name, isSuccess));
 #endif
 
 				if (isSuccess == CommunicatorResultEnum.OK)
@@ -307,18 +321,23 @@ namespace DeviceCommunicators.MCU
 					return;
 				}
 
-				LoggerService.Inforamtion(this, "Retry");
-
-				data.SendCounter++;
-				_idArrayToData[idNum].Add(data);
-				data.SendTimoutTimer.Start();
-				//lock (CommService)
-					CommService.Send(data.SendBuffer);
+				Retry(data);
 			}
 			catch (Exception ex) 
 			{
 				LoggerService.Error(this, "Failed to handle a received message", ex);
 			}
+		}
+
+		private void Retry(
+			CommunicatorIOData data)
+		{
+			//LoggerService.Inforamtion(this, $"Retry {data.SendCounter}");
+
+			data.SendCounter++;
+			_idArrayToData[data.SendId].Add(data);
+			data.SendTimoutTimer.Start();
+			CommService.Send(data.SendBuffer);
 		}
 
 		private CommunicatorResultEnum HandleBuffer(
