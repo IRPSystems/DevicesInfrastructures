@@ -35,6 +35,8 @@ namespace DeviceHandler.ViewModels
 		public ObservableCollection<RecordData> ParametersList_WithIndex { get; set; }
 
 		public bool IsLimitParametersList { get; set; }
+		public bool IsSaveLoad { get; set; }
+
 		public int LimitOfParametersList { get; set; }
 
 		#endregion Properties
@@ -63,6 +65,7 @@ namespace DeviceHandler.ViewModels
 			string title)
 		{
 			IsLimitParametersList = false;
+			IsSaveLoad = true;
 
 			_devicesContainer = devicesContainer;
 			Title = title;
