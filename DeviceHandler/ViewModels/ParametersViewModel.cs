@@ -214,6 +214,9 @@ namespace DeviceHandler.ViewModel
 
 		private void SetSearchedTest(string text)
 		{
+			if (DevicesList == null)
+				return;
+
 			foreach (DeviceData deviceBase in DevicesList)
 			{
 				if(!(deviceBase is DeviceData deviceData))
@@ -297,6 +300,9 @@ namespace DeviceHandler.ViewModel
 
 		public void BuildDevicesList()
 		{
+			if (_devicesContainer == null)
+				return;
+
 			DevicesList = new ObservableCollection<DeviceData>();
 
 
