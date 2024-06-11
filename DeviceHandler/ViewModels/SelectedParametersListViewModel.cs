@@ -176,7 +176,7 @@ namespace DeviceHandler.ViewModels
 
 		#endregion Save / Load
 
-		protected void GetActualParameters_Json(ObservableCollection<DeviceParameterData> parametersList)
+		public void GetActualParameters_Json(ObservableCollection<DeviceParameterData> parametersList)
 		{
 			if (ParametersList == null)
 				ParametersList = new ObservableCollection<DeviceParameterData>();
