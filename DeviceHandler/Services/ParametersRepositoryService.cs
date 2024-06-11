@@ -313,14 +313,50 @@ namespace DeviceHandler.Services
 
 		protected virtual void LastCallbackHandling()
 		{
+			LastCallbackEvent?.Invoke();
 
+			TimeSpan diff = DateTime.Now - _start;
+			double reducedTime = diff.TotalMilliseconds;
+
+			double refreshTime = 1000 / AcquisitionRate;
+
+			double actualRate = 0;
+
+			//_communicationTimer.Interval = (reducedTime < refreshTime) ? (double)refreshTime - reducedTime : 1;
+
+			//actualRate = /*(reducedTime > refreshTime) ?*/ 1000 / (reducedTime + 1);// : (double)1000 / (refreshTime);
+
+			if (reducedTime > refreshTime)
+			{
+				_communicationTimer.Interval = reducedTime;
+				actualRate = 1000.0 / (reducedTime + 1);
+			}
+			else
+			{
+				_communicationTimer.Interval = refreshTime;
+				actualRate = 1000.0 / refreshTime;
+			}
+
+			if (actualRate != 0)
+				ActualAcquisitionRate = actualRate;
+
+			if (ActualAcquisitionRate < 5)
+			{
+				LoggerService.Inforamtion(this, $"ActualAcquisitionRate={ActualAcquisitionRate}");
+			}
 		}
 
 		#endregion Methods
+
+		#region Events
+
+		public event Action LastCallbackEvent;
+
+		#endregion Events
 	}
 
 
-	
+
 
 
 }
