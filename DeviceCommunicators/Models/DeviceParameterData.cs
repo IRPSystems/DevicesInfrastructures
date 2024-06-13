@@ -40,6 +40,7 @@ namespace DeviceCommunicators.Models
 			}
 		}
 
+		[JsonIgnore]
 		public virtual object EditValue { get; set; }
 
 
