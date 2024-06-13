@@ -179,9 +179,13 @@ namespace DeviceHandler.ViewModel
 
 					DeviceFullData deviceFullData = _devicesContainer.TypeToDevicesFullData[param.DeviceType];
 					if (deviceFullData == null)
-						return;					
+						return;
 
-					actualParam = deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == param.Name);
+					if (param is MCU_ParamData mcuParam)
+						actualParam = deviceFullData.Device.ParemetersList.ToList().Find((p) => ((MCU_ParamData)p).Cmd == mcuParam.Cmd);
+					else
+						actualParam = deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == param.Name);
+
 					if (actualParam == null)
 						return;
 
