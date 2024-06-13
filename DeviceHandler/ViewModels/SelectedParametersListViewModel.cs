@@ -194,12 +194,8 @@ namespace DeviceHandler.ViewModels
 				if (deviceFullData == null || deviceFullData.Device == null)
 					continue;
 
-				DeviceParameterData actualParameterData = null;
-				if (parameterData is MCU_ParamData mcuParam)
-					actualParameterData = deviceFullData.Device.ParemetersList.ToList().Find((p) => ((MCU_ParamData)p).Cmd == mcuParam.Cmd);
-				else
-					actualParameterData = deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == parameterData.Name);
-
+				DeviceParameterData actualParameterData =
+					deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == parameterData.Name);
 				if (actualParameterData == null)
 					continue;
 
@@ -247,11 +243,8 @@ namespace DeviceHandler.ViewModels
 
 				DeviceFullData deviceFullData = _devicesContainer.TypeToDevicesFullData[deviceType];
 
-				DeviceParameterData actualParameterData = null;
-				if (deviceType == DeviceTypesEnum.MCU)
-					actualParameterData = deviceFullData.Device.ParemetersList.ToList().Find((p) => ((MCU_ParamData)p).Cmd == param);
-				else
-					actualParameterData = deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == param);
+				DeviceParameterData actualParameterData =
+					deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == name);
 				if (actualParameterData == null)
 					continue;
 
