@@ -105,37 +105,44 @@ namespace DeviceCommunicators.MCU
 				this,
 				"Initiating communication - Adapter: " + canAdapterType);
 
-			_syncID = syncID;
-
-			if (canAdapterType == "PCAN")
+			try
 			{
-				CommService = new CanPCanService(baudrate, hwId, syncID);
-			}
-			else if (canAdapterType == "Sloki")
-			{
-				CommService = new CanSlokiService(baudrate, syncID);
-			}
-			else if (canAdapterType == "UDP Simulator")
-			{
-				CommService = new CanUdpSimulationService(baudrate, syncID, rxPort, txPort, address);
-			}
+				_syncID = syncID;
+
+				if (canAdapterType == "PCAN")
+				{
+					CommService = new CanPCanService(baudrate, hwId, syncID);
+				}
+				else if (canAdapterType == "Sloki")
+				{
+					CommService = new CanSlokiService(baudrate, syncID);
+				}
+				else if (canAdapterType == "UDP Simulator")
+				{
+					CommService = new CanUdpSimulationService(baudrate, syncID, rxPort, txPort, address);
+				}
 
 
-			CommService.Init(false);
-			CommService.Name = "MCU_Communicator";
-			CanService.CanMessageReceivedEvent += AsyncMessageWasReceived;
+				CommService.Init(false);
+				CommService.Name = "MCU_Communicator";
+				CanService.CanMessageReceivedEvent += AsyncMessageWasReceived;
 
 
 
-			_poolBuildTimer.Start();
+				_poolBuildTimer.Start();
 
-			FireConnectionEvent();
+				FireConnectionEvent();
 
-			InitBase();
+				InitBase();
 
 #if _SAVE_TIME
 			_commTimeList.Add((new TimeSpan(), "Connect", CommunicatorResultEnum.OK));
 #endif
+			}
+			catch (Exception ex) 
+			{
+				LoggerService.Error(this, "Failed to Init", ex);
+			}
 		}
 
 		public override void Dispose()
