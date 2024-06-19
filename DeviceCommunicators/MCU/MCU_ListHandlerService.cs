@@ -64,7 +64,7 @@ namespace DeviceCommunicators.MCU
 							mcu_Param.GroupName = group.GroupName;
 
 						MCU_ParamData existing = mcu_device.MCU_FullList.ToList().Find((p) =>
-							IsSameName(p.Name, data.Name)) as MCU_ParamData;
+							IsSameName(((MCU_ParamData)p).Cmd, ((MCU_ParamData)data).Cmd)) as MCU_ParamData;
 						if (existing != null)
 						{
 							int index = existing.Name.IndexOf("(");

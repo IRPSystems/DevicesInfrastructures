@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
+using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
 using DeviceHandler.Interfaces;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Timers;
 using System.Windows;
 
@@ -127,9 +129,13 @@ namespace DeviceHandler.Services
 			
 			RepositoryParam repositoryParam;
 
-			if (_nameToRepositoryParamList.ContainsKey(parameter.Name))
+			string name = parameter.Name;
+			if(parameter is MCU_ParamData mcuParam)
+				name = mcuParam.Cmd;
+
+			if (_nameToRepositoryParamList.ContainsKey(name))
 			{
-				repositoryParam = _nameToRepositoryParamList[parameter.Name];
+				repositoryParam = _nameToRepositoryParamList[name];
 				if (repositoryParam.Priority < priority)
 					repositoryParam.Priority = priority;
 				if(receivedMessageCallback != null)
@@ -143,7 +149,7 @@ namespace DeviceHandler.Services
 				repositoryParam.Counter = 0;
 				if (receivedMessageCallback != null)
 					repositoryParam.ReceivedMessageEvent += receivedMessageCallback;
-				_nameToRepositoryParamList[parameter.Name] = repositoryParam;
+				_nameToRepositoryParamList[name] = repositoryParam;
 			}
 
 			repositoryParam.Counter++;
@@ -158,14 +164,19 @@ namespace DeviceHandler.Services
 				if (parameter == null || _nameToRepositoryParamList == null)
 					return;
 
-				if (_nameToRepositoryParamList.ContainsKey(parameter.Name) == false)
+				string name = parameter.Name;
+				if (parameter is MCU_ParamData mcuParam)
+					name = mcuParam.Cmd;
+
+				if (_nameToRepositoryParamList.ContainsKey(name) == false)
 					return;
-				if (_nameToRepositoryParamList[parameter.Name] == null)
+				if (_nameToRepositoryParamList[name] == null)
 					return;
 
+				
 
 				RepositoryParam repositoryParam =
-					_nameToRepositoryParamList[parameter.Name];
+					_nameToRepositoryParamList[name];
 				if (repositoryParam == null)
 					return;
 
@@ -175,7 +186,7 @@ namespace DeviceHandler.Services
 				if (repositoryParam.Counter == 0)
 				{
 					_nameToRepositoryParamList.TryRemove(
-						new KeyValuePair<string, RepositoryParam>(parameter.Name, repositoryParam));
+						new KeyValuePair<string, RepositoryParam>(name, repositoryParam));
 					//_repositoryParamList.Remove(repositoryParam);
 				}
 
@@ -270,13 +281,17 @@ namespace DeviceHandler.Services
 					return;
 				}
 
-				if (_nameToRepositoryParamList.ContainsKey(param.Name) == false)
+				string name = param.Name;
+				if (param is MCU_ParamData mcuParam)
+					name = mcuParam.Cmd;
+
+				if (_nameToRepositoryParamList.ContainsKey(name) == false)
 				{
 					return;
 				}
 
 				RepositoryParam repositoryParam =
-						_nameToRepositoryParamList[param.Name];
+						_nameToRepositoryParamList[name];
 				if (repositoryParam != null)
 				{
 					repositoryParam.IsReceived = result;
