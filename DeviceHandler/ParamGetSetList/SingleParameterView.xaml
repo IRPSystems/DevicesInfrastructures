@@ -79,6 +79,7 @@
                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
                          IsReadOnly="{Binding IsReadOnly}"
                          KeyUp="tb_KeyUp"
+                         TextChanged="tb_TextChanged"
                          KeyboardNavigation.TabIndex="2"/>
 
                 <Grid>
