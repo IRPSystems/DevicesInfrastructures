@@ -255,9 +255,12 @@ namespace DeviceHandler.Services
 					System.Threading.Thread.Sleep(1);
 				}
 
-				
 
-				_timeoutTimer.Start();
+				try
+				{
+					_timeoutTimer.Start();
+				}
+				catch (Exception ex) { }
 
 				//_communicationTimer.Start();
 			}
@@ -301,6 +304,7 @@ namespace DeviceHandler.Services
 
 				if (result != CommunicatorResultEnum.OK)
 				{
+					LoggerService.Inforamtion(this, $"{Name} - Setting NaN");
 					param.Value = double.NaN;
 				}
 
@@ -355,10 +359,10 @@ namespace DeviceHandler.Services
 			if (actualRate != 0)
 				ActualAcquisitionRate = actualRate;
 
-			if (ActualAcquisitionRate < 5)
-			{
-				LoggerService.Inforamtion(this, $"ActualAcquisitionRate={ActualAcquisitionRate}");
-			}
+			//if (ActualAcquisitionRate < 5)
+			//{
+			//	LoggerService.Inforamtion(this, $"ActualAcquisitionRate={ActualAcquisitionRate}");
+			//}
 		}
 
 		#endregion Methods

@@ -238,6 +238,8 @@ namespace DeviceCommunicators.MCU
 		private void Data_TimeoutEvent(CommunicatorIOData data)
 		{
 			data.SendTimoutTimer.Stop();
+			if (_idArrayToData == null || _idArrayToData.Count == 0)
+				return;
 
 			try
 			{
