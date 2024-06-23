@@ -214,7 +214,9 @@ namespace DeviceCommunicators.PowerSupplayBK
 
             LoggerService.Inforamtion(this, supplay_Parameter.Name);
 
-            _serial_port.Send(supplay_Parameter.Command);
+			string cmd = $"{supplay_Parameter.Command}?";
+
+            _serial_port.Send(cmd);
         }
 
 		private string receive_value_from_supply(string name)
