@@ -8,6 +8,7 @@ using Services.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Xml.Linq;
 
 namespace DeviceCommunicators.PowerSupplayBK
 {
@@ -131,14 +132,15 @@ namespace DeviceCommunicators.PowerSupplayBK
                 if (!(param is PowerSupplayBK_ParamData supplay_Parameter))
                     return;
 
-                request_commad_from_supply(supplay_Parameter.Name);
+                request_commad_from_supply(supplay_Parameter);
 
                 Thread.Sleep(10);
 
 
                 param.Value = receive_value_from_supply(supplay_Parameter.Name);
+				LoggerService.Inforamtion(this, $"{supplay_Parameter.Name} - {param.Value}");
 
-                if(param.Value == null)
+				if (param.Value == null)
                 	callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
 				else
                     callback?.Invoke(param, CommunicatorResultEnum.OK, null);
@@ -205,27 +207,14 @@ namespace DeviceCommunicators.PowerSupplayBK
             }
         }
 
-		private void request_commad_from_supply(string name)
+		private void request_commad_from_supply(PowerSupplayBK_ParamData supplay_Parameter)
         {
             if (_serial_port == null)
                 return;
 
-            if (name == "MEASure voltage in supply")
-            {
-                _serial_port.Send("MEASure:SCALar:VOLTage:ALL:DC?");
-            }
-            if (name == "Voltage in supply")
-            {
-                _serial_port.Send("VAPPLY:VOLTage:LEVel?");
-            }
-            if (name == "Current status")
-			{
-				_serial_port.Send("APPLY:OUTput?");
-			}
-            else if(name == "Current value")
-            {
-				_serial_port.Send("APPLY:CURRent:LEVel?");
-			}
+            LoggerService.Inforamtion(this, supplay_Parameter.Name);
+
+            _serial_port.Send(supplay_Parameter.Command);
         }
 
 		private string receive_value_from_supply(string name)
