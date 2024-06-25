@@ -52,34 +52,50 @@ namespace DeviceCommunicators.PowerSupplayBK
 			int txPort = 0,
 			string address = "")
         {
-            //_name_comport = comName;
-            //_boud_rate = baudtate;
+			//_name_comport = comName;
+			//_boud_rate = baudtate;
 
-            if(isUdpSimulation)
-				CommService = new SerialUdpSimulationService(rxPort, txPort, address);
-            else
-				CommService = new SerialService(comName, baudtate);
-            
-            _serial_port.Init(false);
+			try
+			{
+				if (isUdpSimulation)
+					CommService = new SerialUdpSimulationService(rxPort, txPort, address);
+				else
+					CommService = new SerialService(comName, baudtate);
 
-            if(_serial_port.IsInitialized)
-                _serial_port.Send("SYST:REM\n");
+				_serial_port.Init(false);
+
+				if (_serial_port.IsInitialized)
+					_serial_port.Send("SYST:REM\n");
 
 
 
-			InitBase();
+				InitBase();
+			}
+			catch(Exception ex) 
+			{
+				LoggerService.Error(this, "Failed to init", ex);
+			}
 
 		}
 
 		public override void Dispose()
 		{
-            if (_serial_port != null)
-            {
-                if(_serial_port.IsInitialized)
-                    _serial_port.Send("SYST:LOC\n");
-            }
+			try
+			{
+				if (_serial_port != null)
+				{
+					if (_serial_port.IsInitialized)
+						_serial_port.Send("SYST:LOC\n");
+				}
 
-			base.Dispose();
+
+				base.Dispose();
+
+			}
+			catch (Exception ex)
+			{
+				LoggerService.Error(this, "Failed to dispose", ex);
+			}
 		}
 
 		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
