@@ -112,7 +112,14 @@ namespace DeviceHandler.Services
 		{
 			_communicationTimer.Stop();
 
+			
+
 			_isDisposed = true;
+		}
+
+		public void RemoveAll()
+		{
+			_nameToRepositoryParamList.Clear();
 		}
 
 
