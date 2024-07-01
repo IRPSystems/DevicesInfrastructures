@@ -2,6 +2,7 @@
 using DBCFileParser.Model;
 using DeviceCommunicators.Models;
 using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace DeviceCommunicators.DBC
 {
@@ -22,6 +23,38 @@ namespace DeviceCommunicators.DBC
 		public override string ToString()
 		{
 			return Name + " - " + ID;
+		}
+
+		public void HideNotVisibleGroups()
+		{
+			bool isVisible = false;
+			foreach (DBC_ParamData param in ParamsList)
+			{
+				if (param.Visibility == Visibility.Visible)
+				{
+					isVisible = true;
+					break;
+				}
+			}
+
+			if (isVisible)
+				Visibility = Visibility.Visible;
+			else
+				Visibility = Visibility.Collapsed;
+		}
+	}
+
+	public class DBC_File : DeviceParameterData
+	{
+		public string FilePath { get; set; }
+		public ObservableCollection<DBC_ParamGroup> ParamsList { get; set; }
+
+		public void HideNotVisibleGroups()
+		{
+			foreach (DBC_ParamGroup group in ParamsList)
+			{
+				group.HideNotVisibleGroups();
+			}
 		}
 	}
 }
