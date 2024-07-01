@@ -80,7 +80,7 @@ namespace DeviceCommunicators.DBC
 				}
 
 
-				//WeakReferenceMessenger.Default.Send(new SETUP_UPDATEDMessage());
+				
 
 
 			}
