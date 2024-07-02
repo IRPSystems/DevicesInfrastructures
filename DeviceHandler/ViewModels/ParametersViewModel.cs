@@ -56,6 +56,7 @@ namespace DeviceHandler.ViewModel
 
 			ExpandAllCommand = new RelayCommand(ExpandAll);
 			CollapseAllCommand = new RelayCommand(CollapseAll);
+			DBCRemoveCommand = new RelayCommand<DeviceParameterData>(DBCRemove);
 
 
 			BuildDevicesList();
@@ -417,6 +418,11 @@ namespace DeviceHandler.ViewModel
 			BuildDevicesList();
 		}
 
+		private void DBCRemove(DeviceParameterData param)
+		{
+			DBCRemoveEvent?.Invoke(param);
+		}
+
 		#endregion Methods
 
 
@@ -496,6 +502,8 @@ namespace DeviceHandler.ViewModel
 		public RelayCommand ExpandAllCommand { get; private set; }
 		public RelayCommand CollapseAllCommand { get; private set; }
 
+		public RelayCommand<DeviceParameterData> DBCRemoveCommand { get; private set; }
+
 		private RelayCommand<TextChangedEventArgs> _DeviceParamSearch_TextChanged;
 		public RelayCommand<TextChangedEventArgs> DeviceParamSearch_TextChanged
 		{
@@ -511,6 +519,7 @@ namespace DeviceHandler.ViewModel
 		#region Events
 
 		public event Action<DeviceParameterData> ParamDoubleClickedEvent;
+		public event Action<DeviceParameterData> DBCRemoveEvent;
 
 		#endregion Events
 	}
