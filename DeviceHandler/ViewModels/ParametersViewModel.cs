@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using DeviceCommunicators.DBC;
 using DeviceCommunicators.EvvaDevice;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
@@ -16,6 +17,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace DeviceHandler.ViewModel
@@ -54,6 +56,7 @@ namespace DeviceHandler.ViewModel
 
 			ExpandAllCommand = new RelayCommand(ExpandAll);
 			CollapseAllCommand = new RelayCommand(CollapseAll);
+			DBCRemoveCommand = new RelayCommand<DeviceParameterData>(DBCRemove);
 
 
 			BuildDevicesList();
@@ -229,29 +232,25 @@ namespace DeviceHandler.ViewModel
 				if (deviceData.ParemetersList == null)
 					continue;
 
-				HideShowParameters(deviceData.ParemetersList, text);
+				//	
 
-				if(deviceBase is MCU_DeviceData mcu_Device)
-					mcu_Device.HideNotVisibleGroups();
-			}
-		}
-
-		private void HideShowParameters(
-			ObservableCollection<MCU_ParamData> list,
-			string text)
-		{
-			foreach (DeviceParameterData data in list)
-			{
-				if (data is ParamGroup group)
+				if (deviceBase is MCU_DeviceData mcu_Device)
 				{
-					HideShowParameters(group.ParamList, text);
-					continue;
+					HideShowParameters(
+						mcu_Device.MCU_GroupList,
+						text);
+					mcu_Device.HideNotVisibleGroups();
 				}
-
-				if (data.Name.ToLower().Contains(text.ToLower()))
-					data.Visibility = Visibility.Visible;
+				else if (deviceBase is DBC_DeviceData dbc_Device)
+				{
+					HideShowParameters(
+						dbc_Device.DBC_FilesList,
+						text);
+				}
 				else
-					data.Visibility = Visibility.Collapsed;
+				{
+					HideShowParameters(deviceData.ParemetersList, text);
+				}
 			}
 		}
 
@@ -261,17 +260,86 @@ namespace DeviceHandler.ViewModel
 		{
 			foreach (DeviceParameterData data in list)
 			{
+				HideShowParameters(data, text);
+			}
+		}
+
+		private void HideShowParameters(
+			ObservableCollection<ParamGroup> list,
+			string text)
+		{
+			foreach (DeviceParameterData data in list)
+			{
+				HideShowParameters(data, text);
+			}
+		}
+
+		private void HideShowParameters(
+			ObservableCollection<MCU_ParamData> list,
+			string text)
+		{
+			foreach (DeviceParameterData data in list)
+			{
+				HideShowParameters(data, text);
+			}
+		}
+
+		private void HideShowParameters(
+			ObservableCollection<DBC_ParamData> list,
+			string text)
+		{
+			foreach (DeviceParameterData data in list)
+			{
+				HideShowParameters(data, text);
+			}
+		}
+
+		private void HideShowParameters(
+			ObservableCollection<DBC_ParamGroup> list,
+			string text)
+		{
+			foreach (DeviceParameterData data in list)
+			{
+				HideShowParameters(data, text);
+			}
+		}
+
+		private void HideShowParameters(
+			ObservableCollection<DBC_File> list,
+			string text)
+		{
+			foreach (DBC_File data in list)
+			{
+				HideShowParameters(data, text);
+				data.HideNotVisibleGroups();
+			}
+		}
+
+		private void HideShowParameters(
+			DeviceParameterData data,
+			string text)
+		{
 				if (data is ParamGroup group)
 				{
 					HideShowParameters(group.ParamList, text);
-					continue;
+					return;
+				}
+				else if (data is DBC_ParamGroup dbc_group)
+				{
+					HideShowParameters(dbc_group.ParamsList, text);
+				return;
+				}
+				else if (data is DBC_File dbc_file)
+				{
+					HideShowParameters(dbc_file.ParamsList, text);
+					return;
 				}
 
 				if (data.Name.ToLower().Contains(text.ToLower()))
 					data.Visibility = Visibility.Visible;
 				else
 					data.Visibility = Visibility.Collapsed;
-			}
+			
 		}
 
 
@@ -360,6 +428,11 @@ namespace DeviceHandler.ViewModel
 			BuildDevicesList();
 		}
 
+		private void DBCRemove(DeviceParameterData param)
+		{
+			DBCRemoveEvent?.Invoke(param);
+		}
+
 		#endregion Methods
 
 
@@ -439,6 +512,8 @@ namespace DeviceHandler.ViewModel
 		public RelayCommand ExpandAllCommand { get; private set; }
 		public RelayCommand CollapseAllCommand { get; private set; }
 
+		public RelayCommand<DeviceParameterData> DBCRemoveCommand { get; private set; }
+
 		private RelayCommand<TextChangedEventArgs> _DeviceParamSearch_TextChanged;
 		public RelayCommand<TextChangedEventArgs> DeviceParamSearch_TextChanged
 		{
@@ -454,6 +529,7 @@ namespace DeviceHandler.ViewModel
 		#region Events
 
 		public event Action<DeviceParameterData> ParamDoubleClickedEvent;
+		public event Action<DeviceParameterData> DBCRemoveEvent;
 
 		#endregion Events
 	}

@@ -9,6 +9,7 @@
              xmlns:mcu_modles="clr-namespace:DeviceCommunicators.MCU;assembly=DeviceCommunicators"
              xmlns:dbc_modles="clr-namespace:DeviceCommunicators.DBC;assembly=DeviceCommunicators"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" 
+             xmlns:converters="clr-namespace:DeviceHandler.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" MinWidth="200">
 
@@ -19,7 +20,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-
+            <converters:TreeViewWidthConverte x:Key="TreeViewWidthConverte" />
 
         </ResourceDictionary>
     </UserControl.Resources>
@@ -81,10 +82,10 @@
         </Grid>
 
         <TreeView Grid.Row="1" ItemsSource="{Binding DevicesList}"
-                          Background="Transparent"
-                          BorderBrush="{DynamicResource MahApps.Brushes.Accent2}"
-                          BorderThickness="1"
-                          FontSize="14">
+                  Background="Transparent"
+                  BorderBrush="{DynamicResource MahApps.Brushes.Accent2}"
+                  BorderThickness="1"
+                  FontSize="14">
 
             <i:Interaction.Triggers>
 
@@ -136,7 +137,7 @@
                 <HierarchicalDataTemplate DataType="{x:Type mcu_modles:MCU_DeviceData}" ItemsSource="{Binding MCU_GroupList}" >
                     <TextBlock Text="{Binding Path=Name}" Margin="0,2" />
                 </HierarchicalDataTemplate>
-                <HierarchicalDataTemplate DataType="{x:Type dbc_modles:DBC_DeviceData}" ItemsSource="{Binding DBC_GroupList}" >
+                <HierarchicalDataTemplate DataType="{x:Type dbc_modles:DBC_DeviceData}" ItemsSource="{Binding DBC_FilesList}" >
                     <TextBlock Text="{Binding Path=Name}" Margin="0,2" ToolTip="{Binding DBCFilePath}"/>
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type device_comm_models:DeviceData}" ItemsSource="{Binding ParemetersList}">
@@ -148,18 +149,41 @@
                 <HierarchicalDataTemplate DataType="{x:Type dbc_modles:DBC_ParamGroup}" ItemsSource="{Binding ParamsList}">
                     <TextBlock Text="{Binding Path=Name}" Margin="0,2"/>
                 </HierarchicalDataTemplate>
-                
+                <HierarchicalDataTemplate DataType="{x:Type dbc_modles:DBC_File}" ItemsSource="{Binding ParamsList}">
+                    <Grid Width="{Binding ActualWidth, 
+                                          RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView},
+                                          Converter={StaticResource TreeViewWidthConverte}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="5" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="{Binding Path=Name}" Margin="0,2" ToolTip="{Binding FilePath}" />
+
+                        <Button Grid.Column="2" Style="{StaticResource ButtonWithIconStyle}"
+                                Width="15"
+                                Height="15"
+                                ToolTip="Remove DBC file"
+                                Command="{Binding DataContext.DBCRemoveCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}"
+                                CommandParameter="{Binding}">
+                            <iconPacks:PackIconMaterial Kind="TrashCan" Width="10" Height="10"/>
+                        </Button>
+                    </Grid>
+                </HierarchicalDataTemplate>
+
                 <DataTemplate DataType="{x:Type device_comm_models:DeviceParameterData}" >
-                    <Grid>
+                    <Grid Margin="0,2" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="5" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="{Binding Path=Name}" Margin="0,2"/>
+                        <TextBlock Grid.Column="0" Text="{Binding Path=Name}" />
 
-                        <TextBlock Grid.Column="2" Text="{Binding Path=Units, StringFormat={}{0}}" Margin="0,2"/>
+                        <TextBlock Grid.Column="2" Text="{Binding Path=Units, StringFormat={}{0}}"/>
 
                     </Grid>
                 </DataTemplate>
