@@ -35,6 +35,8 @@ namespace DeviceHandler.ViewModels
 		public ObservableCollection<RecordData> ParametersList_WithIndex { get; set; }
 
 		public bool IsLimitParametersList { get; set; }
+		public bool IsSaveLoad { get; set; }
+
 		public int LimitOfParametersList { get; set; }
 
 		#endregion Properties
@@ -63,6 +65,7 @@ namespace DeviceHandler.ViewModels
 			string title)
 		{
 			IsLimitParametersList = false;
+			IsSaveLoad = true;
 
 			_devicesContainer = devicesContainer;
 			Title = title;
@@ -173,7 +176,7 @@ namespace DeviceHandler.ViewModels
 
 		#endregion Save / Load
 
-		protected void GetActualParameters_Json(ObservableCollection<DeviceParameterData> parametersList)
+		public void GetActualParameters_Json(ObservableCollection<DeviceParameterData> parametersList)
 		{
 			if (ParametersList == null)
 				ParametersList = new ObservableCollection<DeviceParameterData>();
@@ -194,8 +197,12 @@ namespace DeviceHandler.ViewModels
 				if (deviceFullData == null || deviceFullData.Device == null)
 					continue;
 
-				DeviceParameterData actualParameterData =
-					deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == parameterData.Name);
+				DeviceParameterData actualParameterData = null;
+				if (parameterData is MCU_ParamData mcuParam)
+					actualParameterData = deviceFullData.Device.ParemetersList.ToList().Find((p) => ((MCU_ParamData)p).Cmd == mcuParam.Cmd);
+				else
+					actualParameterData = deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == parameterData.Name);
+
 				if (actualParameterData == null)
 					continue;
 
@@ -243,8 +250,11 @@ namespace DeviceHandler.ViewModels
 
 				DeviceFullData deviceFullData = _devicesContainer.TypeToDevicesFullData[deviceType];
 
-				DeviceParameterData actualParameterData =
-					deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == name);
+				DeviceParameterData actualParameterData = null;
+				if (deviceType == DeviceTypesEnum.MCU)
+					actualParameterData = deviceFullData.Device.ParemetersList.ToList().Find((p) => ((MCU_ParamData)p).Cmd == param);
+				else
+					actualParameterData = deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == param);
 				if (actualParameterData == null)
 					continue;
 

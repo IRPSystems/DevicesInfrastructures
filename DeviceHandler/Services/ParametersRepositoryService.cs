@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
+using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
 using DeviceHandler.Interfaces;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Timers;
 using System.Windows;
 
@@ -110,7 +112,14 @@ namespace DeviceHandler.Services
 		{
 			_communicationTimer.Stop();
 
+			
+
 			_isDisposed = true;
+		}
+
+		public void RemoveAll()
+		{
+			_nameToRepositoryParamList.Clear();
 		}
 
 
@@ -127,9 +136,13 @@ namespace DeviceHandler.Services
 			
 			RepositoryParam repositoryParam;
 
-			if (_nameToRepositoryParamList.ContainsKey(parameter.Name))
+			string name = parameter.Name;
+			if(parameter is MCU_ParamData mcuParam)
+				name = mcuParam.Cmd;
+
+			if (_nameToRepositoryParamList.ContainsKey(name))
 			{
-				repositoryParam = _nameToRepositoryParamList[parameter.Name];
+				repositoryParam = _nameToRepositoryParamList[name];
 				if (repositoryParam.Priority < priority)
 					repositoryParam.Priority = priority;
 				if(receivedMessageCallback != null)
@@ -143,7 +156,7 @@ namespace DeviceHandler.Services
 				repositoryParam.Counter = 0;
 				if (receivedMessageCallback != null)
 					repositoryParam.ReceivedMessageEvent += receivedMessageCallback;
-				_nameToRepositoryParamList[parameter.Name] = repositoryParam;
+				_nameToRepositoryParamList[name] = repositoryParam;
 			}
 
 			repositoryParam.Counter++;
@@ -158,14 +171,19 @@ namespace DeviceHandler.Services
 				if (parameter == null || _nameToRepositoryParamList == null)
 					return;
 
-				if (_nameToRepositoryParamList.ContainsKey(parameter.Name) == false)
+				string name = parameter.Name;
+				if (parameter is MCU_ParamData mcuParam)
+					name = mcuParam.Cmd;
+
+				if (_nameToRepositoryParamList.ContainsKey(name) == false)
 					return;
-				if (_nameToRepositoryParamList[parameter.Name] == null)
+				if (_nameToRepositoryParamList[name] == null)
 					return;
 
+				
 
 				RepositoryParam repositoryParam =
-					_nameToRepositoryParamList[parameter.Name];
+					_nameToRepositoryParamList[name];
 				if (repositoryParam == null)
 					return;
 
@@ -175,7 +193,7 @@ namespace DeviceHandler.Services
 				if (repositoryParam.Counter == 0)
 				{
 					_nameToRepositoryParamList.TryRemove(
-						new KeyValuePair<string, RepositoryParam>(parameter.Name, repositoryParam));
+						new KeyValuePair<string, RepositoryParam>(name, repositoryParam));
 					//_repositoryParamList.Remove(repositoryParam);
 				}
 
@@ -219,6 +237,7 @@ namespace DeviceHandler.Services
 				}
 
 				_communicationTimer.Stop();
+				_start = DateTime.Now;
 				//LoggerService.Inforamtion(this, "_communicationTimer stopped");
 
 
@@ -243,9 +262,12 @@ namespace DeviceHandler.Services
 					System.Threading.Thread.Sleep(1);
 				}
 
-				_start = DateTime.Now;
 
-				_timeoutTimer.Start();
+				try
+				{
+					_timeoutTimer.Start();
+				}
+				catch (Exception ex) { }
 
 				//_communicationTimer.Start();
 			}
@@ -269,13 +291,17 @@ namespace DeviceHandler.Services
 					return;
 				}
 
-				if (_nameToRepositoryParamList.ContainsKey(param.Name) == false)
+				string name = param.Name;
+				if (param is MCU_ParamData mcuParam)
+					name = mcuParam.Cmd;
+
+				if (_nameToRepositoryParamList.ContainsKey(name) == false)
 				{
 					return;
 				}
 
 				RepositoryParam repositoryParam =
-						_nameToRepositoryParamList[param.Name];
+						_nameToRepositoryParamList[name];
 				if (repositoryParam != null)
 				{
 					repositoryParam.IsReceived = result;
@@ -285,6 +311,7 @@ namespace DeviceHandler.Services
 
 				if (result != CommunicatorResultEnum.OK)
 				{
+					LoggerService.Inforamtion(this, $"{Name} - Setting NaN");
 					param.Value = double.NaN;
 				}
 
@@ -312,14 +339,50 @@ namespace DeviceHandler.Services
 
 		protected virtual void LastCallbackHandling()
 		{
+			LastCallbackEvent?.Invoke();
 
+			TimeSpan diff = DateTime.Now - _start;
+			double reducedTime = diff.TotalMilliseconds;
+
+			double refreshTime = 1000 / AcquisitionRate;
+
+			double actualRate = 0;
+
+			//_communicationTimer.Interval = (reducedTime < refreshTime) ? (double)refreshTime - reducedTime : 1;
+
+			//actualRate = /*(reducedTime > refreshTime) ?*/ 1000 / (reducedTime + 1);// : (double)1000 / (refreshTime);
+
+			if (reducedTime > refreshTime)
+			{
+				_communicationTimer.Interval = reducedTime;
+				actualRate = 1000.0 / (reducedTime + 1);
+			}
+			else
+			{
+				_communicationTimer.Interval = refreshTime;
+				actualRate = 1000.0 / refreshTime;
+			}
+
+			if (actualRate != 0)
+				ActualAcquisitionRate = actualRate;
+
+			//if (ActualAcquisitionRate < 5)
+			//{
+			//	LoggerService.Inforamtion(this, $"ActualAcquisitionRate={ActualAcquisitionRate}");
+			//}
 		}
 
 		#endregion Methods
+
+		#region Events
+
+		public event Action LastCallbackEvent;
+
+		#endregion Events
 	}
 
 
-	
+
 
 
 }

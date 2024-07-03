@@ -182,9 +182,13 @@ namespace DeviceHandler.ViewModel
 
 					DeviceFullData deviceFullData = _devicesContainer.TypeToDevicesFullData[param.DeviceType];
 					if (deviceFullData == null)
-						return;					
+						return;
 
-					actualParam = deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == param.Name);
+					if (param is MCU_ParamData mcuParam)
+						actualParam = deviceFullData.Device.ParemetersList.ToList().Find((p) => ((MCU_ParamData)p).Cmd == mcuParam.Cmd);
+					else
+						actualParam = deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == param.Name);
+
 					if (actualParam == null)
 						return;
 
@@ -217,6 +221,9 @@ namespace DeviceHandler.ViewModel
 
 		private void SetSearchedTest(string text)
 		{
+			if (DevicesList == null)
+				return;
+
 			foreach (DeviceData deviceBase in DevicesList)
 			{
 				if(!(deviceBase is DeviceData deviceData))
@@ -365,6 +372,9 @@ namespace DeviceHandler.ViewModel
 
 		public void BuildDevicesList()
 		{
+			if (_devicesContainer == null)
+				return;
+
 			DevicesList = new ObservableCollection<DeviceData>();
 
 

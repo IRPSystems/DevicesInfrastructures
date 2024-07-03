@@ -5,18 +5,16 @@ using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceCommunicators.Models;
 using Entities.Models;
-using Newtonsoft.Json.Linq;
 using Services.Services;
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 #if _SAVE_TIME
 using System.Collections.Generic;
 using System.IO;
 #endif
 using System.Linq;
-using System.Text;
 using System.Timers;
+using System.Windows.Markup;
 
 namespace DeviceCommunicators.MCU
 {
@@ -33,8 +31,8 @@ namespace DeviceCommunicators.MCU
 		private const byte _errMask = 0xF0;
 		private const byte _errShift = 4;
 
-		private const int _getResponseRepeats = 5;
-		private const int _getResponsesTime = 20;
+		private const int _getResponseRepeats = 20;
+		public const int GetResponsesTimeout = 50;
 
 		public ConcurrentDictionary<int, string> _mcuErrorToDescription;
 
@@ -43,8 +41,10 @@ namespace DeviceCommunicators.MCU
 
 		private System.Timers.Timer _poolBuildTimer;
 
+		private ConcurrentDictionary<uint, BlockingCollection<CommunicatorIOData>> _idArrayToData;
 
-		private uint _syncID;
+		private object _lockObj;
+
 
 #if _SAVE_TIME
 		private List<(TimeSpan, string, CommunicatorResultEnum)> _commTimeList;
@@ -71,6 +71,9 @@ namespace DeviceCommunicators.MCU
 
 			_poolBuildTimer = new System.Timers.Timer(500);
 			_poolBuildTimer.Elapsed += PoolBuildTimerElapsed;
+
+			_idArrayToData = new ConcurrentDictionary<uint, BlockingCollection<CommunicatorIOData>>();
+			_lockObj = new object();
 
 #if _SAVE_TIME
 			_commTimeList = new List<(TimeSpan, string, CommunicatorResultEnum)>();
@@ -105,25 +108,24 @@ namespace DeviceCommunicators.MCU
 				this,
 				"Initiating communication - Adapter: " + canAdapterType);
 
-			_syncID = syncID;
-
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, hwId, syncID);
+				CommService = new CanPCanService(baudrate, hwId, syncID, syncID);
 			}
 			else if (canAdapterType == "Sloki")
 			{
-				CommService = new CanSlokiService(baudrate, syncID);
+				CommService = new CanSlokiService(baudrate, syncID, syncID);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
-				CommService = new CanUdpSimulationService(baudrate, syncID, rxPort, txPort, address);
+				CommService = new CanUdpSimulationService(baudrate, syncID, syncID, rxPort, txPort, address);
 			}
 
 
-			CommService.Init(false);
+			CommService.Init(true);
 			CommService.Name = "MCU_Communicator";
 			CanService.CanMessageReceivedEvent += AsyncMessageWasReceived;
+			CanService.MessageReceivedEvent += CanService_MessageReceivedEvent;
 
 
 
@@ -149,6 +151,8 @@ namespace DeviceCommunicators.MCU
 
 			FireConnectionEvent();
 
+			_idArrayToData.Clear();
+
 #if _SAVE_TIME
 			try
 			{
@@ -158,7 +162,7 @@ namespace DeviceCommunicators.MCU
 					foreach ((TimeSpan, string, CommunicatorResultEnum) time in _commTimeList)
 					{
 						string name = string.Empty;
-						if(!string.IsNullOrEmpty(time.Item2))
+						if (!string.IsNullOrEmpty(time.Item2))
 							name = time.Item2.Replace("\n", "-");
 						sw.WriteLine($"{time.Item1.TotalMilliseconds}\t\t\t{name}\t\t\t{time.Item3}");
 						//LoggerService.Debug(this, time.TotalMilliseconds.ToString());
@@ -172,8 +176,9 @@ namespace DeviceCommunicators.MCU
 		}
 
 
-
-
+#if _SAVE_TIME
+		private DateTime _prevStart;
+#endif
 		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
 		{
 			if (data is CommunicatorIOData_SendMessage sendMessageData)
@@ -186,200 +191,158 @@ namespace DeviceCommunicators.MCU
 				return CommunicatorResultEnum.None;
 
 #if _SAVE_TIME
-			DateTime startTime = DateTime.Now;
+			//data.SendStartTime = DateTime.Now;
+			//if(_prevStart.Year != 1)
+			//{
+			//	_commTimeList.Add((data.SendStartTime - _prevStart, data.Parameter.Name, CommunicatorResultEnum.None));
+			//}
+
+			//_prevStart = data.SendStartTime;
 #endif
 
-			CommunicatorResultEnum result = CommunicatorResultEnum.None;
-			string errorDescription = null;
-			int i = 0;
-			for (; i < _getResponseRepeats; i++)
+
+			byte[] id = null;
+			byte[] buffer = null;
+			try
 			{
-				byte[] id = null;
+				id = _idBuffersPool.Take(_cancellationToken);
+				buffer = _buffersPool.Take(_cancellationToken);
+			}
+			catch (OperationCanceledException)
+			{
+				return CommunicatorResultEnum.OK;
+			}
+
+			ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
+
+			uint idNum = (uint)(id[0] + (id[1] << 8) + (id[2] << 16));
+
+			if (_idArrayToData.ContainsKey(idNum) == false)
+				_idArrayToData[idNum] = new BlockingCollection<CommunicatorIOData>();
+
+			data.SendCounter++;
+			data.SendBuffer = buffer;
+			data.SendId = idNum;
+			data.TimeoutEvent += Data_TimeoutEvent;
+			_idArrayToData[idNum].Add(data);
+
+			
+
+			data.SendTimoutTimer.Start();
+			//lock (CommService)
+				CommService.Send(buffer);
+
+			return CommunicatorResultEnum.OK;
+		}
+
+		private void Data_TimeoutEvent(CommunicatorIOData data)
+		{
+			data.SendTimoutTimer.Stop();
+			if (_idArrayToData == null || _idArrayToData.Count == 0)
+				return;
+
+			try
+			{
+				data = _idArrayToData[data.SendId].Take(_cancellationToken);
+			}
+			catch (OperationCanceledException)
+			{
+				return;
+			}
+
+			
+
+			// If retrys eanded, return error
+			if (data.SendCounter > _getResponseRepeats)
+			{
+				data.TimeoutEvent -= Data_TimeoutEvent;
+				data.Callback?.Invoke(data.Parameter, CommunicatorResultEnum.NoResponse, "");
+				return;
+			}
+
+			Retry(data);
+		}
+
+		private void CanService_MessageReceivedEvent(byte[] buffer)
+		{
+			try
+			{
+#if _SAVE_TIME
+				DateTime start = DateTime.Now;
+				//if(_prevStart.Year != 1)
+				//{
+				//	_commTimeList.Add((data.SendStartTime - _prevStart, data.Parameter.Name, CommunicatorResultEnum.None));
+				//}
+
+				//_prevStart = data.SendStartTime;
+#endif
+				uint idNum = (uint)(buffer[0] + (buffer[1] << 8) + (buffer[2] << 16));
+
+				if (_idArrayToData.ContainsKey(idNum) == false || _idArrayToData[idNum].Count == 0)
+				{
+					//LoggerService.Inforamtion(this, $"ID of received message not found: {idNum}");
+					return;
+				}
+
+				CommunicatorIOData data = null;
 				try
 				{
-					id = _idBuffersPool.Take(_cancellationToken);
+					data = _idArrayToData[idNum].Take(_cancellationToken);
 				}
 				catch (OperationCanceledException)
 				{
-					break;
+					return;
 				}
 
-				byte[] buffer = _buffersPool.Take(_cancellationToken);
-				ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
+				data.SendTimoutTimer.Stop();
 
-				//if (mcuParam.Name == "MTPA Vector Angle" ||
-				//		mcuParam.Name == "MTPA Vector Amplitude")
-				//{
-				//	StringBuilder sb = new StringBuilder();
-				//	sb.Append("Send " + mcuParam.Name + ": ");
-				//	foreach (byte b in buffer) sb.Append(b);
-				//	LoggerService.Inforamtion(this, sb.ToString());
-				//}
-
-				CommService.Send(buffer);
-
-
-				try
-				{
-					//int intVal = 0;
-					//if (data.IsSet)
-					//{
-					//	try
-					//	{
-					//		intVal = GetValueAsInt(data.Value);
-					//	}
-					//	catch (Exception ex)
-					//	{
-					//		errorDescription = "Failed to handle get/set.\r\n" +
-					//		"Parameter: " + mcuParam.Name + "\r\n" +
-					//		"Value: " + mcuParam.Value;
-					//		LoggerService.Error(this, errorDescription, ex);
-					//		result = CommunicatorResultEnum.Error;
-
-					//		System.Threading.Thread.Sleep(1);
-					//		continue;
-					//	}
-					//}
-
-					result = WaitForResponse(
-						mcuParam,
-						out errorDescription,
-						data.IsSet,
-						id,
-						data.Value);
-
-				}
-				catch (Exception ex)
-				{
-					errorDescription = "Failed to handle get/set.\r\n" +
-						"Parameter: " + mcuParam.Name + "\r\n" +
-						"Value: " + mcuParam.Value;
-					LoggerService.Error(this, errorDescription, ex);
-					result = CommunicatorResultEnum.Error;
-				}
-
-				if (result == CommunicatorResultEnum.OK/* || result == CommunicatorResultEnum.Error*/)
-					break;
-
-				LoggerService.Inforamtion(this, "Retry");
-
-				System.Threading.Thread.Sleep(1);
-			}
-
-
-			data.Callback?.Invoke(mcuParam, result, errorDescription);
+				string errorDescription = string.Empty;
+				CommunicatorResultEnum isSuccess = HandleBuffer(
+					buffer,
+					data.Parameter as MCU_ParamData,
+					data.IsSet,
+					data.Value,
+					out errorDescription);
 
 #if _SAVE_TIME
-			TimeSpan diff = (DateTime.Now - startTime);
-			//LoggerService.Debug(this,
-			//	"Parameter: " + mcuParam.Name +
-			//		" - Value: " + mcuParam.Value +
-			//		" - Callback status: " + result +
-			//		" - Err description: " + errorDescription +
-			//		" - Iteration: " + i +
-			//		" - Time: " + diffBefore.TotalMilliseconds +
-			//		": " + diff.TotalMilliseconds);
-
-			//if(mcuParam.Name == "Runtime")
-				_commTimeList.Add((diff, mcuParam.Name, result));
-#endif // _SAVE_TIME
-
-			return result;
-		}
-
-		private int GetValueAsInt(object valOb)
-		{
-			double d = 0;
-			if (valOb is string str)
-				double.TryParse(str, out d);
-			else
-			{
-				d = Convert.ToDouble(valOb);
-			}
-
-			return Convert.ToInt32(d);
-
-		}
-
-		private object _lockObj = new object();
-		private CommunicatorResultEnum WaitForResponse(
-			MCU_ParamData mcuParam,
-			out string errorDescription,
-			bool isSet,
-			byte[] paramId,
-			object setValue = null)
-		{
-
-
-			lock (_lockObj)
-			{
-				CommunicatorResultEnum isSuccess = CommunicatorResultEnum.None;
-				errorDescription = null;
-
-
-				byte[] readBuffer = null;
-
-				readBuffer = null;
-				ReadBuffer(ref readBuffer);
-
-
-				if (readBuffer != null)
-				{
-					isSuccess = HandleBuffer(
-						paramId,
-						readBuffer,
-						mcuParam,
-						isSet,
-						setValue,
-						out errorDescription);
-				}
+			_commTimeList.Add((DateTime.Now - start, data.Parameter.Name, isSuccess));
+#endif
 
 				if (isSuccess == CommunicatorResultEnum.OK)
-					return isSuccess;
-
-				System.Threading.Thread.Sleep(1);
-
-
-				if (readBuffer == null && isSuccess == CommunicatorResultEnum.None)
 				{
-					isSuccess = CommunicatorResultEnum.NoResponse;
+					data.TimeoutEvent -= Data_TimeoutEvent;
+					data.Callback?.Invoke(data.Parameter, isSuccess, errorDescription);
+					return;
 				}
 
-				return isSuccess;
+				// If retrys eanded, return error
+				if (data.SendCounter > _getResponseRepeats)
+				{
+					data.TimeoutEvent -= Data_TimeoutEvent;
+					data.Callback?.Invoke(data.Parameter, isSuccess, errorDescription);
+					return;
+				}
+
+				Retry(data);
 			}
-
-
+			catch (Exception ex) 
+			{
+				LoggerService.Error(this, "Failed to handle a received message", ex);
+			}
 		}
 
-		private void ReadBuffer(ref byte[] readBuffer)
+		private void Retry(
+			CommunicatorIOData data)
 		{
-			uint readNode = 0;
+			//LoggerService.Inforamtion(this, $"Retry {data.SendCounter}");
 
-			Stopwatch timeout = new Stopwatch();
-			timeout.Start();
-			while (readBuffer == null && (timeout.ElapsedMilliseconds < _getResponsesTime))
-			{
-
-				CanService.Read(out readBuffer, out readNode);
-
-
-				if (readBuffer != null)
-				{
-					if (readNode != _syncID)
-					{
-						readBuffer = null;
-						continue;
-					}
-					break;
-				}
-
-				System.Threading.Thread.Sleep(1);
-
-			}
+			data.SendCounter++;
+			_idArrayToData[data.SendId].Add(data);
+			data.SendTimoutTimer.Start();
+			CommService.Send(data.SendBuffer);
 		}
 
 		private CommunicatorResultEnum HandleBuffer(
-			byte[] paramId,
 			byte[] readBuffer,
 			MCU_ParamData mcuParam,
 			bool isSet,
@@ -393,19 +356,11 @@ namespace DeviceCommunicators.MCU
 			try
 			{
 
-				int isSuccess = IsErr(readBuffer, paramId);
+				var err = (readBuffer[3] & _errMask) >> _errShift;
 
-				
-				if (isSuccess == 0)
+
+				if (err == 0)
 				{
-					//if(mcuParam.Name == "MTPA Vector Angle" ||
-					//	mcuParam.Name == "MTPA Vector Amplitude")
-					//{
-					//	StringBuilder sb = new StringBuilder();
-					//	sb.Append("Ack " + mcuParam.Name + ": ");
-					//	foreach (byte b in readBuffer) sb.Append(b);
-					//	LoggerService.Inforamtion(this, sb.ToString());
-					//}
 
 					value = readBuffer[4] << 24 | readBuffer[5] << 16 | readBuffer[6] << 8 | readBuffer[7];
 
@@ -414,22 +369,12 @@ namespace DeviceCommunicators.MCU
 					value *= is_negative;
 
 					dvalue = (double)value / mcuParam.Scale;
-					
-					//if (dvalue == 0 &&
-					//	mcuParam.Value is double prevValue &&
-					//	prevValue != 0)
-					//{
-					//	LoggerService.Inforamtion(this, "Value = 0 for " + mcuParam.Name);
-					//}
-
-					
-
 				}
 				else
 				{
-					errDescription = "Unknown error: " + isSuccess;
-					if (_mcuErrorToDescription.ContainsKey((int)isSuccess))
-						errDescription = _mcuErrorToDescription[(int)isSuccess];
+					errDescription = "Unknown error: " + err;
+					if (_mcuErrorToDescription.ContainsKey(err))
+						errDescription = _mcuErrorToDescription[err];
 					return CommunicatorResultEnum.Error;
 				}
 			}
@@ -458,17 +403,17 @@ namespace DeviceCommunicators.MCU
 
 				DropDownParamData dd =
 					mcuParam.DropDown.Find((i) => i.Value == dvalue.ToString());
-				if (dd != null) 
+				if (dd != null)
 				{
 					mcuParam.Value = dd.Name;
 				}
 				else mcuParam.Value = dvalue;
 			}
-			else if(string.IsNullOrEmpty(mcuParam.Format) == false)
+			else if (string.IsNullOrEmpty(mcuParam.Format) == false)
 			{
 				mcuParam.Value = GetFormatedValuesService.GetString(mcuParam.Format, dvalue);
 			}
-			else 
+			else
 				mcuParam.Value = dvalue;
 
 			return CommunicatorResultEnum.OK;
@@ -487,7 +432,7 @@ namespace DeviceCommunicators.MCU
 		{
 			value = value * mcu_Message.Scale;
 
-			
+
 
 
 			//! Split command and value:
@@ -530,32 +475,6 @@ namespace DeviceCommunicators.MCU
 			return data;
 		}
 
-		private int IsErr(
-			byte[] buffer,
-			byte[] out_id)
-		{
-
-			byte[] in_id = _idBuffersPool.Take(_cancellationToken);
-
-			Array.Copy(buffer, 0, in_id, 0, 3);
-
-			//! Check if id sent is id received
-			if (!Enumerable.SequenceEqual(in_id, out_id))
-			{
-				return 4;
-			}
-
-			//! err bits locates in H nibble in data byte[3]
-			var err = (buffer[3] & _errMask) >> _errShift;
-
-			if (err != 0)
-			{
-				return err;
-			}
-
-			return 0;
-		}
-
 		private void PoolBuildTimerElapsed(object sender, ElapsedEventArgs e)
 		{
 			while (_buffersPool.Count < _maxNumOfBuffers)
@@ -569,6 +488,8 @@ namespace DeviceCommunicators.MCU
 				{
 					break;
 				}
+
+				System.Threading.Thread.Sleep(1);
 			}
 
 			while (_idBuffersPool.Count < _maxNumOfIds)
@@ -582,6 +503,8 @@ namespace DeviceCommunicators.MCU
 				{
 					break;
 				}
+
+				System.Threading.Thread.Sleep(1);
 			}
 		}
 
@@ -623,7 +546,7 @@ namespace DeviceCommunicators.MCU
 
 		#endregion DBC
 
-#endregion Methods
+		#endregion Methods
 
 		#region Events
 
