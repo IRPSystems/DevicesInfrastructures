@@ -163,12 +163,12 @@
                         <TextBlock Grid.Column="0" Text="{Binding Path=Name}" Margin="0,2" ToolTip="{Binding FilePath}" />
 
                         <Button Grid.Column="2" Style="{StaticResource ButtonWithIconStyle}"
-                                Width="15"
-                                Height="15"
+                                Width="20"
+                                Height="20"
                                 ToolTip="Remove DBC file"
                                 Command="{Binding DataContext.DBCRemoveCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}"
                                 CommandParameter="{Binding}">
-                            <iconPacks:PackIconMaterial Kind="TrashCan" Width="10" Height="10"/>
+                            <iconPacks:PackIconMaterial Kind="TrashCan" Width="15" Height="15"/>
                         </Button>
                     </Grid>
                 </HierarchicalDataTemplate>
