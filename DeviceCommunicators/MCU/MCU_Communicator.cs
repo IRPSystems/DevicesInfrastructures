@@ -114,7 +114,7 @@ namespace DeviceCommunicators.MCU
 			}
 			else if (canAdapterType == "Sloki")
 			{
-				CommService = new CanSlokiService(baudrate, syncID, syncID);
+				//CommService = new CanSlokiService(baudrate, syncID, syncID);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{

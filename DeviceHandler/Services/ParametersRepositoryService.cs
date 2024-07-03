@@ -267,7 +267,7 @@ namespace DeviceHandler.Services
 				{
 					_timeoutTimer.Start();
 				}
-				catch (Exception ex) { }
+				catch (Exception) { }
 
 				//_communicationTimer.Start();
 			}
