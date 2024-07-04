@@ -173,38 +173,6 @@ namespace DeviceHandler.Services
 					if (!(repositoryParam.Parameter is DBC_ParamData dbcParam))
 						continue;
 
-					//int byteLength = dbcParam.Signal.Length / 8;  // dbcParam.Signal.Length is in bits
-					//int startByte = dbcParam.Signal.StartBit / 8; // dbcParam.Signal.StartBit is in bits
-
-					//switch (byteLength)
-					//{
-					//	case 1: dbcParam.Value = buffer[startByte]; break;
-					//	case 2:
-					//		if (dbcParam.Signal.ValueType == DbcValueType.Unsigned)
-					//			dbcParam.Value = BitConverter.ToUInt16(buffer, startByte);
-					//		else if (dbcParam.Signal.ValueType == DbcValueType.Signed)
-					//			dbcParam.Value = BitConverter.ToInt16(buffer, startByte);
-					//		break;
-					//	case 3:
-					//	case 4:
-					//		byte[] buffer4Bytes = new byte[4];
-					//		Array.Copy(buffer, startByte, buffer4Bytes, 0, byteLength);
-					//		Get4BytesValue(dbcParam, buffer4Bytes, startByte);
-					//		break;
-					//	case 5:
-					//	case 6:
-					//	case 7:
-					//	case 8:
-					//		byte[] buffer8Bytes = new byte[8];
-					//		Array.Copy(buffer, startByte, buffer8Bytes, 0, byteLength);
-					//		Get8BytesValue(dbcParam, buffer8Bytes, startByte);
-					//		break;
-					//}
-
-					//double dVal = Convert.ToDouble(dbcParam.Value);
-					//dVal += dbcParam.Signal.Offset;
-					//dVal *= dbcParam.Signal.Factor;
-
 					dbcParam.Value = dbcParam.GetValue(buffer);
 				}
 				catch(Exception ex)
@@ -215,32 +183,6 @@ namespace DeviceHandler.Services
 				System.Threading.Thread.Sleep(1);
 			}
 		}
-
-		//private void Get4BytesValue(
-		//	DBC_ParamData dbcParam,
-		//	byte[] buffer4Bytes,
-		//	int startByte)
-		//{
-		//	if (dbcParam.Signal.ValueType == DbcValueType.Unsigned)
-		//		dbcParam.Value = BitConverter.ToUInt32(buffer4Bytes, startByte);
-		//	else if (dbcParam.Signal.ValueType == DbcValueType.Signed)
-		//		dbcParam.Value = BitConverter.ToInt32(buffer4Bytes, startByte);
-		//	else if (dbcParam.Signal.ValueType == DbcValueType.IEEEFloat)
-		//		dbcParam.Value = BitConverter.ToSingle(buffer4Bytes, startByte);
-		//}
-
-		//private void Get8BytesValue(
-		//	DBC_ParamData dbcParam,
-		//	byte[] buffer8Bytes,
-		//	int startByte)
-		//{
-		//	if (dbcParam.Signal.ValueType == DbcValueType.Unsigned)
-		//		dbcParam.Value = BitConverter.ToUInt64(buffer8Bytes, startByte);
-		//	else if (dbcParam.Signal.ValueType == DbcValueType.Signed)
-		//		dbcParam.Value = BitConverter.ToInt64(buffer8Bytes, startByte);
-		//	else if (dbcParam.Signal.ValueType == DbcValueType.IEEEDouble)
-		//		dbcParam.Value = BitConverter.ToDouble(buffer8Bytes, startByte);
-		//}
 
 		#endregion Methods
 	}
