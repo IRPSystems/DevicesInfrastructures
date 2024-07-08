@@ -91,8 +91,8 @@ namespace DeviceCommunicators.PowerSupplayGK
 			    CommService = new ModbusTCPSevice(_ipAdderss, _port, 255);
 
 
-			CommService.MessageReceivedEvent += _modbusTCPSevice_MessageReceivedEvent;
-			CommService.ErrorEvent += _modbusTCPSevice_ErrorEvent;
+			ModbusTCP.MessageReceivedEvent += _modbusTCPSevice_MessageReceivedEvent;
+			ModbusTCP.ErrorEvent += _modbusTCPSevice_ErrorEvent;
 			CommService.Init(true);
 
 			InitBase();
