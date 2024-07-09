@@ -64,8 +64,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 			DeviceData easpDevice)
         {
 			CommService = new ModbusTCPSevice(address, 502, 1);
-			CommService.MessageReceivedEvent += _modbusTCPSevice_MessageReceivedEvent;
-			CommService.ErrorEvent += _modbusTCPSevice_ErrorEvent;
+			_modbusTCPSevice.MessageReceivedEvent += _modbusTCPSevice_MessageReceivedEvent;
+			_modbusTCPSevice.ErrorEvent += _modbusTCPSevice_ErrorEvent;
 			CommService.Init(true);
 
 			if (CommService.IsInitialized == false)
@@ -101,8 +101,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 						if (isEa)
 							ipsList.Add(ip);
 
-						CommService.MessageReceivedEvent -= _modbusTCPSevice_MessageReceivedEvent;
-						CommService.ErrorEvent -= _modbusTCPSevice_ErrorEvent;
+						_modbusTCPSevice.MessageReceivedEvent -= _modbusTCPSevice_MessageReceivedEvent;
+						_modbusTCPSevice.ErrorEvent -= _modbusTCPSevice_ErrorEvent;
 						CommService.Dispose();
 						CommService = null;
 
@@ -134,8 +134,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 					Parameter = eaParam,
 				};
 
-				CommService.MessageReceivedEvent += _modbusTCPSevice_MessageReceivedEvent;
-				CommService.ErrorEvent += _modbusTCPSevice_ErrorEvent;
+				_modbusTCPSevice.MessageReceivedEvent += _modbusTCPSevice_MessageReceivedEvent;
+				_modbusTCPSevice.ErrorEvent += _modbusTCPSevice_ErrorEvent;
 
 				bool isOk = Get(data);
 				return isOk;
