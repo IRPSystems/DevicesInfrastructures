@@ -428,6 +428,7 @@ namespace DeviceHandler.ViewModels
 				}
 				else if (dragData is DeviceParameterData param)
 				{
+					param.IsSelected = false;
 					LoggerService.Inforamtion(this, "Dropping parameter \"" + param.Name + "\"");
 					AddParamToLogList(param, droppedOnIndex);
 				}
