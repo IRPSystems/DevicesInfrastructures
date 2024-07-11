@@ -17,22 +17,60 @@ namespace DeviceSimulators.ViewModels
     {
         public ObservableCollection<DeviceSimulatorViewModel> ViewModelsList { get; set; }
 
+		private DevicesContainer _devicesContainer;
 
-        public DeviceSimulatorsViewModel(DevicesContainer devicesContainer)
+
+		public DeviceSimulatorsViewModel(DevicesContainer devicesContainer)
         {
+			_devicesContainer = devicesContainer;
+
 			ClosingCommand = new RelayCommand<CancelEventArgs>(Closing);
 
 
 			ViewModelsList = new ObservableCollection<DeviceSimulatorViewModel>();
 
-			foreach (DeviceFullData deviceFullData in devicesContainer.DevicesFullDataList) 
-            { 
-                switch(deviceFullData.Device.DeviceType) 
-                {
+			UpdateDevices();
+		}
 
-                    case DeviceTypesEnum.Dyno:
-                        ViewModelsList.Add(new DynoSimulatorMainWindowViewModel(deviceFullData.Device));
-                        break;
+		private void Closing(CancelEventArgs e)
+        {
+            foreach(DeviceSimulatorViewModel vm in ViewModelsList)
+            {
+                vm.Disconnect();
+            }
+        }
+
+		private void SearchText_TextChanged(TextChangedEventArgs e)
+		{
+			if (!(e.Source is TextBox textBox))
+				return;
+
+			if (!(textBox.DataContext is DeviceSimulatorViewModel simulator))
+				return;
+
+			foreach (DeviceParameterData param in simulator.ParametersList)
+			{
+				if (param.Name.ToLower().Contains(textBox.Text.ToLower()))
+					param.Visibility = Visibility.Visible;
+				else
+					param.Visibility = Visibility.Collapsed;
+			}
+		}
+
+		public void UpdateDevices()
+		{
+			foreach (DeviceFullData deviceFullData in _devicesContainer.DevicesFullDataList)
+			{
+				bool isAlreadyExist = IsAlreadyExist(deviceFullData);
+				if (isAlreadyExist)
+					continue;
+
+				switch (deviceFullData.Device.DeviceType)
+				{
+
+					case DeviceTypesEnum.Dyno:
+						ViewModelsList.Add(new DynoSimulatorMainWindowViewModel(deviceFullData.Device));
+						break;
 
 					case DeviceTypesEnum.MCU:
 					case DeviceTypesEnum.MCU_B2B:
@@ -60,36 +98,22 @@ namespace DeviceSimulators.ViewModels
 						break;
 
 					case DeviceTypesEnum.KeySight:
-                        break;
+						break;
 
 				}
-            }
+			}
 
 		}
 
-		private void Closing(CancelEventArgs e)
-        {
-            foreach(DeviceSimulatorViewModel vm in ViewModelsList)
-            {
-                vm.Disconnect();
-            }
-        }
-
-		private void SearchText_TextChanged(TextChangedEventArgs e)
+		private bool IsAlreadyExist(DeviceFullData deviceFullData)
 		{
-			if (!(e.Source is TextBox textBox))
-				return;
-
-			if (!(textBox.DataContext is DeviceSimulatorViewModel simulator))
-				return;
-
-			foreach (DeviceParameterData param in simulator.ParametersList)
+			foreach(DeviceSimulatorViewModel simulator in ViewModelsList)
 			{
-				if (param.Name.ToLower().Contains(textBox.Text.ToLower()))
-					param.Visibility = Visibility.Visible;
-				else
-					param.Visibility = Visibility.Collapsed;
+				if(simulator.DeviceName == deviceFullData.Device.Name)
+					return true;
 			}
+
+			return false;
 		}
 
 
