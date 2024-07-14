@@ -409,7 +409,7 @@ namespace DeviceHandler.ViewModels
 
 				
 
-				if (dragData is ObservableCollection<object> list)
+				if (dragData is System.Collections.IList list)
 				{
 					foreach (object obj in list)
 					{

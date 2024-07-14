@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Controls.ViewModels;
 using DeviceCommunicators.DBC;
 using DeviceCommunicators.EvvaDevice;
 using DeviceCommunicators.MCU;
@@ -151,61 +152,81 @@ namespace DeviceHandler.ViewModel
 				Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
 			{
 
-				TreeView treeView =
-					FindAncestorService.FindAncestor<TreeView>((DependencyObject)e.OriginalSource);
-				TreeViewItem treeViewItem =
-					FindAncestorService.FindAncestor<TreeViewItem>((DependencyObject)e.OriginalSource);
+				MultiSelectTreeView treeView =
+					FindAncestorService.FindAncestor<MultiSelectTreeView>((DependencyObject)e.OriginalSource);
 
-				DependencyObject sourceObject = treeViewItem;
-				object item = null;
-
-				if (treeView != null && treeViewItem != null)
+				if(treeView.SelectedItems == null || treeView.SelectedItems.Count == 1)
 				{
-					item = treeViewItem.DataContext;
-
-					if (item == null)
-						return;
+					DragSingleItem(e, treeView);
 				}
-				else
-					return;
-
-				if (!(item is DeviceParameterData param))
-					return;
-
-				LoggerService.Inforamtion(this, "Dragging original parameter \"" + param.Name + "\"");
-
-				DeviceParameterData actualParam = null;
-				if (param.DeviceType != DeviceTypesEnum.EVVA)
+				else if(treeView.SelectedItems.Count > 0)
 				{
-					if (_devicesContainer.TypeToDevicesFullData.ContainsKey(param.DeviceType) == false)
-						return;
+					LoggerService.Inforamtion(this, "Multiple items dragging");
 
-					DeviceFullData deviceFullData = _devicesContainer.TypeToDevicesFullData[param.DeviceType];
-					if (deviceFullData == null)
-						return;
+					DependencyObject sourceObject = treeView;
 
-					if (param is MCU_ParamData mcuParam)
-						actualParam = deviceFullData.Device.ParemetersList.ToList().Find((p) => ((MCU_ParamData)p).Cmd == mcuParam.Cmd);
-					else
-						actualParam = deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == param.Name);
-
-					if (actualParam == null)
-						return;
-
-					LoggerService.Inforamtion(this, "Dragging actual parameter \"" + actualParam.Name + "\"");
-
+					DataObject dragData = new DataObject(DragDropFormat, treeView.SelectedItems);
+					DragDrop.DoDragDrop(sourceObject, dragData, DragDropEffects.Move);
 				}
-				else
-					actualParam = param;
-
-				LoggerService.Inforamtion(this, "Dragging parameter \"" + actualParam.Name + "\"");
-
-				DataObject dragData = new DataObject(DragDropFormat, actualParam);
-				DragDrop.DoDragDrop(sourceObject, dragData, DragDropEffects.Move);
+				
 			}
 		}
 
-		
+		private void DragSingleItem(
+			MouseEventArgs e,
+			TreeView treeView)
+		{
+			TreeViewItem treeViewItem =
+				FindAncestorService.FindAncestor<TreeViewItem>((DependencyObject)e.OriginalSource);
+
+			DependencyObject sourceObject = treeViewItem;
+			object item = null;
+
+			if (treeView != null && treeViewItem != null)
+			{
+				item = treeViewItem.DataContext;
+
+				if (item == null)
+					return;
+			}
+			else
+				return;
+
+			if (!(item is DeviceParameterData param))
+				return;
+
+			LoggerService.Inforamtion(this, "Dragging original parameter \"" + param.Name + "\"");
+
+			DeviceParameterData actualParam = null;
+			if (param.DeviceType != DeviceTypesEnum.EVVA)
+			{
+				if (_devicesContainer.TypeToDevicesFullData.ContainsKey(param.DeviceType) == false)
+					return;
+
+				DeviceFullData deviceFullData = _devicesContainer.TypeToDevicesFullData[param.DeviceType];
+				if (deviceFullData == null)
+					return;
+
+				if (param is MCU_ParamData mcuParam)
+					actualParam = deviceFullData.Device.ParemetersList.ToList().Find((p) => ((MCU_ParamData)p).Cmd == mcuParam.Cmd);
+				else
+					actualParam = deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == param.Name);
+
+				if (actualParam == null)
+					return;
+
+				LoggerService.Inforamtion(this, "Dragging actual parameter \"" + actualParam.Name + "\"");
+
+			}
+			else
+				actualParam = param;
+
+			LoggerService.Inforamtion(this, $"Dragging parameter \"{actualParam.Name}\"");
+
+			DataObject dragData = new DataObject(DragDropFormat, actualParam);
+			DragDrop.DoDragDrop(sourceObject, dragData, DragDropEffects.Move);
+		}
+
 
 		#endregion Drag
 
