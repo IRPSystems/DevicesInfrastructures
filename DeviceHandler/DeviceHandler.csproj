@@ -5,6 +5,7 @@
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
     <Platforms>AnyCPU;x86</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -34,7 +35,6 @@
     <ProjectReference Include="..\..\Infrastructure\Controls\Controls.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Converters\Converters.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Services\Services.csproj" />
-	<ProjectReference Include="..\..\Infrastructure\J2534DotNet\J2534DotNet.csproj" />
     <ProjectReference Include="..\DeviceCommunicators\DeviceCommunicators.csproj" />
   </ItemGroup>
 

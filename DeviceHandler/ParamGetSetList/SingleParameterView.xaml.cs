@@ -347,10 +347,15 @@ namespace DeviceHandler.ParamGetSetList
 			TextBoxKeyUpEvent?.Invoke(e);
 		}
 
-		//private void ComboBox_DropDownClosed(object sender, EventArgs e)
-		//{
-		//	ComboBox_DropDownClosedEvent?.Invoke(sender as ComboBox);
-		//}
+		private void tb_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			if(ParamData is MCU_ParamData mcuParam &&
+				mcuParam.IsChangeCaretPos &&
+				sender is TextBox textBox)
+			{
+				textBox.CaretIndex = textBox.Text.Length;
+			}
+		}
 
 		private void cb_DropDownOpened(object sender, EventArgs e)
 		{
@@ -422,6 +427,7 @@ namespace DeviceHandler.ParamGetSetList
 
 
 
+
 		#endregion Methods
 
 		#region Commands
@@ -429,6 +435,5 @@ namespace DeviceHandler.ParamGetSetList
 
 		#endregion Commands
 
-		
 	}
 }

@@ -35,6 +35,8 @@ namespace DeviceHandler.ViewModels
 		public ObservableCollection<RecordData> ParametersList_WithIndex { get; set; }
 
 		public bool IsLimitParametersList { get; set; }
+		public bool IsSaveLoad { get; set; }
+
 		public int LimitOfParametersList { get; set; }
 
 		#endregion Properties
@@ -63,6 +65,7 @@ namespace DeviceHandler.ViewModels
 			string title)
 		{
 			IsLimitParametersList = false;
+			IsSaveLoad = true;
 
 			_devicesContainer = devicesContainer;
 			Title = title;
@@ -173,7 +176,7 @@ namespace DeviceHandler.ViewModels
 
 		#endregion Save / Load
 
-		protected void GetActualParameters_Json(ObservableCollection<DeviceParameterData> parametersList)
+		public void GetActualParameters_Json(ObservableCollection<DeviceParameterData> parametersList)
 		{
 			if (ParametersList == null)
 				ParametersList = new ObservableCollection<DeviceParameterData>();
@@ -399,7 +402,7 @@ namespace DeviceHandler.ViewModels
 
 				
 
-				if (dragData is ObservableCollection<object> list)
+				if (dragData is System.Collections.IList list)
 				{
 					foreach (object obj in list)
 					{
@@ -418,6 +421,7 @@ namespace DeviceHandler.ViewModels
 				}
 				else if (dragData is DeviceParameterData param)
 				{
+					param.IsSelected = false;
 					LoggerService.Inforamtion(this, "Dropping parameter \"" + param.Name + "\"");
 					AddParamToLogList(param, droppedOnIndex);
 				}

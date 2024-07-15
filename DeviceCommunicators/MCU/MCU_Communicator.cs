@@ -110,15 +110,15 @@ namespace DeviceCommunicators.MCU
 
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, hwId, syncID);
+				CommService = new CanPCanService(baudrate, hwId, syncID, syncID);
 			}
 			else if (canAdapterType == "Sloki")
 			{
-				CommService = new CanSlokiService(baudrate, syncID);
+				//CommService = new CanSlokiService(baudrate, syncID, syncID);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
-				CommService = new CanUdpSimulationService(baudrate, syncID, rxPort, txPort, address);
+				CommService = new CanUdpSimulationService(baudrate, syncID, syncID, rxPort, txPort, address);
 			}
 
 
@@ -238,6 +238,8 @@ namespace DeviceCommunicators.MCU
 		private void Data_TimeoutEvent(CommunicatorIOData data)
 		{
 			data.SendTimoutTimer.Stop();
+			if (_idArrayToData == null || _idArrayToData.Count == 0)
+				return;
 
 			try
 			{

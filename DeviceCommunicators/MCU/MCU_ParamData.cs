@@ -198,7 +198,8 @@ namespace DeviceCommunicators.MCU
 		[JsonIgnore]
 		public object Data { get; set; }
 
-		
+		[JsonIgnore]
+		public bool IsChangeCaretPos { get; set; }
 	}
 
 	public class ParamGroup: DeviceParameterData

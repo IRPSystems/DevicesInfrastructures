@@ -5,19 +5,27 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
+	<UseWindowsForms>true</UseWindowsForms>
     <Platforms>AnyCPU;x86</Platforms>
+    <ApplicationIcon>Resources\Simulator.ico</ApplicationIcon>
+    <UserSecretsId>21257972-84a0-4e94-984d-a206180fda06</UserSecretsId>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\Simulator.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Infrastructure\Communication\Communication.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Entities\Entities.csproj" />
-	<ProjectReference Include="..\..\Infrastructure\J2534DotNet\J2534DotNet.csproj" />
     <ProjectReference Include="..\DeviceHandler\DeviceHandler.csproj" />
   </ItemGroup>
 
