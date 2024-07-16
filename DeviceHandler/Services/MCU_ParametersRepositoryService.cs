@@ -80,9 +80,9 @@ namespace DeviceHandler.Services
 				_msgIdToNameToRepositoryParamList[dbcParam.ParentMessage.ID] = dictionary;
 			}
 
-			if (dictionary.ContainsKey(((MCU_ParamData)parameter).Cmd))
+			if (dictionary.ContainsKey(parameter.Name))
 			{
-				repositoryParam = dictionary[((MCU_ParamData)parameter).Cmd];
+				repositoryParam = dictionary[parameter.Name];
 				if (repositoryParam.Priority < priority)
 					repositoryParam.Priority = priority;
 				if (receivedMessageCallback != null)
@@ -96,7 +96,7 @@ namespace DeviceHandler.Services
 				repositoryParam.Counter = 0;
 				if (receivedMessageCallback != null)
 					repositoryParam.ReceivedMessageEvent += receivedMessageCallback;
-				dictionary[((MCU_ParamData)parameter).Cmd] = repositoryParam;
+				dictionary[parameter.Name] = repositoryParam;
 			}
 
 			repositoryParam.Counter++;
@@ -128,7 +128,7 @@ namespace DeviceHandler.Services
 				_msgIdToNameToRepositoryParamList[dbcParam.ParentMessage.ID];
 
 			RepositoryParam repositoryParam =
-					dictionary[((MCU_ParamData)parameter).Cmd];
+					dictionary[parameter.Name];
 			if (repositoryParam == null)
 				return;
 
@@ -138,7 +138,7 @@ namespace DeviceHandler.Services
 			if (repositoryParam.Counter == 0)
 			{
 				dictionary.TryRemove(
-					new KeyValuePair<string, RepositoryParam>(((MCU_ParamData)parameter).Cmd, repositoryParam));
+					new KeyValuePair<string, RepositoryParam>(parameter.Name, repositoryParam));
 			}
 
 			
