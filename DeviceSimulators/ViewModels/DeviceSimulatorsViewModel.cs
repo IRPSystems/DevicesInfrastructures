@@ -97,7 +97,7 @@ namespace DeviceSimulators.ViewModels
 						ViewModelsList.Add(new TKSimulatorMainWindowViewModel(deviceFullData.Device));
 						break;
 
-					case DeviceTypesEnum.KeySight:
+					case DeviceTypesEnum.ScopeKeysight:
 						break;
 
 				}

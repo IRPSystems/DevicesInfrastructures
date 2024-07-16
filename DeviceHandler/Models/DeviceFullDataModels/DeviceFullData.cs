@@ -256,7 +256,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		        case DeviceTypesEnum.MCU: return new DeviceFullData_MCU(deviceData);
 				case DeviceTypesEnum.PowerSupplyBK: return new DeviceFullData_PowerSupplyBK(deviceData);
 				case DeviceTypesEnum.PowerSupplyEA: return new DeviceFullData_PowerSupplyEA(deviceData);
-				case DeviceTypesEnum.KeySight: return new DeviceFullData_Scope_KeySight(deviceData);
+				case DeviceTypesEnum.ScopeKeysight: return new DeviceFullData_Scope_KeySight(deviceData);
 				case DeviceTypesEnum.TorqueKistler: return new DeviceFullData_TorqueKistler(deviceData);
 				case DeviceTypesEnum.MCU_B2B: return new DeviceFullData_MCU_B2B(deviceData);
 				case DeviceTypesEnum.BTMTempLogger: return new DeviceFullData_BTMTempLogger(deviceData);
@@ -267,6 +267,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				case DeviceTypesEnum.PowerSupplyGK: return new DeviceFullData_PowerSupplyGK(deviceData);
 				case DeviceTypesEnum.BrainChild: return new DeviceFullData_BrainChild(deviceData);
 				case DeviceTypesEnum.Dyno3: return new DeviceFullData_Dyno3(deviceData);
+				case DeviceTypesEnum.PowerSupplyKeysight: return new DeviceFullData_PowerSupplyKeysight(deviceData);
 				default: return null;
             }
         }

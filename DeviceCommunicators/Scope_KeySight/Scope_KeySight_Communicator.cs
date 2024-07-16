@@ -38,38 +38,38 @@ namespace DeviceCommunicators.Scope_KeySight
             DeviceData device = new DeviceData()
             {
                 Name = "Scope_KeySight",
-                DeviceType = DeviceTypesEnum.KeySight
+                DeviceType = DeviceTypesEnum.ScopeKeysight
             };
 
             device.ParemetersList = new ObservableCollection<DeviceParameterData>()
              {
-                new Scope_KeySight_ParamData() { Name = "channel to config",        Command = "Choose channel" ,      DeviceType = DeviceTypesEnum.KeySight,  },
+                new Scope_KeySight_ParamData() { Name = "channel to config",        Command = "Choose channel" ,      DeviceType = DeviceTypesEnum.ScopeKeysight,  },
                 
                 
                 
-                new Scope_KeySight_ParamData() { Name = "Channel Turn on/off",      Command = ":CHANnel<channel>:DISPlay" ,       DeviceType = DeviceTypesEnum.KeySight,   DropDown = new List<DropDownParamData>() { new DropDownParamData() {Name = "Channel OFF", Value = "0" }, new DropDownParamData() {Name = "Channel ON", Value = "1" } } },
-                new Scope_KeySight_ParamData() { Name = "Channel to measurement",   Command = "Set signal" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "Volte/Ampere",            Command = "Probe  Volte/Ampere",   data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "Clear all ",               Command = "Clear all mesure" ,      data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "Run/Stop",                Command = "Run Control" ,           data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "Acquire",                  Command = "Acquire" ,               data="",    DeviceType = DeviceTypesEnum.KeySight,  },                      
-                new Scope_KeySight_ParamData() { Name = "Time scaling",             Command = "Time scaling" ,          data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "Measurement Scaling",      Command = "Measurement Scaling" ,   data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "Scaling prob ",            Command = "Scaling prob" ,          data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "Triger mode",              Command = "Triger mode" ,           data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "Triger slope parameter",   Command = "Triger slope" ,          data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "File_name",                Command = "file_name" ,             data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "Save ",                    Command = "Save" ,                  data="",    DeviceType = DeviceTypesEnum.KeySight,  },
+                new Scope_KeySight_ParamData() { Name = "Channel Turn on/off",      Command = ":CHANnel<channel>:DISPlay" ,       DeviceType = DeviceTypesEnum.ScopeKeysight,   DropDown = new List<DropDownParamData>() { new DropDownParamData() {Name = "Channel OFF", Value = "0" }, new DropDownParamData() {Name = "Channel ON", Value = "1" } } },
+                new Scope_KeySight_ParamData() { Name = "Channel to measurement",   Command = "Set signal" ,            data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "Volte/Ampere",            Command = "Probe  Volte/Ampere",   data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "Clear all ",               Command = "Clear all mesure" ,      data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "Run/Stop",                Command = "Run Control" ,           data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "Acquire",                  Command = "Acquire" ,               data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },                      
+                new Scope_KeySight_ParamData() { Name = "Time scaling",             Command = "Time scaling" ,          data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "Measurement Scaling",      Command = "Measurement Scaling" ,   data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "Scaling prob ",            Command = "Scaling prob" ,          data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "Triger mode",              Command = "Triger mode" ,           data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "Triger slope parameter",   Command = "Triger slope" ,          data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "File_name",                Command = "file_name" ,             data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "Save ",                    Command = "Save" ,                  data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
                
-                new Scope_KeySight_ParamData() { Name = "CYCLe DC",                 Command = "CYCLe,DC" ,              data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "DISPlay DC",               Command = "DISPlay,DC" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "CYCLe AC",                 Command = "CYCLe,AC" ,              data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "DISPlay AC",               Command = "DISPlay,AC" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "Peak to peak",             Command = "VPP" ,                   data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "VAMPlitude",               Command = "VAMPlitude" ,            data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "VTOP",                     Command = "VTOP" ,                  data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "Average CYCLe",            Command = "VAVerage CYCLe" ,        data="",    DeviceType = DeviceTypesEnum.KeySight,  },
-                new Scope_KeySight_ParamData() { Name = "Average DISPlay",          Command = "VAVerage DISPlay" ,      data="",    DeviceType = DeviceTypesEnum.KeySight,  },
+                new Scope_KeySight_ParamData() { Name = "CYCLe DC",                 Command = "CYCLe,DC" ,              data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "DISPlay DC",               Command = "DISPlay,DC" ,            data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "CYCLe AC",                 Command = "CYCLe,AC" ,              data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "DISPlay AC",               Command = "DISPlay,AC" ,            data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "Peak to peak",             Command = "VPP" ,                   data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "VAMPlitude",               Command = "VAMPlitude" ,            data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "VTOP",                     Command = "VTOP" ,                  data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "Average CYCLe",            Command = "VAVerage CYCLe" ,        data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
+                new Scope_KeySight_ParamData() { Name = "Average DISPlay",          Command = "VAVerage DISPlay" ,      data="",    DeviceType = DeviceTypesEnum.ScopeKeysight,  },
             };
 
 
@@ -202,9 +202,8 @@ namespace DeviceCommunicators.Scope_KeySight
                 if (!(param is Scope_KeySight_ParamData scopeKeySight))
                     return;
 
-                string data_from_scop;
-
-                data_from_scop= Read_command(scopeKeySight);
+                
+				param.Value = Read_command(scopeKeySight);
 
                 Thread.Sleep(10);
 
