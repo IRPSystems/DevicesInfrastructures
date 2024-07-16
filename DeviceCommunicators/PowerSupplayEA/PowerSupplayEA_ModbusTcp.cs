@@ -180,6 +180,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 				if (nominalVoltageParam.Value != null)
 					_nominalVoltage = (float)nominalVoltageParam.Value;
 
+				System.Threading.Thread.Sleep(100);
+
 				PowerSupplayEA_ParamData nominalCurrentParam =
 					easpDevice.ParemetersList.ToList().Find((p) => ((PowerSupplayEA_ParamData)p).Cmd == "SYSTem:NOMinal:CURRent")
 						as PowerSupplayEA_ParamData;
@@ -188,6 +190,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 				if (nominalCurrentParam.Value != null)
 					_nominalCurrent = (float)nominalCurrentParam.Value;
 
+				System.Threading.Thread.Sleep(100);
+
 				PowerSupplayEA_ParamData nominalPowerParam =
 					easpDevice.ParemetersList.ToList().Find((p) => ((PowerSupplayEA_ParamData)p).Cmd == "SYSTem:NOMinal:POWer")
 						as PowerSupplayEA_ParamData;
@@ -195,6 +199,9 @@ namespace DeviceCommunicators.PowerSupplayEA
 				Get(iOData);
 				if (nominalPowerParam.Value != null)
 					_nominalPower = (float)nominalPowerParam.Value;
+
+
+				System.Threading.Thread.Sleep(1000);
 			}
 			catch(Exception ex) 
 			{

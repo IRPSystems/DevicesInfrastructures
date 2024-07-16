@@ -27,8 +27,11 @@
             <TextBlock Text="Address" VerticalAlignment="Center" Margin="0,0,5,0"/>
             <TextBox Text="{Binding Address}" Margin="0,0,10,0" Width="90" VerticalAlignment="Center"
                      Visibility="{Binding AddressTBVisibility}"/>
-            <ComboBox ItemsSource="{Binding EAIPsList}" SelectedItem="{Binding Address}" Margin="0,0,10,0"
+            <ComboBox ItemsSource="{Binding EAIPsList}" 
+                      Text="{Binding Address}" 
+                      Margin="0,0,10,0"
                       Visibility="{Binding AddressCBVisibility}" 
+                      IsEditable="True"
                       Width="120"/>
             <Button Content="Search IP" Command="{Binding EASearchIPCommand}" Margin="0,0,10,0"
                       Visibility="{Binding AddressCBVisibility}" />

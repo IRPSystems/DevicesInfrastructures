@@ -79,7 +79,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		{
 			ConnectionViewModel = new SerialAndTCPViewModel(
 				115200, "COM1", 14323, 14320,
-				502, "192.168.10.28", "Serial");
+				502, "", "Serial");
 
 			_eapsCommunicator = new PowerSupplayEA_Communicator();
 			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp();
