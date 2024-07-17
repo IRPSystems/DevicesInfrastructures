@@ -352,9 +352,9 @@ namespace DeviceCommunicators.PowerSupplayEA
 					eaParam.NumOfRegisters);
 
 
-				bool isNotTimeout = _waitForResponse.WaitOne(1000);
+				bool isNotTimeout = _waitForResponse.WaitOne(2000);
 
-				if (isNotTimeout == false)
+				if (!isNotTimeout || _data == null || _data.Length == 0)
 				{
 					if (data.Callback != null)
 					{
