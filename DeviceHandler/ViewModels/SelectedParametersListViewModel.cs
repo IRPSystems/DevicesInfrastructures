@@ -460,12 +460,35 @@ namespace DeviceHandler.ViewModels
 			}
 		}
 
+		private bool IsParamExistInList(DeviceParameterData param)
+		{
+			foreach(DeviceParameterData data in ParametersList)
+			{
+				if(data == param) 
+					return true;
+
+				if(param.DeviceType == DeviceTypesEnum.MCU &&
+					data.DeviceType == DeviceTypesEnum.MCU)
+				{
+					if(((MCU_ParamData)param).Cmd == ((MCU_ParamData)data).Cmd)
+						return true;
+				}
+				else
+				{
+					if(data.Name == param.Name)
+						return true;
+				}
+			}
+
+			return false;
+		}
+
 		private void AddParamToLogList(
 			DeviceParameterData param,
 			int droppedOnIndex)
 		{
-			int index = ParametersList.IndexOf(param);
-			if (index >= 0)
+			bool isParamExist = IsParamExistInList(param);
+			if (isParamExist)
 			{
 				MessageBox.Show("The parameter already exist");
 				return;
