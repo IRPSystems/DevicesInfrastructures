@@ -34,7 +34,12 @@ namespace DeviceHandler.Services
 		/// </summary>
 		public int AcquisitionRate 
 		{
-			get => _acquisitionRate;
+			get
+			{
+				if (_acquisitionRate == 0)
+					_acquisitionRate = 5;
+				return _acquisitionRate;
+			}
 			set
 			{
 				_acquisitionRate = value;
