@@ -349,12 +349,7 @@ namespace DeviceHandler.ParamGetSetList
 
 		private void tb_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			if(ParamData is MCU_ParamData mcuParam &&
-				mcuParam.IsChangeCaretPos &&
-				sender is TextBox textBox)
-			{
-				textBox.CaretIndex = textBox.Text.Length;
-			}
+			
 		}
 
 		private void cb_DropDownOpened(object sender, EventArgs e)
