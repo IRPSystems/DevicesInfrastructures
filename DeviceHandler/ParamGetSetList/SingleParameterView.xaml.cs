@@ -352,8 +352,10 @@ namespace DeviceHandler.ParamGetSetList
 			
 		}
 
+		private bool _isComboDropOpended = false;
 		private void cb_DropDownOpened(object sender, EventArgs e)
 		{
+			_isComboDropOpended = true;
 			if (!(DataContext is ParamGetSetListViewModel vm))
 				return;
 
@@ -369,7 +371,10 @@ namespace DeviceHandler.ParamGetSetList
 
 		private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			ComboBox_SelectionChangedEvent?.Invoke(sender as ComboBox);
+			if(_isComboDropOpended)
+				ComboBox_SelectionChangedEvent?.Invoke(sender as ComboBox);
+
+			_isComboDropOpended = false;
 		}
 
 		private void _hexTextBoxView_EnterEvent(object sender, EventArgs e)
