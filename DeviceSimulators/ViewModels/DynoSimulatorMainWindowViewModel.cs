@@ -95,6 +95,7 @@ namespace DeviceSimulators.ViewModels
 					_canConnectViewModel.SelectedBaudrate,
 					CanPCanService.GetHWId(_canConnectViewModel.SelectedHwId),
 					0x600 + _canConnectViewModel.SyncNodeID,
+					0x580 + _canConnectViewModel.SyncNodeID,
 					0x580 + _canConnectViewModel.SyncNodeID);
 			}
 			else if (_canConnectViewModel.SelectedAdapter == "UDP Simulator")
@@ -103,7 +104,8 @@ namespace DeviceSimulators.ViewModels
 					0x600 + _canConnectViewModel.SyncNodeID,
 					0x580 + _canConnectViewModel.SyncNodeID,
 					_canConnectViewModel.RxPort,
-					_canConnectViewModel.TxPort, _canConnectViewModel.Address);
+					_canConnectViewModel.TxPort, _canConnectViewModel.Address,
+					0x580 + _canConnectViewModel.SyncNodeID);
 			}
 
 

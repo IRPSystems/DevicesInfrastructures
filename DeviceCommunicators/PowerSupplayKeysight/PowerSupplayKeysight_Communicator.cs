@@ -20,12 +20,10 @@ namespace DeviceCommunicators.PowerSupplayKeysight
 		 #region Fields
 
 		public int channel = 1; // channel of scope
-		private string file_name = "Scope";
 
 
 
 
-		private string _data = null;
        
         private string _iPaddres;
         private int _port;
