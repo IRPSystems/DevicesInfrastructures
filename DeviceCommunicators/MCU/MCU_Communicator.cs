@@ -99,6 +99,7 @@ namespace DeviceCommunicators.MCU
 			int baudrate,
 			uint syncID,
 			uint asyncID,
+			bool isAsync = false,
 			ushort hwId = 0,
 			int rxPort = 0,
 			int txPort = 0,
@@ -110,7 +111,7 @@ namespace DeviceCommunicators.MCU
 
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, hwId, syncID, syncID);
+				CommService = new CanPCanService(baudrate, hwId, syncID, syncID, asyncID);
 			}
 			else if (canAdapterType == "Sloki")
 			{
@@ -118,11 +119,11 @@ namespace DeviceCommunicators.MCU
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
-				CommService = new CanUdpSimulationService(baudrate, syncID, syncID, rxPort, txPort, address);
+				CommService = new CanUdpSimulationService(baudrate, syncID, syncID, rxPort, txPort, address, asyncID);
 			}
 
 
-			CommService.Init(true);
+			CommService.Init(isAsync);
 			CommService.Name = "MCU_Communicator";
 			CanService.CanMessageReceivedEvent += AsyncMessageWasReceived;
 			CanService.MessageReceivedEvent += CanService_MessageReceivedEvent;

@@ -62,6 +62,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID,
 				(ConnectionViewModel as CanConnectViewModel).AsyncNodeID,
+				true,
 				(ConnectionViewModel as CanConnectViewModel).GetSelectedHWId((ConnectionViewModel as CanConnectViewModel).SelectedHwId));
 		}
 
@@ -72,6 +73,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID,
 				(ConnectionViewModel as CanConnectViewModel).AsyncNodeID,
+				true,
 				0,
 				(ConnectionViewModel as CanConnectViewModel).RxPort,
 				(ConnectionViewModel as CanConnectViewModel).TxPort,
