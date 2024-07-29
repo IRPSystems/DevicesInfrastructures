@@ -268,6 +268,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				case DeviceTypesEnum.BrainChild: return new DeviceFullData_BrainChild(deviceData);
 				case DeviceTypesEnum.Dyno3: return new DeviceFullData_Dyno3(deviceData);
 				case DeviceTypesEnum.PowerSupplyKeysight: return new DeviceFullData_PowerSupplyKeysight(deviceData);
+				case DeviceTypesEnum.ZimmerPowerMeter: return new DeviceFullData_ZimmerPowerMeter(deviceData);
 				default: return null;
             }
         }
