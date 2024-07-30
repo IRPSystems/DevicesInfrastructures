@@ -111,11 +111,22 @@ namespace DeviceCommunicators.ZimmerPowerMeter
 		{ 
             try
             {
-                if (!(param is ZimmerPowerMeter_ParamData supplay_Parameter))
+                if (!(param is ZimmerPowerMeter_ParamData powerMeter))
                     return;
 
-				string cmd = supplay_Parameter.Command + supplay_Parameter.Channel + "?";
+				if (powerMeter.Channel == 0)
+					powerMeter.Channel = 1;
+
+				SerialService.ClearBuffer();
+
+				string cmd = powerMeter.Command;
+				if (powerMeter.Command != "*IDN")
+					cmd += powerMeter.Channel;
+				cmd += "?";
 				SerialService.Send(cmd);
+
+				//Thread.Sleep(50);
+
 
 				string received;
 				SerialService.Read(out received);
@@ -125,12 +136,18 @@ namespace DeviceCommunicators.ZimmerPowerMeter
 					return;
 				}
 
+				if (powerMeter.Command == "*IDN")
+				{
+					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+					return;
+				}
+
 				double d;
 				bool res = double.TryParse(received, out d);
 				param.Value = d;
 
-				if (res)
-                	callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
+				if (!res)
+                	callback?.Invoke(param, CommunicatorResultEnum.Error, "Received: " + received);
 				else
                     callback?.Invoke(param, CommunicatorResultEnum.OK, null);
             }

@@ -39,7 +39,11 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as DeviceParameterData).Name == "Voltage DC");
+			DeviceParameterData data = new ZimmerPowerMeter_ParamData()
+			{
+				Command = "*IDN",
+				Name = "Identification"
+			};
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
