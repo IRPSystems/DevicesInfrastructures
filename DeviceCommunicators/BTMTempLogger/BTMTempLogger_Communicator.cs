@@ -1,4 +1,5 @@
-﻿using Communication.Services;
+﻿using Communication.Interfaces;
+using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceCommunicators.Interfaces;
@@ -48,6 +49,11 @@ namespace DeviceCommunicators.BTMTempLogger
 			get => 12;
 		}
 
+		private ISerialService SerialService 
+		{
+			get => CommService as ISerialService;
+		}
+
 		#endregion Properties
 
 		#region Constructor
@@ -91,7 +97,7 @@ namespace DeviceCommunicators.BTMTempLogger
             else
 			    CommService = new SerialService(_name_comport, _boud_rate);
 
-			CommService.MessageReceivedEvent += MessageReceived;
+			SerialService.MessageReceivedEvent += MessageReceived;
 
 
 			CommService.Init(true);

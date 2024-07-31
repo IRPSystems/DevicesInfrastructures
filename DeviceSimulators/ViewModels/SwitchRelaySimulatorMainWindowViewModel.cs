@@ -76,7 +76,7 @@ namespace DeviceSimulators.ViewModels
 
 			_commService.Init(true);
 
-			_commService.MessageReceivedEvent += MessageReceivedEventHandler;
+			//((TcpStaticService)_commService).MessageReceivedEvent += MessageReceivedEventHandler;
 
 			ConnectVM.IsConnectButtonEnabled = false;
 			ConnectVM.IsDisconnectButtonEnabled = true;

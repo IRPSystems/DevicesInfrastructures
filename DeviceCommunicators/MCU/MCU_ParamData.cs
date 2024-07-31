@@ -15,6 +15,7 @@ namespace DeviceCommunicators.MCU
 	
 	public class MCU_ParamData : DeviceParameterData, IParamWithDropDown
 	{
+		public Action ValueChanged;
 
 		public void GetMessageID(ref byte[] id)
 		{
@@ -47,6 +48,9 @@ namespace DeviceCommunicators.MCU
 			}
 			set
 			{
+				if(_value != value)
+					ValueChanged?.Invoke();
+
 				_value = value;
 				if (_isSettingSelectedDropDown)
 					return;
@@ -54,7 +58,31 @@ namespace DeviceCommunicators.MCU
 				_isSettingValue = true;
 				if (DropDown != null)
 				{
-					SelectedDropDown = DropDown.Find((dd) => dd.Value == _value.ToString());
+					SelectedDropDown = DropDown.Find((dd) => dd.Name == (_value as string));
+				}
+				_isSettingValue = false;
+
+			}
+		}
+
+		private object _editValue;
+		[JsonIgnore]
+		public override object EditValue
+		{
+			get => _editValue;
+			set
+			{
+				if (_editValue != value)
+					ValueChanged?.Invoke();
+
+				_editValue = value;
+				if (_isSettingSelectedDropDown)
+					return;
+
+				_isSettingValue = true;
+				if (DropDown != null)
+				{
+					SelectedDropDown = DropDown.Find((dd) => dd.Name == (_editValue as string));
 				}
 				_isSettingValue = false;
 
@@ -117,9 +145,12 @@ namespace DeviceCommunicators.MCU
 		/// </summary>
 		public List<DropDownParamData> DropDown { get; set; }
 
-		private DropDownParamData _selectedDropDown;
+
+
 
 		private bool _isSettingSelectedDropDown;
+
+		private DropDownParamData _selectedDropDown;
 		[JsonIgnore]
 		public DropDownParamData SelectedDropDown 
 		{
@@ -130,10 +161,36 @@ namespace DeviceCommunicators.MCU
 				if (_isSettingValue)
 					return;
 
+				if (_selectedDropDown == null)
+					return;
+
 				_isSettingSelectedDropDown = true;
 				int nVal;
 				bool res = int.TryParse(_selectedDropDown.Value, out nVal);
 				Value = nVal;
+				_isSettingSelectedDropDown = false;
+			}
+		}
+
+
+		private DropDownParamData _editSelectedDropDown;
+		[JsonIgnore]
+		public DropDownParamData EditSelectedDropDown
+		{
+			get => _editSelectedDropDown;
+			set
+			{
+				_editSelectedDropDown = value;
+				if (_isSettingValue)
+					return;
+
+				if (_editSelectedDropDown == null)
+					return;
+
+				_isSettingSelectedDropDown = true;
+				int nVal;
+				bool res = int.TryParse(_editSelectedDropDown.Value, out nVal);
+				EditValue = nVal;
 				_isSettingSelectedDropDown = false;
 			}
 		}
@@ -146,7 +203,16 @@ namespace DeviceCommunicators.MCU
 
 	public class ParamGroup: DeviceParameterData
 	{
-		public string GroupName { get; set; }
+		private string _groupName;
+		public string GroupName 
+		{ 
+			get => _groupName; 
+			set
+			{
+				_groupName = value;
+				Name = value;
+			}
+		}
 
 		public string GroupDescription { get; set; }
 
@@ -184,6 +250,8 @@ namespace DeviceCommunicators.MCU
 			else
 				Visibility = Visibility.Collapsed;
 		}
+
+		
 	}
 
 	public enum GroupType

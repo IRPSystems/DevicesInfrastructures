@@ -1,21 +1,26 @@
 ﻿
+using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
 using DeviceHandler.Interfaces;
 using DeviceHandler.Models;
-using Entities.Models;
 using Services.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
+using System.Windows;
 
 namespace DeviceHandler.Services
 {
-	public class ParametersRepositoryService
+	/// <summary>
+	/// ParametersRepositoryService is a class that holds a list of parameters and 
+	/// get their values preiodically.
+	/// </summary>
+	public class ParametersRepositoryService: ObservableObject
 	{
 		#region Properties
 
@@ -24,13 +29,21 @@ namespace DeviceHandler.Services
 			get => _communicator.IsInitialized;
 		}
 
+		/// <summary>
+		/// Thre required acquisition rate
+		/// </summary>
 		public int AcquisitionRate 
 		{
-			get => _acquisitionRate;
+			get
+			{
+				if (_acquisitionRate == 0)
+					_acquisitionRate = 5;
+				return _acquisitionRate;
+			}
 			set
 			{
 				_acquisitionRate = value;
-				if (_communicationTimer != null)
+				if (_communicationTimer != null && _acquisitionRate != 0)
 				{
 					_communicationTimer.Stop();
 					_communicationTimer.Interval = 1000 / _acquisitionRate;
@@ -38,6 +51,11 @@ namespace DeviceHandler.Services
 				}
 			}
 		}
+
+		/// <summary>
+		/// Thre actual acquisition rate
+		/// </summary>
+		public double ActualAcquisitionRate { get; set; }
 
 		#endregion Properties
 
@@ -47,15 +65,14 @@ namespace DeviceHandler.Services
 
 		private const int _maxNumOfParams = 3000;
 
-		private ConcurrentDictionary<string, RepositoryParam> _nameToRepositoryParamList;
+		protected ConcurrentDictionary<string, RepositoryParam> _nameToRepositoryParamList;
 
-		private System.Timers.Timer _communicationTimer;
+		protected System.Timers.Timer _communicationTimer;
+		protected System.Timers.Timer _timeoutTimer;
 
+		protected DateTime _start;
 
 		private DeviceCommunicator _communicator;
-
-		private bool _isGetMedium;
-		private int _lowGetCounter;
 
 		private bool _isDisposed;
 
@@ -75,20 +92,11 @@ namespace DeviceHandler.Services
 			AcquisitionRate = 1;
 
 
-			//_cancellationTokenSource = new CancellationTokenSource();
-			//_cancellationToken = _cancellationTokenSource.Token;
-			//_waitGetCallback = new ManualResetEvent(false);
-
-			_isGetMedium = false;
-			_lowGetCounter = 0;
-
-
-
 			_communicationTimer = new System.Timers.Timer(1000 / AcquisitionRate);
 			_communicationTimer.Elapsed += CommunicationTimerElapsed;
-			
 
-
+			_timeoutTimer = new System.Timers.Timer(1000);
+			_timeoutTimer.Elapsed += _timeoutTimer_Elapsed;
 
 		}
 
@@ -98,9 +106,6 @@ namespace DeviceHandler.Services
 
 		public void Init()
 		{
-			//_cancellationTokenSource = new CancellationTokenSource();
-			//_cancellationToken = _cancellationTokenSource.Token;
-
 			_isDisposed = false;
 			_communicationTimer.Start();
 
@@ -110,13 +115,20 @@ namespace DeviceHandler.Services
 		{
 			_communicationTimer.Stop();
 
+			
+
 			_isDisposed = true;
+		}
+
+		public void RemoveAll()
+		{
+			_nameToRepositoryParamList.Clear();
 		}
 
 
 		#region Add/Remove
 
-		public void Add(
+		public virtual void Add(
 			DeviceParameterData parameter,
 			RepositoryPriorityEnum priority,
 			Action<DeviceParameterData, CommunicatorResultEnum,string> receivedMessageCallback)
@@ -124,7 +136,7 @@ namespace DeviceHandler.Services
 			if (parameter == null)
 				return;
 
-
+			
 			RepositoryParam repositoryParam;
 
 			if (_nameToRepositoryParamList.ContainsKey(parameter.Name))
@@ -149,7 +161,7 @@ namespace DeviceHandler.Services
 			repositoryParam.Counter++;
 		}
 
-		public void Remove(
+		public virtual void Remove(
 			DeviceParameterData parameter,
 			Action<DeviceParameterData, CommunicatorResultEnum,string> receivedMessageCallback) 
 		{
@@ -178,6 +190,14 @@ namespace DeviceHandler.Services
 						new KeyValuePair<string, RepositoryParam>(parameter.Name, repositoryParam));
 					//_repositoryParamList.Remove(repositoryParam);
 				}
+
+				if (_nameToRepositoryParamList.Count == 0)
+				{
+					LoggerService.Inforamtion(this, "The list is empty");
+					_communicationTimer.Interval = 1000 / AcquisitionRate;
+					_communicationTimer.Start();
+					ActualAcquisitionRate = 0;
+				}
 			}
 			catch(Exception ex) 
 			{
@@ -187,55 +207,44 @@ namespace DeviceHandler.Services
 
 		#endregion Add/Remove
 
+		
+		private void _timeoutTimer_Elapsed(object sender, ElapsedEventArgs e)
+		{
+			_timeoutTimer.Stop();
+
+			LoggerService.Inforamtion(this, "_timeoutTimer_Elapsed");
+
+			_communicationTimer.Stop();
+			_communicationTimer.Interval = 1000 / AcquisitionRate;
+			_communicationTimer.Start();
+			ActualAcquisitionRate = 0;
+		}
 
 		private void CommunicationTimerElapsed(object sender, ElapsedEventArgs e)
 		{
-			GetParams(RepositoryPriorityEnum.High);
-
-			if (_isDisposed)
-				return;
-
-			if (_isGetMedium)
+			try
 			{
-				GetParams(RepositoryPriorityEnum.Medium);
-			}
-
-
-
-			if (_isDisposed)
-				return;
-
-			_lowGetCounter++;
-			if (_lowGetCounter == 3)
-			{
-				_lowGetCounter = 0;
-
-				GetParams(RepositoryPriorityEnum.Low);
-			}
-
-
-
-			_isGetMedium = !_isGetMedium;
-		}
-
-		private object _lockObj = new object();
-		private void GetParams(RepositoryPriorityEnum priority)
-		{
-			if (_nameToRepositoryParamList == null)
-				return;
-
-			lock (_lockObj)
-			{
-				List<RepositoryParam> repositoryParamsList =
-					_nameToRepositoryParamList.Values.Where((rp) => rp.Priority == priority).ToList();
-				foreach (RepositoryParam param in repositoryParamsList)
+				if (_nameToRepositoryParamList == null || _nameToRepositoryParamList.Count == 0)
 				{
+					ActualAcquisitionRate = 0;
+					return;
+				}
 
+				_communicationTimer.Stop();
+				_start = DateTime.Now;
+				//LoggerService.Inforamtion(this, "_communicationTimer stopped");
+
+
+				foreach (RepositoryParam param in _nameToRepositoryParamList.Values)
+				{
 
 					if (_isDisposed)
 						return;
 
-					if(param.Parameter is ICalculatedParamete calculated)
+					if (param.Parameter.DeviceType == Entities.Enums.DeviceTypesEnum.DBC)
+						continue;
+
+					if (param.Parameter is ICalculatedParamete calculated)
 					{
 						calculated.Calculate();
 						continue;
@@ -243,67 +252,127 @@ namespace DeviceHandler.Services
 
 					param.IsReceived = CommunicatorResultEnum.None;
 					_communicator.GetParamValue(param.Parameter, GetValueCallback);
-					//int eventThatSignaledIndex =
-					//	WaitHandle.WaitAny(
-					//		new WaitHandle[] { _waitGetCallback, _cancellationToken.WaitHandle },
-					//		new TimeSpan(0, 0, 0, 0, 500));
-					//_waitGetCallback.Reset();
-					//if (_cancellationToken.IsCancellationRequested)
-					//	break;
-					//if (eventThatSignaledIndex == WaitHandle.WaitTimeout)
-					//{
-					//	param.IsReceived = CommunicatorResultEnum.NoResponse;
-					//	param.RaisEvent(CommunicatorResultEnum.NoResponse, "Timeout");
-					//}
 
 					System.Threading.Thread.Sleep(1);
-
 				}
+
+
+				try
+				{
+					_timeoutTimer.Start();
+				}
+				catch (Exception) { }
+
+				//_communicationTimer.Start();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($"Failed to handle response\r\n{ex}");
 			}
 		}
 
 
 		private void GetValueCallback(DeviceParameterData param, CommunicatorResultEnum result, string resultDescription)
 		{
-			if (_isDisposed)
-				return;
-
-			if (_nameToRepositoryParamList == null || _nameToRepositoryParamList.Count == 0)
+			try
 			{
-			//	_waitGetCallback.Set();
-				return;
-			}
+				
+				if (_isDisposed)
+					return;
 
-			if (_nameToRepositoryParamList.ContainsKey(param.Name) == false)
+				if (_nameToRepositoryParamList == null || _nameToRepositoryParamList.Count == 0)
+				{
+					return;
+				}
+
+				if (_nameToRepositoryParamList.ContainsKey(param.Name) == false)
+				{
+					return;
+				}
+
+				RepositoryParam repositoryParam =
+						_nameToRepositoryParamList[param.Name];
+				if (repositoryParam != null)
+				{
+					repositoryParam.IsReceived = result;
+					repositoryParam.ErrDescription = resultDescription;
+					repositoryParam.RaisEvent(result, resultDescription);
+				}
+
+				if (result != CommunicatorResultEnum.OK)
+				{
+					LoggerService.Inforamtion(this, $"{Name} - Setting NaN");
+					param.Value = double.NaN;
+				}
+
+				RepositoryParam lastParam =
+					_nameToRepositoryParamList.Values.ElementAt(_nameToRepositoryParamList.Values.Count - 1);
+				if (param == lastParam.Parameter)
+				{
+					LastCallbackHandling();
+					_communicationTimer.Start();
+					_timeoutTimer.Stop();
+					//LoggerService.Inforamtion(this, "_communicationTimer started");
+				}
+
+			}
+			catch (Exception ex) 
 			{
-			//	_waitGetCallback.Set();
-				return;
+				MessageBox.Show($"Failed to handle response\r\n{ex}");
 			}
-
-			RepositoryParam repositoryParam =
-					_nameToRepositoryParamList[param.Name];
-			if (repositoryParam != null)
-			{
-				repositoryParam.IsReceived = result;
-				repositoryParam.ErrDescription = resultDescription;
-				repositoryParam.RaisEvent(result, resultDescription);
-			}
-
-			if(result != CommunicatorResultEnum.OK)
-			{
-				param.Value = double.NaN;
-			}
-
-			//_waitGetCallback.Set();
 		}
 
+		protected virtual void CallbackHandling()
+		{
 
+		}
+
+		protected virtual void LastCallbackHandling()
+		{
+			LastCallbackEvent?.Invoke();
+
+			TimeSpan diff = DateTime.Now - _start;
+			double reducedTime = diff.TotalMilliseconds;
+
+			double refreshTime = 1000 / AcquisitionRate;
+
+			double actualRate = 0;
+
+			//_communicationTimer.Interval = (reducedTime < refreshTime) ? (double)refreshTime - reducedTime : 1;
+
+			//actualRate = /*(reducedTime > refreshTime) ?*/ 1000 / (reducedTime + 1);// : (double)1000 / (refreshTime);
+
+			if (reducedTime > refreshTime)
+			{
+				_communicationTimer.Interval = reducedTime;
+				actualRate = 1000.0 / (reducedTime + 1);
+			}
+			else
+			{
+				_communicationTimer.Interval = refreshTime;
+				actualRate = 1000.0 / refreshTime;
+			}
+
+			if (actualRate != 0)
+				ActualAcquisitionRate = actualRate;
+
+			//if (ActualAcquisitionRate < 5)
+			//{
+			//	LoggerService.Inforamtion(this, $"ActualAcquisitionRate={ActualAcquisitionRate}");
+			//}
+		}
 
 		#endregion Methods
+
+		#region Events
+
+		public event Action LastCallbackEvent;
+
+		#endregion Events
 	}
 
 
-	
+
 
 
 }

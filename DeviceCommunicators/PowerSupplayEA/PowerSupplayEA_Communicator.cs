@@ -24,6 +24,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		private List<string> _onOffCommands;
 
+		private bool _isUseRampForOnOff;
+
 		#endregion Fields
 
 
@@ -44,6 +46,7 @@ namespace DeviceCommunicators.PowerSupplayEA
         {
 
 			_onOffCommands = new List<string>() { "SYST:LOCK", "OUTP" };
+			_isUseRampForOnOff = true;
 		}
 
 		#endregion Constructor
@@ -104,11 +107,17 @@ namespace DeviceCommunicators.PowerSupplayEA
 				if (!(param is PowerSupplayEA_ParamData ea_ParamData))
 					return;
 
+				
+
                 string cmd = ea_ParamData.Cmd + " " + value;
-				if(_onOffCommands.IndexOf(ea_ParamData.Cmd) >= 0)
+
+				LoggerService.Inforamtion(this, "Setting \"" + ea_ParamData.Name + "\" - cmd: " + cmd);
+
+				if (_onOffCommands.IndexOf(ea_ParamData.Cmd) >= 0)
 				{
-					if (value == 0)
+					if (value == 1)
 					{
+						LoggerService.Inforamtion(this, "Setting \"" + ea_ParamData.Name + "\" ON");
 						cmd = ea_ParamData.Cmd + " ON";
 
 						Task task = Task.Run(() =>
@@ -117,10 +126,10 @@ namespace DeviceCommunicators.PowerSupplayEA
 						}, _cancellationToken);
 
 						task.Wait();
-						return;
 					}
-					else if (value == 1)
+					else if (value == 0)
 					{
+						LoggerService.Inforamtion(this, "Setting \"" + ea_ParamData.Name + "\" OFF");
 						cmd = ea_ParamData.Cmd + " OFF";
 
 						Task task = Task.Run(() =>
@@ -129,11 +138,14 @@ namespace DeviceCommunicators.PowerSupplayEA
 						}, _cancellationToken);
 
 						task.Wait();
-						return;
 					}
-				}
 
-				_serial_port.Send(cmd);
+					System.Threading.Thread.Sleep(2000);
+				}
+				else
+				{
+					_serial_port.Send(cmd);
+				}
 
 				callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 			}
@@ -143,7 +155,6 @@ namespace DeviceCommunicators.PowerSupplayEA
 			}
 		}
 
-
         private void GetParamValue_Do(DeviceParameterData param, Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
 		{
             try
@@ -151,9 +162,13 @@ namespace DeviceCommunicators.PowerSupplayEA
 				if (!(param is PowerSupplayEA_ParamData ea_ParamData))
 					return;
 
+				
+
 				string cmd = ea_ParamData.Cmd;
-				if(ea_ParamData.Name != "Identity")
-					cmd = ea_ParamData.Cmd + "?";
+				cmd = ea_ParamData.Cmd + "?";
+
+				LoggerService.Inforamtion(this, "Getting \"" + ea_ParamData.Name + "\" - cmd: " + cmd);
+
 				_serial_port.Send(cmd);
 
 				string buffer = Read();
@@ -164,18 +179,14 @@ namespace DeviceCommunicators.PowerSupplayEA
 					return;
 				}
 
-				if (ea_ParamData.Name == "Identity")
-				{
-					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
-					return;
-				}
+				
 
 				if (_onOffCommands.IndexOf(ea_ParamData.Cmd) >= 0)
 				{
 					if (buffer.ToLower() == "ON")
-						param.Value = 0;
-					else if (buffer == "OFF")
 						param.Value = 1;
+					else if (buffer == "OFF")
+						param.Value = 0;
 					else
 					{
 						callback?.Invoke(param, CommunicatorResultEnum.Error, "Invalid value");
@@ -189,13 +200,12 @@ namespace DeviceCommunicators.PowerSupplayEA
 					double dVal;
 					bool res = GetValueFromMessage(buffer, out dVal);
 
-					if (!res)
-						callback?.Invoke(param, CommunicatorResultEnum.Error, "Invalid value");
-					else
-					{
+					if (res)
 						param.Value = dVal;
-						callback?.Invoke(param, CommunicatorResultEnum.OK, null);
-					}
+					else
+						param.Value = buffer;
+					
+					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 				}
 			}
             catch(Exception ex) 
@@ -234,6 +244,12 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		private void TurnOffProcess(string offCmd)
 		{
+			if (!_isUseRampForOnOff)
+			{
+				_serial_port.Send(offCmd);
+				return;
+			}
+
 			double startVoltage;
 			bool res = GetVoltage(out startVoltage);
 			if (res == false)
@@ -246,10 +262,18 @@ namespace DeviceCommunicators.PowerSupplayEA
 			}
 
 			_serial_port.Send(offCmd);
+
+			_serial_port.Send("SOUR:VOLTAGE " + startVoltage.ToString());
 		}
 
 		private void TurnOnProcess(string onCmd) 
 		{
+			if (!_isUseRampForOnOff)
+			{
+				_serial_port.Send(onCmd);
+				return;
+			}
+
 			double startVoltage;
 			bool res = GetVoltage(out startVoltage);
 			if (res == false)
@@ -261,7 +285,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 				return;
 
 			_serial_port.Send("SOUR:VOLTAGE 0");
-			_serial_port.Send("SOUR:CURRENT 1");
+			_serial_port.Send("SOUR:CURRENT 2");
 			_serial_port.Send(onCmd);
 
 			for (double i = 0; i < startVoltage && !_cancellationToken.IsCancellationRequested; i++)
@@ -270,7 +294,9 @@ namespace DeviceCommunicators.PowerSupplayEA
 				System.Threading.Thread.Sleep(100);
 			}
 
+			_serial_port.Send("SOUR:VOLTAGE " + startVoltage.ToString());
 			_serial_port.Send("SOUR:CURRENT " + startCurrent.ToString());
+
 		}
 
 		private bool GetVoltage(out double dVal)
@@ -311,6 +337,11 @@ namespace DeviceCommunicators.PowerSupplayEA
 			}
 
 			return false;
+		}
+
+		public void SetIsUseRampForOnOff(bool isUseRamp)
+		{
+			_isUseRampForOnOff = isUseRamp;
 		}
 
 		#endregion Methods

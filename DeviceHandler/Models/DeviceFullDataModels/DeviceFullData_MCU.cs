@@ -33,6 +33,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				ConnectionViewModel = new CanConnectViewModel(500000, 0xAB, 0xAA, 12223, 12220);
 			if ((ConnectionViewModel as CanConnectViewModel).SyncNodeID == 0)
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID = 0xAB;
+
 		}
 
 		protected override void ConstructConnectionViewModel()
@@ -61,6 +62,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID,
 				(ConnectionViewModel as CanConnectViewModel).AsyncNodeID,
+				true,
 				(ConnectionViewModel as CanConnectViewModel).GetSelectedHWId((ConnectionViewModel as CanConnectViewModel).SelectedHwId));
 		}
 
@@ -71,6 +73,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID,
 				(ConnectionViewModel as CanConnectViewModel).AsyncNodeID,
+				true,
 				0,
 				(ConnectionViewModel as CanConnectViewModel).RxPort,
 				(ConnectionViewModel as CanConnectViewModel).TxPort,
@@ -86,6 +89,12 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				return true;
 
 			return false;
+		}
+
+		protected override void GetRepository()
+		{
+			ParametersRepository = new MCU_ParametersRepositoryService(DeviceCommunicator);
+			ParametersRepository.Name = Device.DeviceType.ToString();
 		}
 	}
 }

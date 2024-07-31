@@ -19,7 +19,7 @@ namespace DeviceCommunicators.Models
 		{
 			get
 			{
-				if (IsAbsolute)
+				if (IsAbsolute && _value != null)
 				{
 					double d;
 					bool res = double.TryParse(_value.ToString(), out d);
@@ -40,6 +40,9 @@ namespace DeviceCommunicators.Models
 			}
 		}
 
+		[JsonIgnore]
+		public virtual object EditValue { get; set; }
+
 
 		[JsonIgnore]
 		public DeviceData Device { get; set; }
@@ -51,6 +54,8 @@ namespace DeviceCommunicators.Models
 		[JsonIgnore]
 		public bool IsEnabled { get; set; }
 		[JsonIgnore]
+		public bool IsEditing { get; set; }
+		[JsonIgnore]
 		public bool IsSelected { get; set; }
 		[JsonIgnore]
 		public Visibility Visibility { get; set; }
@@ -58,6 +63,8 @@ namespace DeviceCommunicators.Models
 		public Visibility GetSetVisibility { get; set; }
 		[JsonIgnore]
 		public Brush Background { get; set; }
+		[JsonIgnore]
+		public Brush Foreground { get; set; }
 		[JsonIgnore]
 		public string ErrorDescription { get; set; }
 

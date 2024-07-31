@@ -119,11 +119,11 @@ namespace DeviceCommunicators.Dyno
 
 			if (canAdapterType == "PCAN")
 			{
-				CommService = new CanPCanService(baudrate, hwId, 0x580 + _nodeId, 0x600 + _nodeId);
+				CommService = new CanPCanService(baudrate, hwId, 0x600 + _nodeId, 0x580 + _nodeId, 0x580 + _nodeId);
 			}
 			else if (canAdapterType == "UDP Simulator")
 			{
-				CommService = new CanUdpSimulationService(baudrate, 0x580 + _nodeId, 0x600 + _nodeId, rxPort, txPort, address);
+				CommService = new CanUdpSimulationService(baudrate, 0x600 + _nodeId, 0x580 + _nodeId, rxPort, txPort, address, 0x580 + _nodeId);
 			}
 
 			CommService.Init(false);
@@ -537,10 +537,18 @@ namespace DeviceCommunicators.Dyno
 
 		private void PoolBuildTimerElapsed(object sender, ElapsedEventArgs e)
 		{
-			while (_buffersPool.Count < _maxNumOfMessages)
+			try
 			{
-				_buffersPool.Add(new byte[8], _cancellationToken);
-				System.Threading.Thread.Sleep(1);
+				while (_buffersPool.Count < _maxNumOfMessages)
+				{
+					_buffersPool.Add(new byte[8], _cancellationToken);
+					System.Threading.Thread.Sleep(1);
+				}
+			}
+
+			catch (OperationCanceledException)
+			{
+				
 			}
 		}
 

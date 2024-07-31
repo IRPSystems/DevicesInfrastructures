@@ -1,17 +1,44 @@
 ﻿
+using Communication.Services;
 using DeviceCommunicators.Dyno;
+using DeviceCommunicators.General;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using DeviceCommunicators.PowerSupplayEA;
+using DeviceHandler.Interfaces;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
 	public class DeviceFullData_PowerSupplyEA : DeviceFullData
 	{
+
+		public override DeviceCommunicator DeviceCommunicator 
+		{ 
+			get
+			{
+				if (ConnectionViewModel == null)
+					return null;
+
+				if ((ConnectionViewModel as SerialAndTCPViewModel).SelectedCommType == "Serial")
+					return _eapsCommunicator;
+				else
+					return _eapsModbusTcp;
+			}
+
+		}
+
+		private PowerSupplayEA_Communicator _eapsCommunicator;
+		private PowerSupplayEA_ModbusTcp _eapsModbusTcp;
+
 		public DeviceFullData_PowerSupplyEA(DeviceData deviceData) :
 			base(deviceData)
 		{
@@ -24,24 +51,46 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		}
 		protected override void ConstructCommunicator()
 		{
-			DeviceCommunicator = new PowerSupplayEA_Communicator();
+			//DeviceCommunicator = new PowerSupplayEA_Communicator();
 		}
 
 		protected override void DeserializeConnectionViewModel(
 			string jsonString,
 			JsonSerializerSettings settings)
 		{
-			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
+			SerialAndTCPViewModel connectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialAndTCPViewModel;
+			ConstructConnectionViewModel();
+			if(connectionViewModel!= null) 
+			{
+				(ConnectionViewModel as SerialAndTCPViewModel).Copy(connectionViewModel);
+			}
+
+			ConnectionViewModel.RefreshProperties();
+
+			_eapsCommunicator = new PowerSupplayEA_Communicator();
+			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp();
+
+			
 		}
+
+		
 
 		protected override void ConstructConnectionViewModel()
 		{
-			ConnectionViewModel = new SerialConncetViewModel(115200, "COM1", 14323, 14320);
+			ConnectionViewModel = new SerialAndTCPViewModel(
+				115200, "COM1", 14323, 14320,
+				502, "", "Serial");
+
+			_eapsCommunicator = new PowerSupplayEA_Communicator();
+			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp();
+
+			(ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.EASearchIPEvent +=
+				TcpConncetVM_EASearchIPEvent;
 		}
 
 		protected override void ConstructCheckConnection()
 		{
-			PowerSupplayEA_ParamData data = new PowerSupplayEA_ParamData() { Name = "Identity", Cmd = "*IDN?" };
+			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => p.Name == "Max Voltage");
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
@@ -52,29 +101,85 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void InitRealCommunicator()
 		{
-			(DeviceCommunicator as PowerSupplayEA_Communicator).Init(
-				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
-				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
-				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate);
+			if ((ConnectionViewModel as SerialAndTCPViewModel).SelectedCommType == "Serial")
+			{
+				_eapsCommunicator.Init(
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.IsUdpSimulation,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedCOM,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedBaudrate);
+			}
+			else
+			{
+				_eapsModbusTcp.Init(
+					(ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.IsUdpSimulation,
+					(ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.Address,
+					Device);
+			}
 		}
 
 		protected override void InitSimulationCommunicator()
 		{
-			(DeviceCommunicator as PowerSupplayEA_Communicator).Init(
-				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
-				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
-				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate,
-				(ConnectionViewModel as SerialConncetViewModel).RxPort,
-				(ConnectionViewModel as SerialConncetViewModel).TxPort,
-				(ConnectionViewModel as SerialConncetViewModel).Address);
+			if ((ConnectionViewModel as SerialAndTCPViewModel).SelectedCommType == "Serial")
+			{
+				_eapsCommunicator.Init(
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.IsUdpSimulation,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedCOM,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedBaudrate,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.RxPort,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.TxPort,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.Address);
+			}
 		}
 
 		protected override bool IsSumulation()
 		{
-			if (!(ConnectionViewModel is SerialConncetViewModel serialConncet))
+			if (!(ConnectionViewModel is SerialAndTCPViewModel serialConncet))
 				return true;
 
-			return serialConncet.IsUdpSimulation;
+			return serialConncet.SerialConncetVM.IsUdpSimulation;
+		}
+
+		private void TcpConncetVM_EASearchIPEvent()
+		{
+			Task task = Task.Run(() =>
+			{
+				EASearchIP();
+			});
+
+		}
+
+		private void EASearchIP()
+		{ 
+			if (!(DeviceCommunicator is PowerSupplayEA_ModbusTcp eaCommunicator))
+				return;
+
+			if (!(ConnectionViewModel is SerialAndTCPViewModel serialTcpConncet))
+				return;
+
+			Application.Current.Dispatcher.Invoke(() =>
+			{
+				serialTcpConncet.TcpConncetVM.SearchNoticeVisibility =
+					System.Windows.Visibility.Visible;
+				serialTcpConncet.IsEnabled = false;
+			});
+
+			List<string> ipsList = eaCommunicator.FindEaIPs();
+
+
+
+
+			Application.Current.Dispatcher.Invoke(() =>
+			{
+				serialTcpConncet.TcpConncetVM.EAIPsList =
+				new ObservableCollection<string>(ipsList);
+				serialTcpConncet.TcpConncetVM.Address = ipsList[0];
+
+				serialTcpConncet.TcpConncetVM.SearchNoticeVisibility =
+					System.Windows.Visibility.Collapsed;
+				serialTcpConncet.IsEnabled = true;
+			});
+
+			InitCheckConnection();
 		}
 	}
 }

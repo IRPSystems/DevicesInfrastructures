@@ -18,6 +18,9 @@ using DeviceCommunicators.Models;
 using DeviceHandler.Models.DeviceFullDataModels;
 using System.IO;
 using DeviceHandler.Services;
+using System.Text;
+using DeviceCommunicators.MCU;
+using Entities.Enums;
 
 namespace DeviceHandler.ViewModels
 {
@@ -32,6 +35,8 @@ namespace DeviceHandler.ViewModels
 		public ObservableCollection<RecordData> ParametersList_WithIndex { get; set; }
 
 		public bool IsLimitParametersList { get; set; }
+		public bool IsSaveLoad { get; set; }
+
 		public int LimitOfParametersList { get; set; }
 
 		#endregion Properties
@@ -60,6 +65,7 @@ namespace DeviceHandler.ViewModels
 			string title)
 		{
 			IsLimitParametersList = false;
+			IsSaveLoad = true;
 
 			_devicesContainer = devicesContainer;
 			Title = title;
@@ -88,49 +94,89 @@ namespace DeviceHandler.ViewModels
 		public void SaveParametersList()
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
-			saveFileDialog.Filter = "JSON Files | *.json";
+			saveFileDialog.Filter = "JSON Files | *.json|Text Files | *.txt";
 			bool? result = saveFileDialog.ShowDialog();
 			if (result != true)
 				return;
 
 			string path = saveFileDialog.FileName;
+			
+			string extension = Path.GetExtension(path);
 
-			JsonSerializerSettings settings = new JsonSerializerSettings();
-			settings.Formatting = Formatting.Indented;
-			settings.TypeNameHandling = TypeNameHandling.All;
-			var sz = JsonConvert.SerializeObject(ParametersList, settings);
-			System.IO.File.WriteAllText(path, sz);
+			if (extension == ".json")
+			{
+				JsonSerializerSettings settings = new JsonSerializerSettings();
+				settings.Formatting = Formatting.Indented;
+				settings.TypeNameHandling = TypeNameHandling.All;
+				var sz = JsonConvert.SerializeObject(ParametersList, settings);
+				System.IO.File.WriteAllText(path, sz);
+			}
+			else if (extension == ".txt")
+			{
+				StringBuilder text = new StringBuilder();
+				foreach (DeviceParameterData p in ParametersList)
+				{
+					string name = p.Name.Replace("\n", "\\n");
+					name += " ;; " + "MCU";
+					text.AppendLine(name);
+				}
+
+				//! Create text file:
+				File.WriteAllText(path, text.ToString());
+			}
 		}
 
 		public void LoadParametersList()
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "JSON Files | *.json";
+			openFileDialog.Filter = "JSON Files | *.json|Text Files | *.txt";
 			bool? result = openFileDialog.ShowDialog();
 			if (result != true)
 				return;
 
 			string path = openFileDialog.FileName;
 
-			FixJson(path);
+			try
+			{
+
+				string extension = Path.GetExtension(path);
+				ObservableCollection<DeviceParameterData> parametersList = null;
+				if (extension == ".json")
+				{
+					FixJson(path);
 
 
-			string jsonString = System.IO.File.ReadAllText(path);
+					string jsonString = System.IO.File.ReadAllText(path);
 
-			JsonSerializerSettings settings = new JsonSerializerSettings();
-			settings.Formatting = Formatting.Indented;
-			settings.TypeNameHandling = TypeNameHandling.All;
-			ObservableCollection<DeviceParameterData> parametersList = JsonConvert.DeserializeObject(jsonString, settings) as
-				ObservableCollection<DeviceParameterData>;
+					JsonSerializerSettings settings = new JsonSerializerSettings();
+					settings.Formatting = Formatting.Indented;
+					settings.TypeNameHandling = TypeNameHandling.All;
+					parametersList = JsonConvert.DeserializeObject(jsonString, settings) as
+						ObservableCollection<DeviceParameterData>;
 
-			GetActualParameters(parametersList);
+					GetActualParameters_Json(parametersList);
+				}
+				else if (extension == ".txt")
+				{
+					string paramsString = System.IO.File.ReadAllText(path);
+					string[] paramsList = paramsString.Split("\r\n");
 
-			SendRECORD_LIST_CHANGEDMessage();
+					GetActualParameters_txt(paramsList.ToList());
+				}
+
+
+
+				SendRECORD_LIST_CHANGEDMessage();
+			}
+			catch(Exception ex)
+			{
+				LoggerService.Error(this, "Failed to load the file \"" + path + "\"", "Error", ex);
+			}
 		}
 
 		#endregion Save / Load
 
-		protected void GetActualParameters(ObservableCollection<DeviceParameterData> parametersList)
+		public void GetActualParameters_Json(ObservableCollection<DeviceParameterData> parametersList)
 		{
 			if (ParametersList == null)
 				ParametersList = new ObservableCollection<DeviceParameterData>();
@@ -166,6 +212,48 @@ namespace DeviceHandler.ViewModels
 			{
 				ParametersList.RemoveAt(ParametersList.Count - 1);
 				ParametersList_WithIndex.RemoveAt(ParametersList.Count - 1);
+			}
+
+			SetIndeces();
+		}
+
+		protected void GetActualParameters_txt(List<string> parametersList)
+		{
+			ParametersList.Clear();
+			ParametersList_WithIndex.Clear();
+
+			foreach (string param in parametersList)
+			{
+				if (string.IsNullOrEmpty(param))
+					continue;
+
+				string[] parts = param.Split(" ;; ");
+				DeviceTypesEnum deviceType = DeviceTypesEnum.None;
+				if (parts.Length >= 2)
+				{
+					bool res = Enum.TryParse(parts[1], out deviceType);
+				}
+
+				if (deviceType == DeviceTypesEnum.None)
+					deviceType = DeviceTypesEnum.MCU;
+
+				string name = parts[0];
+				
+				
+
+				if (_devicesContainer.TypeToDevicesFullData.ContainsKey(deviceType) == false)
+					continue;
+
+				DeviceFullData deviceFullData = _devicesContainer.TypeToDevicesFullData[deviceType];
+
+				DeviceParameterData actualParameterData =
+					deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == name);
+				if (actualParameterData == null)
+					continue;
+
+				ParametersList.Add(actualParameterData);
+				ParametersList_WithIndex.Add(new RecordData() { Data = actualParameterData });
+
 			}
 
 			SetIndeces();
@@ -314,7 +402,7 @@ namespace DeviceHandler.ViewModels
 
 				
 
-				if (dragData is ObservableCollection<object> list)
+				if (dragData is System.Collections.IList list)
 				{
 					foreach (object obj in list)
 					{
@@ -333,6 +421,7 @@ namespace DeviceHandler.ViewModels
 				}
 				else if (dragData is DeviceParameterData param)
 				{
+					param.IsSelected = false;
 					LoggerService.Inforamtion(this, "Dropping parameter \"" + param.Name + "\"");
 					AddParamToLogList(param, droppedOnIndex);
 				}
@@ -364,12 +453,35 @@ namespace DeviceHandler.ViewModels
 			}
 		}
 
+		private bool IsParamExistInList(DeviceParameterData param)
+		{
+			foreach(DeviceParameterData data in ParametersList)
+			{
+				if(data == param) 
+					return true;
+
+				if(param.DeviceType == DeviceTypesEnum.MCU &&
+					data.DeviceType == DeviceTypesEnum.MCU)
+				{
+					if(((MCU_ParamData)param).Cmd == ((MCU_ParamData)data).Cmd)
+						return true;
+				}
+				else
+				{
+					if(data.Name == param.Name)
+						return true;
+				}
+			}
+
+			return false;
+		}
+
 		private void AddParamToLogList(
 			DeviceParameterData param,
 			int droppedOnIndex)
 		{
-			int index = ParametersList.IndexOf(param);
-			if (index >= 0)
+			bool isParamExist = IsParamExistInList(param);
+			if (isParamExist)
 			{
 				MessageBox.Show("The parameter already exist");
 				return;
@@ -408,28 +520,41 @@ namespace DeviceHandler.ViewModels
 		private void MoveGroupOfParam(
 			RecordData droppedOnParam)
 		{
-			List<RecordData> list = new List<RecordData>();
-			foreach (var item in _selectedItemsList)
-				list.Add(item as RecordData);
+			if(_selectedItemsList == null)
+			{
+				return;
+			}
 
-			List<DeviceParameterData> parametersList = ParametersList.ToList();
-			List<RecordData> parametersList_WithIndex = ParametersList_WithIndex.ToList();
-			_selectedParamsList_Move.MoveByDragAndDrop(
-				parametersList,
-				parametersList_WithIndex,
-				list,
-				droppedOnParam);
+			try
+			{
+
+				List<RecordData> list = new List<RecordData>();
+				foreach (var item in _selectedItemsList)
+					list.Add(item as RecordData);
+
+				List<DeviceParameterData> parametersList = ParametersList.ToList();
+				List<RecordData> parametersList_WithIndex = ParametersList_WithIndex.ToList();
+				_selectedParamsList_Move.MoveByDragAndDrop(
+					parametersList,
+					parametersList_WithIndex,
+					list,
+					droppedOnParam);
 
 
-			ParametersList =
-				new ObservableCollection<DeviceParameterData>(parametersList);
-			ParametersList_WithIndex =
-				new ObservableCollection<RecordData>(parametersList_WithIndex);
+				ParametersList =
+					new ObservableCollection<DeviceParameterData>(parametersList);
+				ParametersList_WithIndex =
+					new ObservableCollection<RecordData>(parametersList_WithIndex);
 
 
-			SetIndeces();
+				SetIndeces();
 
-			SendRECORD_LIST_CHANGEDMessage();
+				SendRECORD_LIST_CHANGEDMessage();
+			}
+			catch (Exception ex) 
+			{
+				LoggerService.Error(this, "Failed to drop item", "Error", ex);
+			}
 		}
 
 		

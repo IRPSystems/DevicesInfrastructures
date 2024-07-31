@@ -8,6 +8,8 @@ using System;
 using Services.Services;
 using DeviceHandler.Interfaces;
 using System.Windows;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace DeviceHandler.ViewModels
 {
@@ -32,26 +34,43 @@ namespace DeviceHandler.ViewModels
 		[JsonIgnore]
 		public GridLength UdpRowHeight { get; set; }
 
+		[JsonIgnore]
+		public Visibility AddressTBVisibility { get; set; }
+		[JsonIgnore]
+		public Visibility AddressCBVisibility { get; set; }
+		[JsonIgnore]
+		public Visibility SearchNoticeVisibility { get; set; }
+
+		[JsonIgnore]
+		public ObservableCollection<string> EAIPsList { get; set; }
+
+
 
 		#endregion Properties
-
 		#region Constructor
 
-		public TcpConncetViewModel(int port, int rxPort, int txPort)
+		public TcpConncetViewModel(int port, int rxPort, int txPort, string address = null)
 		{
+			Address = address;
 			Port = port;	
 			RxPort = rxPort;
 			TxPort = txPort;
+
+			AddressTBVisibility = Visibility.Visible;
+			AddressCBVisibility = Visibility.Collapsed;
+			SearchNoticeVisibility = Visibility.Collapsed;
 
 			LoggerService.Inforamtion(this, "Starting TcpConnctViewModel");
 			ConnectCommand = new RelayCommand(Connect);
 			DisconnectCommand = new RelayCommand(Disconnect);
 			IsUdpSimulationClickCommand = new RelayCommand(IsUdpSimulationClick);
+			EASearchIPCommand = new RelayCommand(EASearchIP);
 
 			IsConnectButtonEnabled = true;
 			IsDisconnectButtonEnabled = false;
 
-			GetIpAddress();
+			//if (string.IsNullOrEmpty(address))
+			//	GetIpAddress();
 
 			HandleSelectedAddapter();
 
@@ -105,6 +124,20 @@ namespace DeviceHandler.ViewModels
 			DisconnectEvent?.Invoke();
 		}
 
+		public void Copy(TcpConncetViewModel source)
+		{
+			Port = source.Port;
+			Address = source.Address;
+			RxPort = source.RxPort;
+			TxPort = source.TxPort;
+			IsUdpSimulation = source.IsUdpSimulation;
+		}
+
+		private void EASearchIP()
+		{
+			EASearchIPEvent?.Invoke();
+		}
+
 		#endregion Methods
 
 		#region Commands
@@ -115,7 +148,8 @@ namespace DeviceHandler.ViewModels
 		public RelayCommand DisconnectCommand { get; private set; }
 		[JsonIgnore]
 		public RelayCommand IsUdpSimulationClickCommand { get; private set; }
-
+		[JsonIgnore]
+		public RelayCommand EASearchIPCommand { get; private set; }
 
 
 		#endregion Commands
@@ -124,6 +158,7 @@ namespace DeviceHandler.ViewModels
 
 		public event Action ConnectEvent;
 		public event Action DisconnectEvent;
+		public event Action EASearchIPEvent;
 
 		#endregion Events
 	}

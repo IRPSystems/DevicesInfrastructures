@@ -8,6 +8,7 @@ using Services.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Xml.Linq;
 
 namespace DeviceCommunicators.PowerSupplayBK
 {
@@ -36,7 +37,7 @@ namespace DeviceCommunicators.PowerSupplayBK
 
 		public PowerSupplayBK_Communicator()
 		{
-			_parameterQueue = new BlockingCollection<CommunicatorIOData>();
+			
 		}
 
 		#endregion Constructor
@@ -51,34 +52,50 @@ namespace DeviceCommunicators.PowerSupplayBK
 			int txPort = 0,
 			string address = "")
         {
-            //_name_comport = comName;
-            //_boud_rate = baudtate;
+			//_name_comport = comName;
+			//_boud_rate = baudtate;
 
-            if(isUdpSimulation)
-				CommService = new SerialUdpSimulationService(rxPort, txPort, address);
-            else
-				CommService = new SerialService(comName, baudtate);
-            
-            _serial_port.Init(false);
+			try
+			{
+				if (isUdpSimulation)
+					CommService = new SerialUdpSimulationService(rxPort, txPort, address);
+				else
+					CommService = new SerialService(comName, baudtate);
 
-            if(_serial_port.IsInitialized)
-                _serial_port.Send("SYST:REM\n");
+				_serial_port.Init(false);
+
+				if (_serial_port.IsInitialized)
+					_serial_port.Send("SYST:REM\n");
 
 
 
-			InitBase();
+				InitBase();
+			}
+			catch(Exception ex) 
+			{
+				LoggerService.Error(this, "Failed to init", ex);
+			}
 
 		}
 
 		public override void Dispose()
 		{
-            if (_serial_port != null)
-            {
-                if(_serial_port.IsInitialized)
-                    _serial_port.Send("SYST:LOC\n");
-            }
+			try
+			{
+				if (_serial_port != null)
+				{
+					if (_serial_port.IsInitialized)
+						_serial_port.Send("SYST:LOC\n");
+				}
 
-			base.Dispose();
+
+				base.Dispose();
+
+			}
+			catch (Exception ex)
+			{
+				LoggerService.Error(this, "Failed to dispose", ex);
+			}
 		}
 
 		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
@@ -131,14 +148,15 @@ namespace DeviceCommunicators.PowerSupplayBK
                 if (!(param is PowerSupplayBK_ParamData supplay_Parameter))
                     return;
 
-                request_commad_from_supply(supplay_Parameter.Name);
+                request_commad_from_supply(supplay_Parameter);
 
                 Thread.Sleep(10);
 
 
                 param.Value = receive_value_from_supply(supplay_Parameter.Name);
+				LoggerService.Inforamtion(this, $"{supplay_Parameter.Name} - {param.Value}");
 
-                if(param.Value == null)
+				if (param.Value == null)
                 	callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
 				else
                     callback?.Invoke(param, CommunicatorResultEnum.OK, null);
@@ -205,27 +223,16 @@ namespace DeviceCommunicators.PowerSupplayBK
             }
         }
 
-		private void request_commad_from_supply(string name)
+		private void request_commad_from_supply(PowerSupplayBK_ParamData supplay_Parameter)
         {
             if (_serial_port == null)
                 return;
 
-            if (name == "MEASure voltage in supply")
-            {
-                _serial_port.Send("MEASure:SCALar:VOLTage:ALL:DC?");
-            }
-            if (name == "Voltage in supply")
-            {
-                _serial_port.Send("VAPPLY:VOLTage:LEVel?");
-            }
-            if (name == "Current status")
-			{
-				_serial_port.Send("APPLY:OUTput?");
-			}
-            else if(name == "Current value")
-            {
-				_serial_port.Send("APPLY:CURRent:LEVel?");
-			}
+            LoggerService.Inforamtion(this, supplay_Parameter.Name);
+
+			string cmd = $"{supplay_Parameter.Command}?";
+
+            _serial_port.Send(cmd);
         }
 
 		private string receive_value_from_supply(string name)

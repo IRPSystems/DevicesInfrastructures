@@ -5,11 +5,13 @@ using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
 using DeviceHandler.Interfaces;
 using DeviceHandler.Services;
+using DeviceHandler.ViewModels;
 using Entities.Enums;
 using Newtonsoft.Json;
 using Services.Services;
 using System;
 using System.IO;
+using System.Windows;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
@@ -18,7 +20,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
         #region Properties
 
         public DeviceData Device { get; set; }
-        public DeviceCommunicator DeviceCommunicator { get; set; }
+        public virtual DeviceCommunicator DeviceCommunicator { get; set; }
         public CheckCommunicationService CheckCommunication { get; set; }
         public IConnectionViewModel ConnectionViewModel { get; set; }
         public ParametersRepositoryService ParametersRepository { get; set; }
@@ -107,8 +109,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
             ConnectionViewModel.RefreshProperties();
 
-            ParametersRepository = new ParametersRepositoryService(DeviceCommunicator);
-            ParametersRepository.Name = Device.DeviceType.ToString();
+            GetRepository();
 
             BuildCheckConnection();
         }
@@ -149,6 +150,16 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
             if (!DeviceCommunicator.IsInitialized)
             {
+                if(Device.DeviceType == DeviceTypesEnum.PowerSupplyEA) 
+                { 
+                    if(ConnectionViewModel is SerialAndTCPViewModel serialTcpConncet)
+                    {
+						serialTcpConncet.TcpConncetVM.AddressTBVisibility = System.Windows.Visibility.Collapsed;
+						serialTcpConncet.TcpConncetVM.AddressCBVisibility = System.Windows.Visibility.Visible;
+						serialTcpConncet.TcpConncetVM.SearchNoticeVisibility = Visibility.Collapsed;
+					}
+                }
+
                 Disconnect();
                 return;
             }
@@ -245,7 +256,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		        case DeviceTypesEnum.MCU: return new DeviceFullData_MCU(deviceData);
 				case DeviceTypesEnum.PowerSupplyBK: return new DeviceFullData_PowerSupplyBK(deviceData);
 				case DeviceTypesEnum.PowerSupplyEA: return new DeviceFullData_PowerSupplyEA(deviceData);
-				//case DeviceTypesEnum.KeySight: return new DevuceFullData_KeySight(deviceData);
+				case DeviceTypesEnum.ScopeKeysight: return new DeviceFullData_Scope_KeySight(deviceData);
 				case DeviceTypesEnum.TorqueKistler: return new DeviceFullData_TorqueKistler(deviceData);
 				case DeviceTypesEnum.MCU_B2B: return new DeviceFullData_MCU_B2B(deviceData);
 				case DeviceTypesEnum.BTMTempLogger: return new DeviceFullData_BTMTempLogger(deviceData);
@@ -254,12 +265,19 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				case DeviceTypesEnum.Yokogawa_WT1804E: return new DeviceFullData_Yokogawa_WT1804E(deviceData);
 				case DeviceTypesEnum.FieldLogger: return new DeviceFullData_FieldLogger(deviceData);
 				case DeviceTypesEnum.PowerSupplyGK: return new DeviceFullData_PowerSupplyGK(deviceData);
-				case DeviceTypesEnum.ATEBox: return new DeviceFullData_ATEBox(deviceData);
 				case DeviceTypesEnum.BrainChild: return new DeviceFullData_BrainChild(deviceData);
+				case DeviceTypesEnum.Dyno3: return new DeviceFullData_Dyno3(deviceData);
+				case DeviceTypesEnum.PowerSupplyKeysight: return new DeviceFullData_PowerSupplyKeysight(deviceData);
+				case DeviceTypesEnum.ZimmerPowerMeter: return new DeviceFullData_ZimmerPowerMeter(deviceData);
 				default: return null;
             }
         }
 
+        protected virtual void GetRepository()
+        {
+			ParametersRepository = new ParametersRepositoryService(DeviceCommunicator);
+			ParametersRepository.Name = Device.DeviceType.ToString();
+		}
 
         protected abstract string GetConnectionFileName();
 		protected abstract void ConstructCommunicator();
