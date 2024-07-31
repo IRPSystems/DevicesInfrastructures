@@ -122,10 +122,10 @@ namespace DeviceCommunicators.ZimmerPowerMeter
 				string cmd = powerMeter.Command;
 				if (powerMeter.Command != "*IDN")
 					cmd += powerMeter.Channel;
-				cmd += "?";
+				cmd += "?\r\n";
 				SerialService.Send(cmd);
 
-				//Thread.Sleep(50);
+				Thread.Sleep(500);
 
 
 				string received;
