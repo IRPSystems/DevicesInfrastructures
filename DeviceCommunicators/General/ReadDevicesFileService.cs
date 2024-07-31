@@ -85,8 +85,8 @@ namespace DeviceCommunicators.Services
 			{
 				InitBTMTempLogger(devicesList);
 				InitFieldLogger(devicesList);
+				InitBrainChild(devicesList);
 			}
-			InitBrainChild(devicesList);
 
 
 			return devicesList;
