@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace DeviceCommunicators.TSCPrinter
 {
-	public class TSCPrinter_ParamData : DeviceParameterData, IParamWithDropDown
+	public class TSCPrinter_ParamData : DeviceParameterData
 	{
 		
 	}
