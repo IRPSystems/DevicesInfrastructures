@@ -76,6 +76,12 @@ namespace DeviceCommunicators.Services
 					devicesList,
 					"MCU",
 					DeviceTypesEnum.MCU);
+
+				ReadFromMCUJson(
+					mcuFilePath,
+					devicesList,
+					"MCU_2",
+					DeviceTypesEnum.MCU_2);
 			}
 
 			if (mcuB2BFilePath != null)
