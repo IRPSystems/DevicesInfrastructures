@@ -3,6 +3,9 @@ using System;
 using DeviceCommunicators.Enums;
 using System.Collections.Generic;
 using Entities.Models;
+using NationalInstruments.DAQmx;
+using System.Threading;
+using System.Windows;
 
 namespace DeviceCommunicators.NI_6002
 {
@@ -25,9 +28,9 @@ namespace DeviceCommunicators.NI_6002
 
 
 
-        
 
 
+        private double avgCurrentRead;
 
 
 
@@ -110,7 +113,12 @@ namespace DeviceCommunicators.NI_6002
           
         }
 
+        public string Anolog_input_current(IO_Pin input, double shuntResistor)
+        {
+            return Convert.ToString(Analog_port_input[(int)input]);
+        }
 
-		#endregion Methods
-	}
+
+        #endregion Methods
+    }
 }
