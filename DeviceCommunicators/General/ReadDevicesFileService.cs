@@ -9,6 +9,7 @@ using DeviceCommunicators.Models;
 using Entities.Enums;
 using Entities.Models;
 using ExcelDataReader;
+using NationalInstruments.Restricted;
 using Newtonsoft.Json;
 using Services.Services;
 using System;
@@ -60,6 +61,11 @@ namespace DeviceCommunicators.Services
 						path = ni6002FilePath;
 
 					ReadFromJson(dir, path, devicesList);
+
+					if(Path.GetFileName(file) == "NI_6002.json")
+					{
+						ReadFromJson(dir, path, devicesList, true);
+					}
 				}
 			}
 
@@ -70,6 +76,12 @@ namespace DeviceCommunicators.Services
 					devicesList,
 					"MCU",
 					DeviceTypesEnum.MCU);
+
+				ReadFromMCUJson(
+					mcuFilePath,
+					devicesList,
+					"MCU_2",
+					DeviceTypesEnum.MCU_2);
 			}
 
 			if (mcuB2BFilePath != null)
@@ -194,7 +206,8 @@ namespace DeviceCommunicators.Services
 		public void ReadFromJson(
 			string originalDir,
 			string path,
-			ObservableCollection<DeviceData> devicesList)
+			ObservableCollection<DeviceData> devicesList,
+			bool isSecondNI = false)
 		{
 
 			if(path.Contains(originalDir) == false)
@@ -214,6 +227,12 @@ namespace DeviceCommunicators.Services
 			DeviceData device = JsonConvert.DeserializeObject(jsonString, settings) as DeviceData;
 			if (device == null)
 				return;
+
+			if(isSecondNI)
+			{
+				device.DeviceType = DeviceTypesEnum.NI_6002_2;
+				device.Name = "NI DUCK 2";
+			}
 
 
 			int index = -1;
@@ -236,8 +255,13 @@ namespace DeviceCommunicators.Services
 			if (device is DeviceData deviceData)
 			{
 				foreach (DeviceParameterData data in deviceData.ParemetersList)
+				{
 					data.Device = device;
+					data.DeviceType = device.DeviceType;
+				}
 			}
+
+
 
 		}
 
