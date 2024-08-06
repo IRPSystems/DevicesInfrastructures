@@ -269,6 +269,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				case DeviceTypesEnum.Dyno3: return new DeviceFullData_Dyno3(deviceData);
 				case DeviceTypesEnum.PowerSupplyKeysight: return new DeviceFullData_PowerSupplyKeysight(deviceData);
 				case DeviceTypesEnum.ZimmerPowerMeter: return new DeviceFullData_ZimmerPowerMeter(deviceData);
+				case DeviceTypesEnum.NI_6002_2: return new DeviceFullData_NI_6002_2(deviceData);
 				default: return null;
             }
         }
