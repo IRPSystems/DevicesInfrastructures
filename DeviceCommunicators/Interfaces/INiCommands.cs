@@ -40,5 +40,7 @@ namespace DeviceCommunicators.Interfaces
         void Anolog_output(AO_Output output, double volt);
 
         string Anolog_input(IO_Pin input);
+
+        string Anolog_input_current(IO_Pin input);
     }
 }

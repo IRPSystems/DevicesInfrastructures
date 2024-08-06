@@ -523,6 +523,11 @@ namespace DeviceCommunicators.NI_6002
                     niParamData.Io_port = 7;
                     data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
                 }
+                else if (niParamData.command_to_device.ToLower() == ("Read Anolog input current").ToLower())
+                {
+                    niParamData.Io_port = 7;
+                    data = _commmand_to_device.Anolog_input_current((IO_Pin)niParamData.Io_port);
+                }
 
             }
             catch(Exception ex)
