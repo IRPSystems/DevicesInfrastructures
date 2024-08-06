@@ -110,6 +110,10 @@ namespace DeviceCommunicators.NI_6002
           
         }
 
+        public string Anolog_input_current(IO_Pin input)
+        {
+			return Convert.ToString(Analog_port_input[(int)input]);
+		}
 
 		#endregion Methods
 	}
