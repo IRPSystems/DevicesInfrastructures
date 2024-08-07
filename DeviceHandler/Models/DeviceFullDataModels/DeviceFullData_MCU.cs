@@ -57,6 +57,9 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void InitRealCommunicator()
 		{
+			if (string.IsNullOrEmpty((ConnectionViewModel as CanConnectViewModel).SelectedHwId))
+				return;
+
 			(DeviceCommunicator as MCU_Communicator).Init(
 				(ConnectionViewModel as CanConnectViewModel).SelectedAdapter,
 				(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
