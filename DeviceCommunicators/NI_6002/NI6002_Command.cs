@@ -155,15 +155,13 @@ namespace DeviceCommunicators.NI_6002
 			return sample.ToString();
         }
 
-        public string Anolog_input_current(IO_Pin input)
+        public string Anolog_input_current(IO_Pin input, double shuntResistor)
         {
             try
             {
                 manualResetEvent.Reset();
 
                 double sample;
-
-                double tempShuntResistor = 0;
                 double tempMinValueNumeric = 0;
                 double tempMaxValueNumeric = 0.020;
                 double tempSamplesToReadNumeric = 0.020;
@@ -178,7 +176,7 @@ namespace DeviceCommunicators.NI_6002
                 // Create a virtual channel // can be internal too
                 myTask.AIChannels.CreateCurrentChannel(commannd_to_device, "",
                     (AITerminalConfiguration)(-1), Convert.ToDouble(tempMinValueNumeric),
-                    Convert.ToDouble(tempMaxValueNumeric), Convert.ToDouble(tempShuntResistor),
+                    Convert.ToDouble(tempMaxValueNumeric), Convert.ToDouble(shuntResistor),
                     AICurrentUnits.Amps);
 
                 myTask.Timing.ConfigureSampleClock("", Convert.ToDouble(tempSamplesToReadNumeric),
