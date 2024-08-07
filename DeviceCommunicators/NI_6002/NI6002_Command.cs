@@ -162,7 +162,6 @@ namespace DeviceCommunicators.NI_6002
                 manualResetEvent.Reset();
 
                 double sample;
-
                 double tempMinValueNumeric = 0;
                 double tempMaxValueNumeric = 0.020;
                 double tempSamplesToReadNumeric = 0.020;
