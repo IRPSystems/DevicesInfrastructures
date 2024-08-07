@@ -164,19 +164,24 @@ namespace DeviceCommunicators.NI_6002
                 double sample;
                 double tempMinValueNumeric = 0;
                 double tempMaxValueNumeric = 0.020;
-                double tempSamplesToReadNumeric = 0.020;
+                double tempSamplesToReadNumeric = 1000;
+                double currentSensorMeasGain = 2000;
+
+                Thread.Sleep(1000);
 
                 // Create a new task
                 myTask = new Task();
 
                 string commannd_to_device = "";
 
+                LoggerService.Error(this, "Analog input current: Port" + input.ToString() + " shuntresistor: " + shuntResistor.ToString());
+
                 commannd_to_device = _deviceName + "/" + "ai" + (int)input;
 
                 // Create a virtual channel // can be internal too
                 myTask.AIChannels.CreateCurrentChannel(commannd_to_device, "",
-                    (AITerminalConfiguration)(-1), Convert.ToDouble(tempMinValueNumeric),
-                    Convert.ToDouble(tempMaxValueNumeric), Convert.ToDouble(shuntResistor),
+                    AITerminalConfiguration.Differential, Convert.ToDouble(tempMinValueNumeric),
+                    Convert.ToDouble(tempMaxValueNumeric), Convert.ToDouble(shuntResistor / currentSensorMeasGain),
                     AICurrentUnits.Amps);
 
                 myTask.Timing.ConfigureSampleClock("", Convert.ToDouble(tempSamplesToReadNumeric),
@@ -188,6 +193,7 @@ namespace DeviceCommunicators.NI_6002
                 AnalogMultiChannelReader reader = new AnalogMultiChannelReader(myTask.Stream);
                 double[] data = reader.ReadSingleSample();
                 sample = data[0];
+                LoggerService.Error(this, "Analog input current: Sample: " + sample.ToString());
 
                 //// Prepare the table for Data
                 //InitializeDataTable(myTask.AIChannels, ref dataTable);
@@ -203,6 +209,7 @@ namespace DeviceCommunicators.NI_6002
                 //    myTask);
 
                 //manualResetEvent.WaitOne();
+                myTask.Dispose();
 
                 return sample.ToString();
 
