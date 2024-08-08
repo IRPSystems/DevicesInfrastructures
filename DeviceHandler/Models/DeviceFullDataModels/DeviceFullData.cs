@@ -271,7 +271,8 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				case DeviceTypesEnum.ZimmerPowerMeter: return new DeviceFullData_ZimmerPowerMeter(deviceData);
 				case DeviceTypesEnum.NI_6002_2: return new DeviceFullData_NI_6002_2(deviceData);
 				case DeviceTypesEnum.MCU_2: return new DeviceFullData_MCU_2(deviceData);
-				default: return null;
+                case DeviceTypesEnum.NumatoGPIO: return new DeviceFullData_MCU_2(deviceData);
+                default: return null;
             }
         }
 

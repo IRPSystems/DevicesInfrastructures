@@ -33,16 +33,9 @@ namespace DeviceCommunicators.NI_6002
         public double[] Analog_port_output { get; set; } = new double[8];
 
         //For current method
-        private Task myTask;
-        private Task runningTask;
-        private AnalogMultiChannelReader myAnalogReader;
-        private AnalogWaveform<double>[] data;
-        private AsyncCallback myAsyncCallback;
-        private DataColumn[] dataColumn = null;
-        private DataTable dataTable = null;
-        private AutoResetEvent manualResetEvent = new AutoResetEvent(false);
-        private System.Timers.Timer Timer_AnalogCurrentRead = new Timer();
         private double avgCurrentRead;
+
+        private Task myTask;
 
         #endregion Fields
 
@@ -52,16 +45,9 @@ namespace DeviceCommunicators.NI_6002
         public NI6002_Command(string device_name)
         {
             _deviceName = device_name;
-            Timer_AnalogCurrentRead.Interval = 4000;
-            Timer_AnalogCurrentRead.Elapsed += AnalogCurrentReadTimerExpired;
         }
 
         #endregion Constructor
-
-        private void AnalogCurrentReadTimerExpired(object sender, ElapsedEventArgs e)
-        {
-            manualResetEvent.Set();
-        }
 
         #region command 
         public void DigitalIO_output(IO_Output output ,int State)
@@ -159,7 +145,6 @@ namespace DeviceCommunicators.NI_6002
         {
             try
             {
-                manualResetEvent.Reset();
 
                 double sample;
                 double tempMinValueNumeric = 0;
@@ -195,20 +180,6 @@ namespace DeviceCommunicators.NI_6002
                 sample = data[0];
                 LoggerService.Error(this, "Analog input current: Sample: " + sample.ToString());
 
-                //// Prepare the table for Data
-                //InitializeDataTable(myTask.AIChannels, ref dataTable);
-
-                //runningTask = myTask;
-                //myAnalogReader = new AnalogMultiChannelReader(myTask.Stream);
-                //myAsyncCallback = new AsyncCallback(AnalogInCallback);
-
-                //// Use SynchronizeCallbacks to specify that the object 
-                //// marshals callbacks across threads appropriately.
-                //myAnalogReader.SynchronizeCallbacks = true;
-                //myAnalogReader.BeginReadWaveform(Convert.ToInt32(tempSamplesToReadNumeric), myAsyncCallback,
-                //    myTask);
-
-                //manualResetEvent.WaitOne();
                 myTask.Dispose();
 
                 return sample.ToString();
@@ -219,84 +190,11 @@ namespace DeviceCommunicators.NI_6002
                 // Display Errors
                 MessageBox.Show(exception.Message);
                 myTask.Dispose();
-                runningTask = null;
                 return "Error";
 
             }
         }
 
         #endregion command 
-
-        #region Helper Methods
-
-        private void AnalogInCallback(IAsyncResult ar)
-        {
-            //try
-            //{
-            //    if (runningTask != null && runningTask == ar.AsyncState)
-            //    {
-            //        // Read the available data from the channels
-            //        data = myAnalogReader.EndReadWaveform(ar);
-
-            //        // Plot your data here
-            //        dataToDataTable(data, ref dataTable);
-
-            //        myAnalogReader.BeginMemoryOptimizedReadWaveform(Convert.ToInt32(samplesToReadNumeric.Value), myAsyncCallback, myTask, data);
-            //    }
-            //}
-            //catch (DaqException exception)
-            //{
-            //    // Display Errors
-            //    MessageBox.Show(exception.Message);
-            //    myTask.Dispose();
-            //    runningTask = null;
-            //}
-
-        }
-
-        private void dataToDataTable(AnalogWaveform<double>[] sourceArray, ref DataTable dataTable)
-        {
-            // Iterate over channels
-            int currentLineIndex = 0;
-            foreach (AnalogWaveform<double> waveform in sourceArray)
-            {
-                for (int sample = 0; sample < waveform.Samples.Count; ++sample)
-                {
-                    if (sample == 10)
-                    {
-                        manualResetEvent.Set();
-                        break;
-                    }
-                    dataTable.Rows[sample][currentLineIndex] = waveform.Samples[sample].Value;
-                }
-                currentLineIndex++;
-            }
-        }
-
-        public void InitializeDataTable(AIChannelCollection channelCollection, ref DataTable data)
-        {
-            int numOfChannels = channelCollection.Count;
-            data.Rows.Clear();
-            data.Columns.Clear();
-            dataColumn = new DataColumn[numOfChannels];
-            int numOfRows = 10;
-
-            for (int currentChannelIndex = 0; currentChannelIndex < numOfChannels; currentChannelIndex++)
-            {
-                dataColumn[currentChannelIndex] = new DataColumn();
-                dataColumn[currentChannelIndex].DataType = typeof(double);
-                dataColumn[currentChannelIndex].ColumnName = channelCollection[currentChannelIndex].PhysicalName;
-            }
-
-            data.Columns.AddRange(dataColumn);
-
-            for (int currentDataIndex = 0; currentDataIndex < numOfRows; currentDataIndex++)
-            {
-                object[] rowArr = new object[numOfChannels];
-                data.Rows.Add(rowArr);
-            }
-        }
-
-        #endregion
     }
 }
