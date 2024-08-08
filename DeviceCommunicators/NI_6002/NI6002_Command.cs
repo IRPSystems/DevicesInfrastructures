@@ -34,15 +34,15 @@ namespace DeviceCommunicators.NI_6002
 
         //For current method
         private Task myTask;
-        private Task runningTask;
-        private AnalogMultiChannelReader myAnalogReader;
-        private AnalogWaveform<double>[] data;
-        private AsyncCallback myAsyncCallback;
+        //private Task runningTask;
+        //private AnalogMultiChannelReader myAnalogReader;
+        //private AnalogWaveform<double>[] data;
+        //private AsyncCallback myAsyncCallback;
         private DataColumn[] dataColumn = null;
-        private DataTable dataTable = null;
+        //private DataTable dataTable = null;
         private AutoResetEvent manualResetEvent = new AutoResetEvent(false);
         private System.Timers.Timer Timer_AnalogCurrentRead = new Timer();
-        private double avgCurrentRead;
+        //private double avgCurrentRead;
 
         #endregion Fields
 
@@ -212,7 +212,7 @@ namespace DeviceCommunicators.NI_6002
                 // Display Errors
                 MessageBox.Show(exception.Message);
                 myTask.Dispose();
-                runningTask = null;
+                //runningTask = null;
                 return "Error";
 
             }

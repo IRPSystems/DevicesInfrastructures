@@ -30,7 +30,7 @@ namespace DeviceCommunicators.NI_6002
 
 
 
-        private double avgCurrentRead;
+        //private double avgCurrentRead;
 
 
 
