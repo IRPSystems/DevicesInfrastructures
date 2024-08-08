@@ -138,11 +138,23 @@ namespace DeviceCommunicators.NumatoGPIO
                     return;
                 }
 
-                double d;
-                bool res = double.TryParse(received, out d);
-                param.Value = d;
+                string response = received.Trim();
 
-                if (!res)
+                double d;
+                bool isParseOk = double.TryParse(response, out d);
+
+                if (isParseOk)
+                {
+                    if (paramData.Cmd.Contains("adc"))
+                    {
+                        double convertedAnalog = ConvertAdcToVoltage((int)d);
+                        response = convertedAnalog.ToString();
+                    }
+                }
+
+                param.Value = response;
+
+                if (!isParseOk)
                     callback?.Invoke(param, CommunicatorResultEnum.Error, "Received: " + received);
                 else
                     callback?.Invoke(param, CommunicatorResultEnum.OK, null);
@@ -151,6 +163,15 @@ namespace DeviceCommunicators.NumatoGPIO
             {
                 LoggerService.Error(this, "Failed to receive value for parameter: " + param.Name, ex);
             }
+        }
+        private double ConvertAdcToVoltage(int adcValue)
+        {
+            const double maxAdcValue = 1023.0;
+            const double referenceVoltage = 5.0;
+            double voltage = (adcValue / maxAdcValue) * referenceVoltage;
+            //double deviation = GetDeviationFromLut(voltage);
+            //voltage = voltage - deviation;
+            return voltage;
         }
     }
 }
