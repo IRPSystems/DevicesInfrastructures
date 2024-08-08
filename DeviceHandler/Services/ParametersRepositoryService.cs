@@ -318,7 +318,7 @@ namespace DeviceHandler.Services
 			}
 			catch (Exception ex) 
 			{
-				MessageBox.Show($"Failed to handle response\r\n{ex}");
+				LoggerService.Error(this, "Failed to handle response", ex);
 			}
 		}
 
