@@ -32,9 +32,6 @@ namespace DeviceCommunicators.NI_6002
         public int[] Digital_port_output { get; set; } = new int[8];
         public double[] Analog_port_output { get; set; } = new double[8];
 
-        //For current method
-        private double avgCurrentRead;
-
         private Task myTask;
 
         #endregion Fields

@@ -97,7 +97,7 @@ namespace DeviceCommunicators.NumatoGPIO
                 }
 
                 string cmd = paramData.Cmd + " " + paramData.Io_port;
-                SerialService.Send(cmd);
+                SerialService.Send(cmd, true);
             
 
                 callback?.Invoke(param, CommunicatorResultEnum.OK, null);
@@ -127,7 +127,7 @@ namespace DeviceCommunicators.NumatoGPIO
                     cmd = paramData.Cmd;
                 }
 
-                SerialService.Send(cmd);
+                SerialService.Send(cmd, true);
 
                 Thread.Sleep(500);
 
