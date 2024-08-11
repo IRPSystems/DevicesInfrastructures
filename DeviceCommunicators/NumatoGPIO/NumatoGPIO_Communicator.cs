@@ -96,7 +96,7 @@ namespace DeviceCommunicators.NumatoGPIO
                     paramData.Cmd = "gpio clear";
                 }
 
-                string cmd = paramData.Cmd + " " + value;
+                string cmd = paramData.Cmd + " " + paramData.Io_port;
                 SerialService.Send(cmd);
             
 
@@ -115,14 +115,23 @@ namespace DeviceCommunicators.NumatoGPIO
                 if (!(param is NumatoGPIO_ParamData paramData))
                     return;
 
-                SerialService.ClearBuffer();
+                //SerialService.ClearBuffer();
 
-                string cmd = paramData.Cmd + " " + value;
+                string cmd;
+                if(paramData.Cmd != "ver")
+                {
+                    cmd = paramData.Cmd + " " + paramData.Io_port;
+                }
+                else
+                {
+                    cmd = paramData.Cmd;
+                }
 
                 SerialService.Send(cmd);
 
                 Thread.Sleep(500);
 
+                //SerialService.ClearBuffer();
 
                 string received;
                 SerialService.Read(out received);

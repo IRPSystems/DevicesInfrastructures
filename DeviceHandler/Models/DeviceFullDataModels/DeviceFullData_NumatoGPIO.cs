@@ -45,9 +45,9 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
         protected override void ConstructCheckConnection()
         {
-            DeviceParameterData data = new ZimmerPowerMeter_ParamData()
+            DeviceParameterData data = new NumatoGPIO_ParamData()
             {
-                Command = "ver",
+                Cmd = "ver",
                 Name = "Identification"
             };
 
