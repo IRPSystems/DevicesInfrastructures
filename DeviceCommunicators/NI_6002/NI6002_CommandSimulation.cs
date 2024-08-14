@@ -118,6 +118,11 @@ namespace DeviceCommunicators.NI_6002
             return Convert.ToString(Analog_port_input[(int)input]);
         }
 
+        public string Digital_Counter()
+        {
+            return "";
+        }
+
 
         #endregion Methods
     }

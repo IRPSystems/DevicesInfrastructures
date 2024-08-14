@@ -42,5 +42,8 @@ namespace DeviceCommunicators.Interfaces
         string Anolog_input(IO_Pin input);
 
         string Anolog_input_current(IO_Pin input, double shuntResistor);
+
+        string Digital_Counter();
+
     }
 }

@@ -12,6 +12,8 @@ using System.Windows;
 using System.Threading;
 using System.Timers;
 using Timer = System.Timers.Timer;
+using System.Runtime.Intrinsics.Arm;
+
 
 namespace DeviceCommunicators.NI_6002
 {
@@ -34,6 +36,18 @@ namespace DeviceCommunicators.NI_6002
 
         private Task myTask;
 
+        //rpm counter properties
+        static AutoResetEvent rpmCounterAutoResetEvent = new AutoResetEvent(false);
+        private int initialCount = 0;
+        private CounterSingleChannelReader myCounterReader;
+        private readonly CICountEdgesActiveEdge edgeType = CICountEdgesActiveEdge.Rising;
+        double rpm;
+        uint countReading;
+        Timer Timer_counterTryRead = new Timer();
+        Timer Timer_revolutions = new Timer();
+        private static int revoultionsTimerElapsed = 0; // Track elapsed seconds
+        private static int revoultionsTimerElapsedLimit = 4;
+
         #endregion Fields
 
 
@@ -42,6 +56,8 @@ namespace DeviceCommunicators.NI_6002
         public NI6002_Command(string device_name)
         {
             _deviceName = device_name;
+            Timer_counterTryRead.Elapsed += CounterTryRead;
+            Timer_revolutions.Elapsed += CalculateRevolutions;
         }
 
         #endregion Constructor
@@ -189,6 +205,86 @@ namespace DeviceCommunicators.NI_6002
                 myTask.Dispose();
                 return "Error";
 
+            }
+        }
+
+        public string Digital_Counter()
+        {
+            //timer
+            try
+            {
+                rpmCounterAutoResetEvent.Reset();
+
+                myTask = new Task();
+                string commannd_to_device = _deviceName + "/" + "ctr0";
+
+                myTask.CIChannels.CreateCountEdgesChannel(commannd_to_device, "Count Edges",
+                    edgeType, Convert.ToInt64(initialCount), CICountEdgesCountDirection.Up);
+
+                myCounterReader = new CounterSingleChannelReader(myTask.Stream);
+
+                Timer_counterTryRead.Interval = 10;
+                Timer_revolutions.Interval = 1000;
+
+                myTask.Start();
+                Timer_counterTryRead.Start();
+                Timer_revolutions.Start();
+
+                rpmCounterAutoResetEvent.WaitOne();
+
+                StopTimers();
+
+                myTask.Dispose();
+                // Return the calculated RPM
+
+                return rpm.ToString();
+            }
+            catch (DaqException exception)
+            {
+                MessageBox.Show(exception.Message);
+                StopTimers();
+                myTask.Dispose();
+                return "Error"; // Return 0 or handle the exception as needed
+            }
+        }
+
+        private void StopTimers()
+        {
+            Timer_counterTryRead.Stop();
+            Timer_revolutions.Stop();
+        }
+
+        private void CounterTryRead(object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                countReading = myCounterReader.ReadSingleSampleUInt32();
+
+                //debug
+                //countReading++;
+            }
+            catch (DaqException exception)
+            {
+                MessageBox.Show(exception.Message);
+                rpmCounterAutoResetEvent.Set();
+                myTask.Dispose();
+                Timer_counterTryRead.Stop();
+                return;
+            }
+        }
+
+        private void CalculateRevolutions(object sender, ElapsedEventArgs e)
+        {
+            uint _countReading = countReading;
+            revoultionsTimerElapsed++;
+
+            if (revoultionsTimerElapsed == revoultionsTimerElapsedLimit)
+            {
+                rpm = (_countReading * 60) / revoultionsTimerElapsed;
+                rpmCounterAutoResetEvent.Set();
+                revoultionsTimerElapsed = 0;
+                // Reset revolution count for the next interval
+                countReading = 0;
             }
         }
 

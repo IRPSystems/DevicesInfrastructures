@@ -527,6 +527,10 @@ namespace DeviceCommunicators.NI_6002
                 {
                     data = _commmand_to_device.Anolog_input_current((IO_Pin)niParamData.Io_port, niParamData.shunt_resistor);
                 }
+                else if (niParamData.command_to_device.ToLower() == ("Read Digital counter").ToLower())
+                {
+                    data = _commmand_to_device.Digital_Counter();
+                }
 
             }
             catch(Exception ex)
