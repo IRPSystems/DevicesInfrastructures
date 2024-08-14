@@ -4,15 +4,10 @@ using System;
 using DeviceCommunicators.Enums;
 using Task = NationalInstruments.DAQmx.Task;
 using Services.Services;
-using NationalInstruments;
-using System.Data;
-using System.Threading.Tasks;
-using System.Windows.Markup;
 using System.Windows;
 using System.Threading;
-using System.Timers;
-using Timer = System.Timers.Timer;
-using System.Runtime.Intrinsics.Arm;
+using MicroLibrary;
+using System.Diagnostics;
 
 
 namespace DeviceCommunicators.NI_6002
@@ -36,17 +31,18 @@ namespace DeviceCommunicators.NI_6002
 
         private Task myTask;
 
-        //rpm counter properties
+        //rpm counter
         static AutoResetEvent rpmCounterAutoResetEvent = new AutoResetEvent(false);
         private int initialCount = 0;
         private CounterSingleChannelReader myCounterReader;
-        private readonly CICountEdgesActiveEdge edgeType = CICountEdgesActiveEdge.Rising;
+        private CICountEdgesActiveEdge edgeType = CICountEdgesActiveEdge.Rising;
         double rpm;
         uint countReading;
-        Timer Timer_counterTryRead = new Timer();
-        Timer Timer_revolutions = new Timer();
-        private static int revoultionsTimerElapsed = 0; // Track elapsed seconds
-        private static int revoultionsTimerElapsedLimit = 4;
+        MicroTimer Timer_counterTryRead = new MicroTimer();
+        MicroTimer Timer_revolutions = new MicroTimer();
+        private Stopwatch stopwatch = new Stopwatch();
+        private static double revoultionsTimerElapsed = 0; // Track elapsed seconds
+        private static double revoultionsTimerElapsedLimit = 4;
 
         #endregion Fields
 
@@ -56,8 +52,8 @@ namespace DeviceCommunicators.NI_6002
         public NI6002_Command(string device_name)
         {
             _deviceName = device_name;
-            Timer_counterTryRead.Elapsed += CounterTryRead;
-            Timer_revolutions.Elapsed += CalculateRevolutions;
+            Timer_counterTryRead.MicroTimerElapsed += CounterTryRead;
+            Timer_revolutions.MicroTimerElapsed += CalculateRevolutions;
         }
 
         #endregion Constructor
@@ -213,8 +209,8 @@ namespace DeviceCommunicators.NI_6002
             //timer
             try
             {
+                LoggerService.Error(this, "Digital_Counter");
                 rpmCounterAutoResetEvent.Reset();
-
                 myTask = new Task();
                 string commannd_to_device = _deviceName + "/" + "ctr0";
 
@@ -223,26 +219,31 @@ namespace DeviceCommunicators.NI_6002
 
                 myCounterReader = new CounterSingleChannelReader(myTask.Stream);
 
-                Timer_counterTryRead.Interval = 10;
-                Timer_revolutions.Interval = 1000;
-
                 myTask.Start();
+                Timer_counterTryRead.Interval = 10000;
+                Timer_revolutions.Interval = 4000000;
+
                 Timer_counterTryRead.Start();
                 Timer_revolutions.Start();
+                stopwatch.Start();
 
                 rpmCounterAutoResetEvent.WaitOne();
 
-                StopTimers();
+                Timer_counterTryRead.Enabled = false;
+                Timer_revolutions.Enabled = false;
+
+                Timer_counterTryRead.Stop();
+                Timer_revolutions.Stop();
+
+                stopwatch.Reset();
 
                 myTask.Dispose();
-                // Return the calculated RPM
 
                 return rpm.ToString();
             }
             catch (DaqException exception)
             {
                 MessageBox.Show(exception.Message);
-                StopTimers();
                 myTask.Dispose();
                 return "Error"; // Return 0 or handle the exception as needed
             }
@@ -254,7 +255,7 @@ namespace DeviceCommunicators.NI_6002
             Timer_revolutions.Stop();
         }
 
-        private void CounterTryRead(object sender, ElapsedEventArgs e)
+        private void CounterTryRead(object sender, MicroTimerEventArgs e)
         {
             try
             {
@@ -272,20 +273,17 @@ namespace DeviceCommunicators.NI_6002
                 return;
             }
         }
-
-        private void CalculateRevolutions(object sender, ElapsedEventArgs e)
+        private void CalculateRevolutions(object sender, MicroTimerEventArgs e)
         {
             uint _countReading = countReading;
-            revoultionsTimerElapsed++;
+            revoultionsTimerElapsed = stopwatch.Elapsed.TotalMilliseconds / 1000;
+            rpm = (_countReading * 60) / revoultionsTimerElapsed;
 
-            if (revoultionsTimerElapsed == revoultionsTimerElapsedLimit)
-            {
-                rpm = (_countReading * 60) / revoultionsTimerElapsed;
-                rpmCounterAutoResetEvent.Set();
-                revoultionsTimerElapsed = 0;
-                // Reset revolution count for the next interval
-                countReading = 0;
-            }
+            LoggerService.Error(this, "RPM: " + rpm.ToString() + " TimerElapsed: " + revoultionsTimerElapsed.ToString());
+            revoultionsTimerElapsed = 0;
+            // Reset revolution count for the next interval
+            countReading = 0;
+            rpmCounterAutoResetEvent.Set();
         }
 
         #endregion command 
