@@ -42,7 +42,6 @@ namespace DeviceCommunicators.NI_6002
         MicroTimer Timer_revolutions = new MicroTimer();
         private Stopwatch stopwatch = new Stopwatch();
         private static double revoultionsTimerElapsed = 0; // Track elapsed seconds
-        private static double revoultionsTimerElapsedLimit = 4;
 
         #endregion Fields
 
@@ -221,7 +220,7 @@ namespace DeviceCommunicators.NI_6002
 
                 myTask.Start();
                 Timer_counterTryRead.Interval = 10000;
-                Timer_revolutions.Interval = 4000000;
+                Timer_revolutions.Interval = 2000000;
 
                 Timer_counterTryRead.Start();
                 Timer_revolutions.Start();
@@ -236,6 +235,9 @@ namespace DeviceCommunicators.NI_6002
                 Timer_revolutions.Stop();
 
                 stopwatch.Reset();
+
+                //This delay is to make sure that the Timer_counterTryRead stops before we dispose myTask object
+                Thread.Sleep(100);
 
                 myTask.Dispose();
 
