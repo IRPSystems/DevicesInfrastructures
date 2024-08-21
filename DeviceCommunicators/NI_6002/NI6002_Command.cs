@@ -4,15 +4,10 @@ using System;
 using DeviceCommunicators.Enums;
 using Task = NationalInstruments.DAQmx.Task;
 using Services.Services;
-using NationalInstruments;
-using System.Data;
-using System.Threading.Tasks;
-using System.Windows.Markup;
 using System.Windows;
 using System.Threading;
-using System.Timers;
-using Timer = System.Timers.Timer;
-using System.Runtime.Intrinsics.Arm;
+using MicroLibrary;
+using System.Diagnostics;
 
 
 namespace DeviceCommunicators.NI_6002
@@ -36,17 +31,17 @@ namespace DeviceCommunicators.NI_6002
 
         private Task myTask;
 
-        //rpm counter properties
+        //rpm counter
         static AutoResetEvent rpmCounterAutoResetEvent = new AutoResetEvent(false);
         private int initialCount = 0;
         private CounterSingleChannelReader myCounterReader;
-        private readonly CICountEdgesActiveEdge edgeType = CICountEdgesActiveEdge.Rising;
+        private CICountEdgesActiveEdge edgeType = CICountEdgesActiveEdge.Rising;
         double rpm;
         uint countReading;
-        Timer Timer_counterTryRead = new Timer();
-        Timer Timer_revolutions = new Timer();
-        private static int revoultionsTimerElapsed = 0; // Track elapsed seconds
-        private static int revoultionsTimerElapsedLimit = 4;
+        MicroTimer Timer_counterTryRead = new MicroTimer();
+        MicroTimer Timer_revolutions = new MicroTimer();
+        private Stopwatch stopwatch = new Stopwatch();
+        private static double revoultionsTimerElapsed = 0; // Track elapsed seconds
 
         #endregion Fields
 
@@ -56,18 +51,18 @@ namespace DeviceCommunicators.NI_6002
         public NI6002_Command(string device_name)
         {
             _deviceName = device_name;
-            Timer_counterTryRead.Elapsed += CounterTryRead;
-            Timer_revolutions.Elapsed += CalculateRevolutions;
+            Timer_counterTryRead.MicroTimerElapsed += CounterTryRead;
+            Timer_revolutions.MicroTimerElapsed += CalculateRevolutions;
         }
 
         #endregion Constructor
 
         #region command 
-        public void DigitalIO_output(IO_Output output ,int State)
+        public void DigitalIO_output(string portLine ,int State)
         {
             string commannd_to_device = "";
 
-            commannd_to_device = _deviceName + "/" + _Port_Io + "/line" + (int)output;
+            commannd_to_device = _deviceName + "/" + portLine;
             //deviceName += "/" + "port0/line" + "0"
             Task digitalWriteTask_Port = new Task();
             //  Create an Digital Output channel and name it.
@@ -88,32 +83,35 @@ namespace DeviceCommunicators.NI_6002
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public string DigitalIO_input(IO_Pin input)
+        public string DigitalIO_input(string portLine)
         {
             string commannd_to_device = "";
 
-            commannd_to_device = _deviceName + "/" + _Port_Io + "/line" + (int)input;
+            commannd_to_device = _deviceName + "/" + portLine;
+
+            LoggerService.Inforamtion(this, "command to device : " + commannd_to_device);
 
 
-
-            Task digReadTaskPort = new Task();
+            Task digReadTaskPort = new Task();         
             digReadTaskPort.DIChannels.CreateChannel(
-                commannd_to_device,
-                "",
-                ChannelLineGrouping.OneChannelForAllLines);
+                 commannd_to_device,
+                 "",
+                    ChannelLineGrouping.OneChannelForAllLines);
             DigitalSingleChannelReader DI_readerPort = new DigitalSingleChannelReader(digReadTaskPort.Stream);
             UInt32 DigIndatapPort = DI_readerPort.ReadSingleSamplePortUInt32();
+            
+
             return String.Format("0x{0:X}", DigIndatapPort);
         }
 
 
-       public void Anolog_output(AO_Output output, double volt)
+       public void Anolog_output(string port, double volt)
         {
             using (Task task = new Task())
             {
                 string commannd_to_device = "";
 
-                commannd_to_device = _deviceName + "/" + "ao" + (int)output;
+                commannd_to_device = _deviceName + "/" + "ao" + port;
 
                 // Configure analog output channel
                 task.AOChannels.CreateVoltageChannel(commannd_to_device, "", _Min_level_voltage, _Max_level_voltage, AOVoltageUnits.Volts);
@@ -124,7 +122,7 @@ namespace DeviceCommunicators.NI_6002
             }
         }
         
-        public string Anolog_input(IO_Pin input)
+        public string Anolog_input(string port)
         {
             double sample;
 			
@@ -134,7 +132,7 @@ namespace DeviceCommunicators.NI_6002
 
 				string commannd_to_device = "";
 
-                commannd_to_device = _deviceName + "/" + "ai" + (int)input;
+                commannd_to_device = _deviceName + "/" + "ai" + port;
                 try
                 {
                     task2.AIChannels.CreateVoltageChannel(commannd_to_device, "",
@@ -154,7 +152,7 @@ namespace DeviceCommunicators.NI_6002
 			return sample.ToString();
         }
 
-        public string Anolog_input_current(IO_Pin input, double shuntResistor)
+        public string Anolog_input_current(string port, double shuntResistor)
         {
             try
             {
@@ -172,9 +170,9 @@ namespace DeviceCommunicators.NI_6002
 
                 string commannd_to_device = "";
 
-                LoggerService.Error(this, "Analog input current: Port" + input.ToString() + " shuntresistor: " + shuntResistor.ToString());
+                LoggerService.Error(this, "Analog input current: Port" + port.ToString() + " shuntresistor: " + shuntResistor.ToString());
 
-                commannd_to_device = _deviceName + "/" + "ai" + (int)input;
+                commannd_to_device = _deviceName + "/" + "ai" + port;
 
                 // Create a virtual channel // can be internal too
                 myTask.AIChannels.CreateCurrentChannel(commannd_to_device, "",
@@ -213,8 +211,8 @@ namespace DeviceCommunicators.NI_6002
             //timer
             try
             {
+                LoggerService.Error(this, "Digital_Counter");
                 rpmCounterAutoResetEvent.Reset();
-
                 myTask = new Task();
                 string commannd_to_device = _deviceName + "/" + "ctr0";
 
@@ -223,26 +221,34 @@ namespace DeviceCommunicators.NI_6002
 
                 myCounterReader = new CounterSingleChannelReader(myTask.Stream);
 
-                Timer_counterTryRead.Interval = 10;
-                Timer_revolutions.Interval = 1000;
-
                 myTask.Start();
+                Timer_counterTryRead.Interval = 10000;
+                Timer_revolutions.Interval = 2000000;
+
                 Timer_counterTryRead.Start();
                 Timer_revolutions.Start();
+                stopwatch.Start();
 
                 rpmCounterAutoResetEvent.WaitOne();
 
-                StopTimers();
+                Timer_counterTryRead.Enabled = false;
+                Timer_revolutions.Enabled = false;
+
+                Timer_counterTryRead.Stop();
+                Timer_revolutions.Stop();
+
+                stopwatch.Reset();
+
+                //This delay is to make sure that the Timer_counterTryRead stops before we dispose myTask object
+                Thread.Sleep(100);
 
                 myTask.Dispose();
-                // Return the calculated RPM
 
                 return rpm.ToString();
             }
             catch (DaqException exception)
             {
                 MessageBox.Show(exception.Message);
-                StopTimers();
                 myTask.Dispose();
                 return "Error"; // Return 0 or handle the exception as needed
             }
@@ -254,7 +260,7 @@ namespace DeviceCommunicators.NI_6002
             Timer_revolutions.Stop();
         }
 
-        private void CounterTryRead(object sender, ElapsedEventArgs e)
+        private void CounterTryRead(object sender, MicroTimerEventArgs e)
         {
             try
             {
@@ -272,20 +278,17 @@ namespace DeviceCommunicators.NI_6002
                 return;
             }
         }
-
-        private void CalculateRevolutions(object sender, ElapsedEventArgs e)
+        private void CalculateRevolutions(object sender, MicroTimerEventArgs e)
         {
             uint _countReading = countReading;
-            revoultionsTimerElapsed++;
+            revoultionsTimerElapsed = stopwatch.Elapsed.TotalMilliseconds / 1000;
+            rpm = (_countReading * 60) / revoultionsTimerElapsed;
 
-            if (revoultionsTimerElapsed == revoultionsTimerElapsedLimit)
-            {
-                rpm = (_countReading * 60) / revoultionsTimerElapsed;
-                rpmCounterAutoResetEvent.Set();
-                revoultionsTimerElapsed = 0;
-                // Reset revolution count for the next interval
-                countReading = 0;
-            }
+            LoggerService.Error(this, "RPM: " + rpm.ToString() + " TimerElapsed: " + revoultionsTimerElapsed.ToString());
+            revoultionsTimerElapsed = 0;
+            // Reset revolution count for the next interval
+            countReading = 0;
+            rpmCounterAutoResetEvent.Set();
         }
 
         #endregion command 
