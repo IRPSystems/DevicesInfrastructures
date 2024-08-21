@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using System.IO;
 using DeviceCommunicators.Models;
+using System.Text.RegularExpressions;
 
 namespace DeviceCommunicators.NI_6002
 {
@@ -105,7 +106,7 @@ namespace DeviceCommunicators.NI_6002
                 if (!(param is NI6002_ParamData niParamData))
                     return;
                 //need add to send data
-                bool res = Send_command(niParamData);
+                bool res = (bool)Send_command(niParamData);
 
                 if (res)
                     callback?.Invoke(param, CommunicatorResultEnum.OK, null);
@@ -128,7 +129,7 @@ namespace DeviceCommunicators.NI_6002
                     return;
 
                 // need change to send data
-                string message = Read_command(niParamData);
+                string message = (string)Send_command(niParamData);
                 if(string.IsNullOrEmpty(message) || message == "Error")
                 {
 					callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
@@ -151,270 +152,322 @@ namespace DeviceCommunicators.NI_6002
 
 
 
-        public  bool Send_command(NI6002_ParamData niParamData)
+        public object Send_command(NI6002_ParamData niParamData )
         {
             if (niParamData == null)
-                return false;
-           
-      
+                return null;
 
-            if (niParamData.command_to_device.ToLower() == ("Minimum voltage").ToLower())
+            object data;
+
+            double value;
+
+            string cmd = niParamData.command_to_device.ToLower();
+
+            if (cmd.Contains("digital") && cmd.Contains("output"))
+                cmd = "digital output";
+            else if (cmd.Contains("digital") && cmd.Contains("input"))
+                cmd = "digital input";
+            else if (cmd.Contains("digital") && cmd.Contains("counter"))
+                cmd = "digital counter";
+            else if (cmd.Contains("analog") && cmd.Contains("input"))
+                cmd = "analog input";
+            else if (cmd.Contains("analog") && cmd.Contains("output"))
+                cmd = "analog output";
+            else if (cmd.Contains("analog") && cmd.Contains("current"))
+                cmd = "analog input current";
+
+
+
+            switch (cmd)
             {
-                double value = Convert.ToDouble(niParamData.Value);
-                _commmand_to_device._Min_level_voltage = value;
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Maximum Voltage").ToLower())
-            {
-                double value= Convert.ToDouble(niParamData.Value);
-                _commmand_to_device._Max_level_voltage = value;
-			}
-            else if(niParamData.command_to_device.ToLower() == ("Minimum voltage throttle").ToLower())
-            {
-                double value = Convert.ToDouble(niParamData.Value);
-                Minimum_voltage_throttle = value;
-
-    }
-            else if (niParamData.command_to_device.ToLower() == ("Maximum  voltage throttle").ToLower())
-            {
-                double value = Convert.ToDouble(niParamData.Value);
-                Maximum_voltage_throttle = value ;
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 0").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port0";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output0,(int)Math.Pow(2, 0));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output0, 0);
-                }
-
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 1").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port0";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output1, (int)Math.Pow(2, 1));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output1, 0);
-                }
-
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 2").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port0";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output2, (int)Math.Pow(2, 2));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output2, 0);
-                }
-
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 3").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port0";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output3, (int)Math.Pow(2, 3));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output3, 0);
-                }
-
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 4").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port0";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output4, (int)Math.Pow(2, 4));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output4, 0);
-                }
-
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 5").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port0";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output5, (int)Math.Pow(2, 5));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output5, 0);
-                }
-
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 6").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port0";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output6, (int)Math.Pow(2, 6));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output6, 0);
-                }
-
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 7").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port0";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output7, (int)Math.Pow(2, 7));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output7, 0);
-                }
-
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 1 port output 0").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port1";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output0, (int)Math.Pow(2, 0));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output0, 0);
-                }
-
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 1 port output 1").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port1";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output1, (int)Math.Pow(2, 1));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output1, 0);
-                }
-
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 1 port output 2").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port1";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output2, (int)Math.Pow(2, 2));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output2, 0);
-                }
-
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 1 port output 3").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port1";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output3, (int)Math.Pow(2, 3));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output3, 0);
-                }
-
-            }
-            else if (niParamData.command_to_device.ToLower() == ("Digital Port 2 port output 0").ToLower())
-            {
-                _commmand_to_device._Port_Io = "port2";
-
-                int value_of_port = Convert.ToInt32(niParamData.Value);
-                //single out(Pin)
-                if (value_of_port > 0)
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output0, (int)Math.Pow(2, 0));
-                }
-                else
-                {
-                    _commmand_to_device.DigitalIO_output(IO_Output.IO_Output0, 0);
-                }
-
-            }
-            
-            else if (niParamData.Name.ToLower() == ("Analog port output 1").ToLower())
-            {               
-
-                double value_of_port= Convert.ToDouble(niParamData.Value);
-                _commmand_to_device.Anolog_output(AO_Output.AO_Output1, value_of_port);
-                    
-
-                
-            }
-            else if (niParamData.Name.ToLower() == ("Throttle").ToLower())
-            {
-             
-                double value_Throttle = Convert.ToDouble(niParamData.Value);
+                case "digital input":
+                    data = _commmand_to_device.DigitalIO_input(niParamData.portLine);
+                    break;
+                case  "digital output":
+                    Regex regex = new Regex(@"\d+$");
+                    Match match = regex.Match(niParamData.portLine);
+                    value = Convert.ToInt32(match.Value);
+                    _commmand_to_device.DigitalIO_output(niParamData.portLine, Convert.ToBoolean(niParamData.Value) ? Convert.ToInt32(Math.Pow(2, value)) : 0 );
+                    data = true;
+                    break;
+                case "analog input":
+                    data = _commmand_to_device.Anolog_input(niParamData.portLine);
+                    break;
+                case "analog output":
+                    value = Convert.ToDouble(niParamData.Value);
+                    _commmand_to_device.Anolog_output(niParamData.portLine, value);
+                    data = true;
+                    break;
+                case "analog input current":
+                    data = _commmand_to_device.Anolog_input_current(niParamData.portLine, niParamData.shunt_resistor);
+                    break;
+                case "digital counter":
+                    data = _commmand_to_device.Digital_Counter();
+                    break;
 
 
-                if (value_Throttle >= 0 && value_Throttle <= 100)
-                {
-
-                    double anlog_out_put = (((Maximum_voltage_throttle - Minimum_voltage_throttle) * value_Throttle )/ 100) + Minimum_voltage_throttle;
-                   
-                    _commmand_to_device.Anolog_output(AO_Output.AO_Output0, anlog_out_put);
-
-                    
-                }
+                default:
+                    return null;
             }
 
-            return true;
+
+            //         if (niParamData.command_to_device.ToLower() == ("Minimum voltage").ToLower())
+            //         {
+            //             double value = Convert.ToDouble(niParamData.Value);
+            //             _commmand_to_device._Min_level_voltage = value;
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Maximum Voltage").ToLower())
+            //         {
+            //             double value= Convert.ToDouble(niParamData.Value);
+            //             _commmand_to_device._Max_level_voltage = value;
+            //}
+            //         else if(niParamData.command_to_device.ToLower() == ("Minimum voltage throttle").ToLower())
+            //         {
+            //             double value = Convert.ToDouble(niParamData.Value);
+            //             Minimum_voltage_throttle = value;
+
+            // }
+            //         else if (niParamData.command_to_device.ToLower() == ("Maximum  voltage throttle").ToLower())
+            //         {
+            //             double value = Convert.ToDouble(niParamData.Value);
+            //             Maximum_voltage_throttle = value ;
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 0").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port0";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output0,(int)Math.Pow(2, 0));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output0, 0);
+            //             }
+
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 1").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port0";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output1, (int)Math.Pow(2, 1));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output1, 0);
+            //             }
+
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 2").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port0";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output2, (int)Math.Pow(2, 2));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output2, 0);
+            //             }
+
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 3").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port0";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output3, (int)Math.Pow(2, 3));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output3, 0);
+            //             }
+
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 4").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port0";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output4, (int)Math.Pow(2, 4));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output4, 0);
+            //             }
+
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 5").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port0";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output5, (int)Math.Pow(2, 5));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output5, 0);
+            //             }
+
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 6").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port0";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output6, (int)Math.Pow(2, 6));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output6, 0);
+            //             }
+
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 0 port output 7").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port0";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output7, (int)Math.Pow(2, 7));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output7, 0);
+            //             }
+
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 1 port output 0").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port1";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output0, (int)Math.Pow(2, 0));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output0, 0);
+            //             }
+
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 1 port output 1").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port1";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output1, (int)Math.Pow(2, 1));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output1, 0);
+            //             }
+
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 1 port output 2").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port1";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output2, (int)Math.Pow(2, 2));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output2, 0);
+            //             }
+
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 1 port output 3").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port1";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output3, (int)Math.Pow(2, 3));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output3, 0);
+            //             }
+
+            //         }
+            //         else if (niParamData.command_to_device.ToLower() == ("Digital Port 2 port output 0").ToLower())
+            //         {
+            //             _commmand_to_device._Port_Io = "port2";
+
+            //             int value_of_port = Convert.ToInt32(niParamData.Value);
+            //             //single out(Pin)
+            //             if (value_of_port > 0)
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output0, (int)Math.Pow(2, 0));
+            //             }
+            //             else
+            //             {
+            //                 _commmand_to_device.DigitalIO_output(IO_Output.IO_Output0, 0);
+            //             }
+
+            //         }
+
+            //         else if (niParamData.Name.ToLower() == ("Analog port output 1").ToLower())
+            //         {               
+
+            //             double value_of_port= Convert.ToDouble(niParamData.Value);
+            //             _commmand_to_device.Anolog_output(AO_Output.AO_Output1, value_of_port);
+
+
+
+            //         }
+            //         else if (niParamData.Name.ToLower() == ("Throttle").ToLower())
+            //         {
+
+            //             double value_Throttle = Convert.ToDouble(niParamData.Value);
+
+
+            //             if (value_Throttle >= 0 && value_Throttle <= 100)
+            //             {
+
+            //                 double anlog_out_put = (((Maximum_voltage_throttle - Minimum_voltage_throttle) * value_Throttle )/ 100) + Minimum_voltage_throttle;
+
+            //                 _commmand_to_device.Anolog_output(AO_Output.AO_Output0, anlog_out_put);
+
+
+            //             }
+            //         }
+
+            return data;
         }
 
 
@@ -426,157 +479,158 @@ namespace DeviceCommunicators.NI_6002
 
             string data = "";
 
-            try
-            {
-                
-                if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 0").ToLower())
-                {
-                    data=port_0_to_digitalal_out(0,niParamData);
 
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 1").ToLower())
-                {
-                    data = port_0_to_digitalal_out(1, niParamData);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 2").ToLower())
-                {
-                    data = port_0_to_digitalal_out(2, niParamData);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 3").ToLower())
-                {
-                    data = port_0_to_digitalal_out(3, niParamData);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 4").ToLower())
-                {
-                    data =port_0_to_digitalal_out(4, niParamData);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 5").ToLower())
-                {
-                    _commmand_to_device._Port_Io = "port0";
-                    data = port_0_to_digitalal_out(5, niParamData);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 6").ToLower())
-                {
-                    data = port_0_to_digitalal_out(6, niParamData);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 7").ToLower())
-                {
-                    data = port_0_to_digitalal_out(7, niParamData);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Port 1 digital input 0").ToLower())
-                {
-                    data = port_1_to_digitalal_out(0, niParamData);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Port 1 digital input 1").ToLower())
-                {
-                    data = port_1_to_digitalal_out(1, niParamData);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Port 1 digital input 2").ToLower())
-                {
-                    data = port_1_to_digitalal_out(2, niParamData);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Port 1 digital input 3").ToLower())
-                {
-                    data = port_1_to_digitalal_out(3, niParamData);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Port 2 digital input 0").ToLower())
-                {
-                    data = port_2_to_digitalal_out(0, niParamData);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 0").ToLower())
-                {
-                    niParamData.Io_port = 0;
-                    data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 1").ToLower())
-                {
-                    niParamData.Io_port = 1;
-                    data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 2").ToLower())
-                {
-                    niParamData.Io_port = 2;
-                    data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 3").ToLower())
-                {
-                    niParamData.Io_port = 3;
-                    data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 4").ToLower())
-                {
-                    niParamData.Io_port = 4;
-                    data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 5").ToLower())
-                {
-                    niParamData.Io_port = 5;
-                    data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 6").ToLower())
-                {
-                    niParamData.Io_port = 6;
-                    data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 7").ToLower())
-                {
-                    niParamData.Io_port = 7;
-                    data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Read Anolog input current").ToLower())
-                {
-                    data = _commmand_to_device.Anolog_input_current((IO_Pin)niParamData.Io_port, niParamData.shunt_resistor);
-                }
-                else if (niParamData.command_to_device.ToLower() == ("Read Digital counter").ToLower())
-                {
-                    data = _commmand_to_device.Digital_Counter();
-                }
+            //try
+            //{
 
-            }
-            catch(Exception ex)
-            {
-                LoggerService.Error(this, "Failed to get data", ex);
-            }
+            //    if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 0").ToLower())
+            //    {
+            //        data=port_0_to_digitalal_out(0,niParamData);
+
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 1").ToLower())
+            //    {
+            //        data = port_0_to_digitalal_out(1, niParamData);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 2").ToLower())
+            //    {
+            //        data = port_0_to_digitalal_out(2, niParamData);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 3").ToLower())
+            //    {
+            //        data = port_0_to_digitalal_out(3, niParamData);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 4").ToLower())
+            //    {
+            //        data =port_0_to_digitalal_out(4, niParamData);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 5").ToLower())
+            //    {
+            //        _commmand_to_device._Port_Io = "port0";
+            //        data = port_0_to_digitalal_out(5, niParamData);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 6").ToLower())
+            //    {
+            //        data = port_0_to_digitalal_out(6, niParamData);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Port 0 digital input 7").ToLower())
+            //    {
+            //        data = port_0_to_digitalal_out(7, niParamData);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Port 1 digital input 0").ToLower())
+            //    {
+            //        data = port_1_to_digitalal_out(0, niParamData);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Port 1 digital input 1").ToLower())
+            //    {
+            //        data = port_1_to_digitalal_out(1, niParamData);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Port 1 digital input 2").ToLower())
+            //    {
+            //        data = port_1_to_digitalal_out(2, niParamData);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Port 1 digital input 3").ToLower())
+            //    {
+            //        data = port_1_to_digitalal_out(3, niParamData);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Port 2 digital input 0").ToLower())
+            //    {
+            //        data = port_2_to_digitalal_out(0, niParamData);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 0").ToLower())
+            //    {
+            //        niParamData.Io_port = 0;
+            //        data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 1").ToLower())
+            //    {
+            //        niParamData.Io_port = 1;
+            //        data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 2").ToLower())
+            //    {
+            //        niParamData.Io_port = 2;
+            //        data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 3").ToLower())
+            //    {
+            //        niParamData.Io_port = 3;
+            //        data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 4").ToLower())
+            //    {
+            //        niParamData.Io_port = 4;
+            //        data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 5").ToLower())
+            //    {
+            //        niParamData.Io_port = 5;
+            //        data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 6").ToLower())
+            //    {
+            //        niParamData.Io_port = 6;
+            //        data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Read Anolog input 7").ToLower())
+            //    {
+            //        niParamData.Io_port = 7;
+            //        data = _commmand_to_device.Anolog_input((IO_Pin)niParamData.Io_port);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Read Anolog input current").ToLower())
+            //    {
+            //        data = _commmand_to_device.Anolog_input_current((IO_Pin)niParamData.Io_port, niParamData.shunt_resistor);
+            //    }
+            //    else if (niParamData.command_to_device.ToLower() == ("Read Digital counter").ToLower())
+            //    {
+            //        data = _commmand_to_device.Digital_Counter();
+            //    }
+
+            //}
+            //catch(Exception ex)
+            //{
+            //    LoggerService.Error(this, "Failed to get data", ex);
+            //}
 
             return data;
         }
      
 
-        private string port_0_to_digitalal_out(int number_port, NI6002_ParamData niParamData)
-        {
-            string data = "";
-            string curent_port = "";
-            curent_port = _commmand_to_device._Port_Io;
-            _commmand_to_device._Port_Io = "port0";
-            niParamData.Io_port = number_port;
-             data= _commmand_to_device.DigitalIO_input((IO_Pin)niParamData.Io_port);
-            _commmand_to_device._Port_Io = curent_port;
-            return data;
-        }
+        //private string port_0_to_digitalal_out(int number_port, NI6002_ParamData niParamData)
+        //{
+        //    string data = "";
+        //    string curent_port = "";
+        //    curent_port = _commmand_to_device._Port_Io;
+        //    _commmand_to_device._Port_Io = "port0";
+        //    niParamData.Io_port = number_port;
+        //     data= _commmand_to_device.DigitalIO_input((IO_Pin)niParamData.Io_port);
+        //    _commmand_to_device._Port_Io = curent_port;
+        //    return data;
+        //}
 
-        private string  port_1_to_digitalal_out(int number_port, NI6002_ParamData niParamData)
-        {
-            string data = "";
-            string curent_port = "";
-            curent_port = _commmand_to_device._Port_Io;
-            _commmand_to_device._Port_Io = "port1";
-            niParamData.Io_port = number_port;
-            data = _commmand_to_device.DigitalIO_input((IO_Pin)niParamData.Io_port);
-            _commmand_to_device._Port_Io = curent_port;
-            return data;
-        }
+        //private string  port_1_to_digitalal_out(int number_port, NI6002_ParamData niParamData)
+        //{
+        //    string data = "";
+        //    string curent_port = "";
+        //    curent_port = _commmand_to_device._Port_Io;
+        //    _commmand_to_device._Port_Io = "port1";
+        //    niParamData.Io_port = number_port;
+        //    data = _commmand_to_device.DigitalIO_input((IO_Pin)niParamData.Io_port);
+        //    _commmand_to_device._Port_Io = curent_port;
+        //    return data;
+        //}
 
-        private string port_2_to_digitalal_out(int number_port, NI6002_ParamData niParamData)
-        {
-            string data = "";
-            string curent_port = "";
-            curent_port = _commmand_to_device._Port_Io;
-            _commmand_to_device._Port_Io = "port2";
-            niParamData.Io_port = number_port;
-            data = _commmand_to_device.DigitalIO_input((IO_Pin)niParamData.Io_port);
-            _commmand_to_device._Port_Io = curent_port;
-            return data;
-        }
+        //private string port_2_to_digitalal_out(int number_port, NI6002_ParamData niParamData)
+        //{
+        //    string data = "";
+        //    string curent_port = "";
+        //    curent_port = _commmand_to_device._Port_Io;
+        //    _commmand_to_device._Port_Io = "port2";
+        //    niParamData.Io_port = number_port;
+        //    data = _commmand_to_device.DigitalIO_input((IO_Pin)niParamData.Io_port);
+        //    _commmand_to_device._Port_Io = curent_port;
+        //    return data;
+        //}
 
 
 
