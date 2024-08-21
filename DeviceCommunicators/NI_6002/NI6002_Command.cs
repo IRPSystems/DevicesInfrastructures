@@ -58,11 +58,11 @@ namespace DeviceCommunicators.NI_6002
         #endregion Constructor
 
         #region command 
-        public void DigitalIO_output(IO_Output output ,int State)
+        public void DigitalIO_output(string portLine ,int State)
         {
             string commannd_to_device = "";
 
-            commannd_to_device = _deviceName + "/" + _Port_Io + "/line" + (int)output;
+            commannd_to_device = _deviceName + "/" + portLine;
             //deviceName += "/" + "port0/line" + "0"
             Task digitalWriteTask_Port = new Task();
             //  Create an Digital Output channel and name it.
@@ -83,32 +83,35 @@ namespace DeviceCommunicators.NI_6002
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public string DigitalIO_input(IO_Pin input)
+        public string DigitalIO_input(string portLine)
         {
             string commannd_to_device = "";
 
-            commannd_to_device = _deviceName + "/" + _Port_Io + "/line" + (int)input;
+            commannd_to_device = _deviceName + "/" + portLine;
+
+            LoggerService.Inforamtion(this, "command to device : " + commannd_to_device);
 
 
-
-            Task digReadTaskPort = new Task();
+            Task digReadTaskPort = new Task();         
             digReadTaskPort.DIChannels.CreateChannel(
-                commannd_to_device,
-                "",
-                ChannelLineGrouping.OneChannelForAllLines);
+                 commannd_to_device,
+                 "",
+                    ChannelLineGrouping.OneChannelForAllLines);
             DigitalSingleChannelReader DI_readerPort = new DigitalSingleChannelReader(digReadTaskPort.Stream);
             UInt32 DigIndatapPort = DI_readerPort.ReadSingleSamplePortUInt32();
+            
+
             return String.Format("0x{0:X}", DigIndatapPort);
         }
 
 
-       public void Anolog_output(AO_Output output, double volt)
+       public void Anolog_output(string port, double volt)
         {
             using (Task task = new Task())
             {
                 string commannd_to_device = "";
 
-                commannd_to_device = _deviceName + "/" + "ao" + (int)output;
+                commannd_to_device = _deviceName + "/" + "ao" + port;
 
                 // Configure analog output channel
                 task.AOChannels.CreateVoltageChannel(commannd_to_device, "", _Min_level_voltage, _Max_level_voltage, AOVoltageUnits.Volts);
@@ -119,7 +122,7 @@ namespace DeviceCommunicators.NI_6002
             }
         }
         
-        public string Anolog_input(IO_Pin input)
+        public string Anolog_input(string port)
         {
             double sample;
 			
@@ -129,7 +132,7 @@ namespace DeviceCommunicators.NI_6002
 
 				string commannd_to_device = "";
 
-                commannd_to_device = _deviceName + "/" + "ai" + (int)input;
+                commannd_to_device = _deviceName + "/" + "ai" + port;
                 try
                 {
                     task2.AIChannels.CreateVoltageChannel(commannd_to_device, "",
@@ -149,7 +152,7 @@ namespace DeviceCommunicators.NI_6002
 			return sample.ToString();
         }
 
-        public string Anolog_input_current(IO_Pin input, double shuntResistor)
+        public string Anolog_input_current(string port, double shuntResistor)
         {
             try
             {
@@ -167,9 +170,9 @@ namespace DeviceCommunicators.NI_6002
 
                 string commannd_to_device = "";
 
-                LoggerService.Error(this, "Analog input current: Port" + input.ToString() + " shuntresistor: " + shuntResistor.ToString());
+                LoggerService.Error(this, "Analog input current: Port" + port.ToString() + " shuntresistor: " + shuntResistor.ToString());
 
-                commannd_to_device = _deviceName + "/" + "ai" + (int)input;
+                commannd_to_device = _deviceName + "/" + "ai" + port;
 
                 // Create a virtual channel // can be internal too
                 myTask.AIChannels.CreateCurrentChannel(commannd_to_device, "",
