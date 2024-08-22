@@ -157,6 +157,8 @@ namespace DeviceCommunicators.NI_6002
             if (niParamData == null)
                 return null;
 
+            int port = niParamData.Io_port, line = niParamData.portLine;
+
             object data;
 
             double value;
@@ -181,30 +183,26 @@ namespace DeviceCommunicators.NI_6002
             switch (cmd)
             {
                 case "digital input":
-                    data = _commmand_to_device.DigitalIO_input(niParamData.portLine);
+                    data = _commmand_to_device.DigitalIO_input(port , line);
                     break;
                 case  "digital output":
-                    Regex regex = new Regex(@"\d+$");
-                    Match match = regex.Match(niParamData.portLine);
-                    value = Convert.ToInt32(match.Value);
-                    _commmand_to_device.DigitalIO_output(niParamData.portLine, Convert.ToBoolean(niParamData.Value) ? Convert.ToInt32(Math.Pow(2, value)) : 0 );
+                    _commmand_to_device.DigitalIO_output(port,line, Convert.ToBoolean(niParamData.Value) ? Convert.ToInt32(Math.Pow(2, line)) : 0 );
                     data = true;
                     break;
                 case "analog input":
-                    data = _commmand_to_device.Anolog_input(niParamData.portLine);
+                    data = _commmand_to_device.Anolog_input(port);
                     break;
                 case "analog output":
                     value = Convert.ToDouble(niParamData.Value);
-                    _commmand_to_device.Anolog_output(niParamData.portLine, value);
+                    _commmand_to_device.Anolog_output(port, value);
                     data = true;
                     break;
                 case "analog input current":
-                    data = _commmand_to_device.Anolog_input_current(niParamData.portLine, niParamData.shunt_resistor);
+                    data = _commmand_to_device.Anolog_input_current(port, niParamData.shunt_resistor);
                     break;
                 case "digital counter":
                     data = _commmand_to_device.Digital_Counter();
                     break;
-
 
                 default:
                     return null;
