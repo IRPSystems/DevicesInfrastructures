@@ -77,13 +77,12 @@
                          Foreground="{Binding Foreground}"
                          Visibility="{Binding RegularTextBoxVisibility,
                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
-                         IsReadOnly="{Binding IsReadOnly}"
                          KeyUp="tb_KeyUp"
                          TextChanged="tb_TextChanged"
                          KeyboardNavigation.TabIndex="2"/>
 
                 <Grid>
-                    <ComboBox ItemsSource="{Binding DropDown}"
+                    <ComboBox Name="cb" ItemsSource="{Binding DropDown}"
                               SelectedItem="{Binding SelectedDropDown, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                               Background="{Binding Background}"
                               Foreground="{Binding Foreground}"
