@@ -1,5 +1,5 @@
 ﻿
-//#define _SAVE_TIME
+#define _SAVE_TIME
 using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
@@ -31,7 +31,7 @@ namespace DeviceCommunicators.MCU
 		private const byte _errMask = 0xF0;
 		private const byte _errShift = 4;
 
-		private const int _getResponseRepeats = 20;
+		private const int _getResponseRepeats = 5;
 		public const int GetResponsesTimeout = 50;
 
 		public ConcurrentDictionary<int, string> _mcuErrorToDescription;
@@ -217,6 +217,8 @@ namespace DeviceCommunicators.MCU
 			ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
 
 			uint idNum = (uint)(id[0] + (id[1] << 8) + (id[2] << 16));
+
+			if (id[0] == 0xE9 && id[1] == 0x2B && id[1] == 0x8D) { }
 
 			if (_idArrayToData.ContainsKey(idNum) == false)
 				_idArrayToData[idNum] = new BlockingCollection<CommunicatorIOData>();
