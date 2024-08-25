@@ -58,11 +58,11 @@ namespace DeviceCommunicators.NI_6002
         #endregion Constructor
 
         #region command 
-        public void DigitalIO_output(string portLine ,int State)
+        public void DigitalIO_output(int port,int portLine ,int State)
         {
             string commannd_to_device = "";
 
-            commannd_to_device = _deviceName + "/" + portLine;
+            commannd_to_device = _deviceName + "/" + "port" + port + "/line" + portLine;
             //deviceName += "/" + "port0/line" + "0"
             Task digitalWriteTask_Port = new Task();
             //  Create an Digital Output channel and name it.
@@ -83,11 +83,11 @@ namespace DeviceCommunicators.NI_6002
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public string DigitalIO_input(string portLine)
+        public string DigitalIO_input(int port, int portLine)
         {
             string commannd_to_device = "";
 
-            commannd_to_device = _deviceName + "/" + portLine;
+            commannd_to_device = _deviceName + "/" + "port"+ port + "/line" + portLine;
 
             LoggerService.Inforamtion(this, "command to device : " + commannd_to_device);
 
@@ -105,7 +105,7 @@ namespace DeviceCommunicators.NI_6002
         }
 
 
-       public void Anolog_output(string port, double volt)
+       public void Anolog_output(int port, double volt)
         {
             using (Task task = new Task())
             {
@@ -122,7 +122,7 @@ namespace DeviceCommunicators.NI_6002
             }
         }
         
-        public string Anolog_input(string port)
+        public string Anolog_input(int port)
         {
             double sample;
 			
@@ -152,7 +152,7 @@ namespace DeviceCommunicators.NI_6002
 			return sample.ToString();
         }
 
-        public string Anolog_input_current(string port, double shuntResistor)
+        public string Anolog_input_current(int port, double shuntResistor)
         {
             try
             {

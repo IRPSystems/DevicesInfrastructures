@@ -64,9 +64,8 @@ namespace DeviceCommunicators.NI_6002
 
         #region Methods 
 
-        public void DigitalIO_output(string portline ,int State)
+        public void DigitalIO_output(int output,int line ,int State)
         {
-            int output = Convert.ToInt32(portline);
             if (State > 0)
             {
                 Digital_port_output[(int)output] = Convert.ToInt32(Math.Pow(2, (int)output));
@@ -86,9 +85,8 @@ namespace DeviceCommunicators.NI_6002
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public string DigitalIO_input(string portline)
+        public string DigitalIO_input(int input, int line)
         {
-            int input = Convert.ToInt32(portline);
 
            if (Digital_port_input[(int)input] ==true)
             {
@@ -103,24 +101,21 @@ namespace DeviceCommunicators.NI_6002
         }
 
 
-       public void Anolog_output(string portline, double volt)
+       public void Anolog_output(int  output, double volt)
         {
 
-            int output = Convert.ToInt32(portline);
             Analog_port_output[(int)output] = volt;
            
         }
         
-        public string Anolog_input(string portline)
+        public string Anolog_input(int input)
         {
-            int input = Convert.ToInt32(portline);
             return Convert.ToString(Analog_port_input[(int)input]);
           
         }
 
-        public string Anolog_input_current(string portline, double shuntResistor)
+        public string Anolog_input_current(int input, double shuntResistor)
         {
-            int input = Convert.ToInt32(portline);
             return Convert.ToString(Analog_port_input[(int)input]);
         }
 
