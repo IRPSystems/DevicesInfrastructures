@@ -51,7 +51,6 @@ namespace DeviceHandler.ViewModels
 		public SetupSelectionViewModel(
 			DeviceSetupUserData deviceSetupUserData,
 			ReadDevicesFileService readDevicesFile,
-			Visibility buttonsVisibility = Visibility.Visible,
 			bool isAddDataLoggers = true)
 		{
 			
@@ -60,7 +59,7 @@ namespace DeviceHandler.ViewModels
 				return;
 
 			_deviceSetupUserData = deviceSetupUserData;
-			ButtonsVisibility = buttonsVisibility;
+			ButtonsVisibility = Visibility.Visible;
 
 
 			SaveDeviceSetupCommand = new RelayCommand(SaveDeviceSetup);
