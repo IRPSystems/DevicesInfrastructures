@@ -28,8 +28,8 @@ namespace DeviceCommunicators.NI_6002
 
 		private bool _isInitialized;
 		public override bool IsInitialized => _isInitialized;
-		private double Minimum_voltage_throttle = 1.05;
-		private double Maximum_voltage_throttle = 4.45;
+		//private double Minimum_voltage_throttle = 1.05;
+		//private double Maximum_voltage_throttle = 4.45;
 
 		#endregion Fields and Properties
 
