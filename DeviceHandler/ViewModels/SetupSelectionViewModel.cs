@@ -48,9 +48,15 @@ namespace DeviceHandler.ViewModels
 
 		public SetupSelectionViewModel(
 			DeviceSetupUserData deviceSetupUserData,
-			ReadDevicesFileService readDevicesFile)
+			ReadDevicesFileService readDevicesFile,
+			bool isAddDataLoggers = true)
 		{
+			if (deviceSetupUserData == null)
+				return;
+
 			_deviceSetupUserData = deviceSetupUserData;
+
+
 
 			SaveDeviceSetupCommand = new RelayCommand(SaveDeviceSetup);
 			LoadDeviceSetupCommand = new RelayCommand(LoadDeviceSetup);
@@ -69,7 +75,8 @@ namespace DeviceHandler.ViewModels
 				deviceSetupUserData.MCUJsonPath,
 				deviceSetupUserData.MCUB2BJsonPath,
 				deviceSetupUserData.DynoCommunicationPath,
-				deviceSetupUserData.NI6002CommunicationPath);
+				deviceSetupUserData.NI6002CommunicationPath,
+				isAddDataLoggers);
 			DevicesSourceList = new ObservableCollection<DeviceData>();
 			foreach (DeviceData device in _devicesSourceList_Full)
 			{

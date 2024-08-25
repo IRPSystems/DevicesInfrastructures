@@ -52,7 +52,11 @@ namespace DeviceCommunicators.Services
 				{
 					string path = file;
 					if (Path.GetFileName(file) == "param_defaults.json")
+					{
+						if(mcuFilePath == null)
+							mcuFilePath = path;
 						continue;
+					}
 
 					else if (Path.GetFileName(file) == "Dyno Communication.json" && dynoFilePath != null)
 						path = dynoFilePath;
