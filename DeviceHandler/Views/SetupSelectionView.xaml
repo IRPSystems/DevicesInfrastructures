@@ -25,7 +25,7 @@
             <RowDefinition Height="5"/>
             <RowDefinition />
             <RowDefinition Height="5"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -182,7 +182,8 @@
 
         </DataGrid>
 
-        <Grid Grid.Row="6" Grid.Column="0" >
+        <Grid Grid.Row="6" Grid.Column="0"
+              Visibility="{Binding ButtonsVisibility}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="5"/>

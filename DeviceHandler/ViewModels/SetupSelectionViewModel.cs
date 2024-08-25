@@ -31,6 +31,8 @@ namespace DeviceHandler.ViewModels
 		public DeviceData DestListSelectedItem { get; set; }
 		public DeviceData SourceListSelectedItem { get; set; }
 
+		public Visibility ButtonsVisibility { get; set; }
+
 		#endregion Properties
 
 		#region Fields
@@ -49,13 +51,16 @@ namespace DeviceHandler.ViewModels
 		public SetupSelectionViewModel(
 			DeviceSetupUserData deviceSetupUserData,
 			ReadDevicesFileService readDevicesFile,
+			Visibility buttonsVisibility = Visibility.Visible,
 			bool isAddDataLoggers = true)
 		{
+			
+
 			if (deviceSetupUserData == null)
 				return;
 
 			_deviceSetupUserData = deviceSetupUserData;
-
+			ButtonsVisibility = buttonsVisibility;
 
 
 			SaveDeviceSetupCommand = new RelayCommand(SaveDeviceSetup);
