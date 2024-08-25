@@ -177,7 +177,7 @@ namespace DeviceCommunicators.NI_6002
 			else if (cmd.Contains("analog") && cmd.Contains("current"))
 				cmd = "analog input current";
 
-
+			double value = 0;
             switch (cmd)
             {
                 case "digital input":
@@ -484,7 +484,7 @@ namespace DeviceCommunicators.NI_6002
 				res = int.TryParse(split[5], out line);
 				if (!res)
 					return false;
-				niParamData.portLine = line.ToString();
+				niParamData.portLine = line;
 
 				niParamData.command_to_device = "digital output";
 			}
