@@ -28,8 +28,8 @@ namespace DeviceCommunicators.NI_6002
 
 		private bool _isInitialized;
 		public override bool IsInitialized => _isInitialized;
-		private double Minimum_voltage_throttle = 1.05;
-		private double Maximum_voltage_throttle = 4.45;
+		//private double Minimum_voltage_throttle = 1.05;
+		//private double Maximum_voltage_throttle = 4.45;
 
 		#endregion Fields and Properties
 
@@ -177,8 +177,9 @@ namespace DeviceCommunicators.NI_6002
 			else if (cmd.Contains("analog") && cmd.Contains("current"))
 				cmd = "analog input current";
 
+
 			double value = 0;
-            switch (cmd)
+			switch (cmd)
             {
                 case "digital input":
                     data = _commmand_to_device.DigitalIO_input(port , line);
