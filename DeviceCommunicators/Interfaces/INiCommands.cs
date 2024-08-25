@@ -25,7 +25,7 @@ namespace DeviceCommunicators.Interfaces
          double[] Analog_port_output { get; set; } 
 
 
-        void DigitalIO_output(string portLine, int State);
+        void DigitalIO_output(int port , int portLine, int State);
 
 
         /// <summary>
@@ -34,14 +34,14 @@ namespace DeviceCommunicators.Interfaces
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        string DigitalIO_input(string portLine);
+        string DigitalIO_input(int port, int portLine);
 
 
-        void Anolog_output(string portLine , double volt);
+        void Anolog_output(int port , double volt);
 
-        string Anolog_input(string portLine);
+        string Anolog_input(int port);
 
-        string Anolog_input_current(string portLine, double shuntResistor);
+        string Anolog_input_current(int port, double shuntResistor);
 
         string Digital_Counter();
 
