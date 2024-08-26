@@ -8,7 +8,7 @@
              xmlns:controls_view="clr-namespace:Controls.Views;assembly=Controls"
              xmlns:local="clr-namespace:DeviceHandler.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="100" d:DesignWidth="900">
+             d:DesignHeight="100" d:DesignWidth="1000">
 
     <UserControl.Resources>
         <converter:TypeToNameConverter x:Key="ConnectionTypeStringConverter"/>
@@ -75,17 +75,15 @@
             </ComboBox>
 
             <TextBlock Text="Node ID" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBox Text="{Binding SyncNodeID}" Margin="0,0,50,0" Width="100" />
-
-            <controls_view:HexTextBoxView x:Name="tbMsgId" Margin="5" Width="100" >
+            <controls_view:HexTextBoxView Text="{Binding SyncNodeID}" Width="100">
 
                 <i:Interaction.Triggers>
 
                     <i:EventTrigger EventName="HexKeyDownEvent">
                         <i:InvokeCommandAction Command="{Binding Path=DataContext.HexKeyDownEventCommand, 
-                                             Mode=OneWay, 
-                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" 
-                               PassEventArgsToCommand="True"/>
+                                                                 Mode=OneWay, 
+                                                                 RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" 
+                                                   PassEventArgsToCommand="True"/>
                     </i:EventTrigger>
 
                     <i:EventTrigger EventName="HexTextChangedEvent">
@@ -98,6 +96,9 @@
                 </i:Interaction.Triggers>
 
             </controls_view:HexTextBoxView>
+
+
+           
 
         </StackPanel>
 
