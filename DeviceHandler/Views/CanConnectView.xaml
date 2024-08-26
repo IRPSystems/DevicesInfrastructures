@@ -75,7 +75,8 @@
             </ComboBox>
 
             <TextBlock Text="Node ID" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <controls_view:HexTextBoxView Text="{Binding SyncNodeID}" Width="100">
+            <TextBox Text="{Binding SyncNodeID}" Margin="0,0,50,0" Width="100" />
+            <!--<controls_view:HexTextBoxView Text="{Binding SyncNodeID}" Width="100">
 
                 <i:Interaction.Triggers>
 
@@ -95,7 +96,7 @@
 
                 </i:Interaction.Triggers>
 
-            </controls_view:HexTextBoxView>
+            </controls_view:HexTextBoxView>-->
 
 
            

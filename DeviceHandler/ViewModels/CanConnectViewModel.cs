@@ -36,7 +36,25 @@ namespace DeviceHandler.ViewModels
 		[JsonIgnore]
 		public bool IsDisconnectButtonEnabled { get; set; }
 
-		public uint SyncNodeID { get; set; }
+		//[JsonIgnore]
+		//public string SyncNodeID_Text
+		//{
+		//	get => _syncNodeID_Text;
+		//	set
+		//	{
+		//		_syncNodeID_Text = value;
+		//	}
+		//}
+
+		public uint SyncNodeID 
+		{
+			get => _syncNodeID;
+			set
+			{
+				_syncNodeID = value;
+			}
+		}
+
 		public uint AsyncNodeID { get; set; }
 
 		public int RxPort { get; set; }
@@ -47,6 +65,13 @@ namespace DeviceHandler.ViewModels
 		public GridLength UdpRowHeight { get; set; }
 
 		#endregion Properties
+
+		#region Fields
+
+		private string _syncNodeID_Text;
+		private uint _syncNodeID;
+
+		#endregion Fields
 
 		#region Constructor
 
