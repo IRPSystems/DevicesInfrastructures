@@ -97,9 +97,14 @@ namespace DeviceCommunicators.NI_6002
 				if (!(param is NI6002_ParamData niParamData))
 					return;
 				//need add to send data
-				bool res = (bool)Send_command(niParamData);
+				var ret = Send_command(niParamData);
+				if(ret == null)
+				{
+					callback?.Invoke(param, CommunicatorResultEnum.Error, null);
+					return;
+				}
 
-				if (res)
+				if ((bool)ret)
 					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 				else
 					callback?.Invoke(param, CommunicatorResultEnum.Error, null);

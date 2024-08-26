@@ -49,8 +49,9 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			{
 				data = new NI6002_ParamData()
 				{
-					command_to_device = "Read Anolog input 0",
-					Name = "Read Anolog input 0"
+					command_to_device = "Analog input",
+					Name = "Read Analog input 0",
+					Io_port = 0,
 				};
 			}
 
