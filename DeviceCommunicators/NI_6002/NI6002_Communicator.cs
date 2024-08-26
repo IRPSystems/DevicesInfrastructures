@@ -130,9 +130,15 @@ namespace DeviceCommunicators.NI_6002
 
 				Thread.Sleep(10);
 
-
-				param.Value = message;
-				callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+				double value;
+				bool res = double.TryParse(message, out value);
+				if (res)
+				{
+					param.Value = value;
+					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+				}
+				else
+					callback?.Invoke(param, CommunicatorResultEnum.Error, $"The response is {message}");
 
 			}
 			catch (Exception ex)
@@ -153,7 +159,7 @@ namespace DeviceCommunicators.NI_6002
 
             object data;
 
-			bool isPass = HandleVandVCommands(niParamData);
+			//bool isPass = HandleVandVCommands(niParamData);
 
 
 			string cmd = niParamData.command_to_device.ToLower();
@@ -192,76 +198,76 @@ namespace DeviceCommunicators.NI_6002
 			return data;
 		}
 
-		private bool HandleVandVCommands(NI6002_ParamData niParamData)
-		{
-			if (niParamData.command_to_device.Contains("Digital Port") &&
-				niParamData.command_to_device.Contains("port output"))
-			{
-				string[] split = niParamData.command_to_device.Split(' ');
+		//private bool HandleVandVCommands(NI6002_ParamData niParamData)
+		//{
+		//	if (niParamData.command_to_device.Contains("Digital Port") &&
+		//		niParamData.command_to_device.Contains("port output"))
+		//	{
+		//		string[] split = niParamData.command_to_device.Split(' ');
 
-				int port;
-				bool res = int.TryParse(split[2], out port);
-				if (!res)
-					return false;
-				niParamData.Io_port = port;
+		//		int port;
+		//		bool res = int.TryParse(split[2], out port);
+		//		if (!res)
+		//			return false;
+		//		niParamData.Io_port = port;
 
-				int line;
-				res = int.TryParse(split[5], out line);
-				if (!res)
-					return false;
-				niParamData.portLine = line;
+		//		int line;
+		//		res = int.TryParse(split[5], out line);
+		//		if (!res)
+		//			return false;
+		//		niParamData.portLine = line;
 
-				niParamData.command_to_device = "digital output";
-			}
+		//		niParamData.command_to_device = "digital output";
+		//	}
 
-			else if (niParamData.command_to_device.Contains("Port") &&
-				niParamData.command_to_device.Contains("digital input"))
-			{
-				string[] split = niParamData.command_to_device.Split(' ');
+		//	else if (niParamData.command_to_device.Contains("Port") &&
+		//		niParamData.command_to_device.Contains("digital input"))
+		//	{
+		//		string[] split = niParamData.command_to_device.Split(' ');
 
-				int port;
-				bool res = int.TryParse(split[1], out port);
-				if (!res)
-					return false;
-				niParamData.Io_port = port;
+		//		int port;
+		//		bool res = int.TryParse(split[1], out port);
+		//		if (!res)
+		//			return false;
+		//		niParamData.Io_port = port;
 
-				int line;
-				res = int.TryParse(split[4], out line);
-				if (!res)
-					return false;
-				niParamData.portLine = line;
+		//		int line;
+		//		res = int.TryParse(split[4], out line);
+		//		if (!res)
+		//			return false;
+		//		niParamData.portLine = line;
 
-				niParamData.command_to_device = "digital input";
-			}
+		//		niParamData.command_to_device = "digital input";
+		//	}
 
-			else if (niParamData.command_to_device.Contains("Analog port output"))
-			{
-				string[] split = niParamData.command_to_device.Split(' ');
+		//	else if (niParamData.command_to_device.Contains("Analog port output"))
+		//	{
+		//		string[] split = niParamData.command_to_device.Split(' ');
 
-				int port;
-				bool res = int.TryParse(split[3], out port);
-				if (!res)
-					return false;
-				niParamData.Io_port = port;
+		//		int port;
+		//		bool res = int.TryParse(split[3], out port);
+		//		if (!res)
+		//			return false;
+		//		niParamData.Io_port = port;
 
-				niParamData.command_to_device = "analog output";
-			}
+		//		niParamData.command_to_device = "analog output";
+		//	}
 
-			else if (niParamData.command_to_device.Contains("Read Anolog input"))
-			{
-				string[] split = niParamData.command_to_device.Split(' ');
+		//	else if (niParamData.command_to_device.Contains("Read Anolog input"))
+		//	{
+		//		string[] split = niParamData.command_to_device.Split(' ');
 
-				int port;
-				bool res = int.TryParse(split[3], out port);
-				if (!res)
-					return false;
-				niParamData.Io_port = port;
+		//		int port;
+		//		bool res = int.TryParse(split[3], out port);
+		//		if (!res)
+		//			return false;
+		//		niParamData.Io_port = port;
 
-				niParamData.command_to_device = "analog input";
-			}
+		//		niParamData.command_to_device = "analog input";
+		//	}
 
-			return true;
-		}
+		//	return true;
+		//}
 
 		public string Read_command(NI6002_ParamData niParamData)
 		{
@@ -387,43 +393,7 @@ namespace DeviceCommunicators.NI_6002
 		}
 
 
-		//private string port_0_to_digitalal_out(int number_port, NI6002_ParamData niParamData)
-		//{
-		//    string data = "";
-		//    string curent_port = "";
-		//    curent_port = _commmand_to_device._Port_Io;
-		//    _commmand_to_device._Port_Io = "port0";
-		//    niParamData.Io_port = number_port;
-		//     data= _commmand_to_device.DigitalIO_input((IO_Pin)niParamData.Io_port);
-		//    _commmand_to_device._Port_Io = curent_port;
-		//    return data;
-		//}
-
-		//private string  port_1_to_digitalal_out(int number_port, NI6002_ParamData niParamData)
-		//{
-		//    string data = "";
-		//    string curent_port = "";
-		//    curent_port = _commmand_to_device._Port_Io;
-		//    _commmand_to_device._Port_Io = "port1";
-		//    niParamData.Io_port = number_port;
-		//    data = _commmand_to_device.DigitalIO_input((IO_Pin)niParamData.Io_port);
-		//    _commmand_to_device._Port_Io = curent_port;
-		//    return data;
-		//}
-
-		//private string port_2_to_digitalal_out(int number_port, NI6002_ParamData niParamData)
-		//{
-		//    string data = "";
-		//    string curent_port = "";
-		//    curent_port = _commmand_to_device._Port_Io;
-		//    _commmand_to_device._Port_Io = "port2";
-		//    niParamData.Io_port = number_port;
-		//    data = _commmand_to_device.DigitalIO_input((IO_Pin)niParamData.Io_port);
-		//    _commmand_to_device._Port_Io = curent_port;
-		//    return data;
-		//}
-
-
+		
 
 
 		public override bool Equals(object obj)
