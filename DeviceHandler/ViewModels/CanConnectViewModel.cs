@@ -12,6 +12,7 @@ using Services.Services;
 using DeviceHandler.Interfaces;
 using Communication.Services;
 using System.Globalization;
+using System.Windows.Input;
 
 namespace DeviceHandler.ViewModels
 {
@@ -35,7 +36,25 @@ namespace DeviceHandler.ViewModels
 		[JsonIgnore]
 		public bool IsDisconnectButtonEnabled { get; set; }
 
-		public uint SyncNodeID { get; set; }
+		//[JsonIgnore]
+		//public string SyncNodeID_Text
+		//{
+		//	get => _syncNodeID_Text;
+		//	set
+		//	{
+		//		_syncNodeID_Text = value;
+		//	}
+		//}
+
+		public uint SyncNodeID 
+		{
+			get => _syncNodeID;
+			set
+			{
+				_syncNodeID = value;
+			}
+		}
+
 		public uint AsyncNodeID { get; set; }
 
 		public int RxPort { get; set; }
@@ -46,6 +65,13 @@ namespace DeviceHandler.ViewModels
 		public GridLength UdpRowHeight { get; set; }
 
 		#endregion Properties
+
+		#region Fields
+
+		private string _syncNodeID_Text;
+		private uint _syncNodeID;
+
+		#endregion Fields
 
 		#region Constructor
 
@@ -83,6 +109,9 @@ namespace DeviceHandler.ViewModels
 
 			Addapter_SelectionChangedCommand = new RelayCommand<SelectionChangedEventArgs>(Addapter_SelectionChanged);
 			HWID_DropDownOpenedCommand = new RelayCommand(HWID_DropDownOpened);
+
+			HexKeyDownEventCommand = new RelayCommand<KeyEventArgs>(HexKeyDownEvent);
+			HexTextChangedEventCommand = new RelayCommand<TextChangedEventArgs>(HexTextChangedEvent);
 
 			LoggerService.Inforamtion(this, "Ending Init of CanConnctViewModel");
 		}
@@ -186,6 +215,42 @@ namespace DeviceHandler.ViewModels
 			DisconnectEvent?.Invoke();
 		}
 
+		private void HexKeyDownEvent(KeyEventArgs e)
+		{
+			if (!(e.Source is TextBox textBox))
+				return;
+
+			if (textBox.Text == "Msg Hex ID")
+				return;
+
+			if (textBox.CaretIndex < 3)
+				return;
+
+
+			if ((textBox.Text.Length + 1) > 3)
+				e.Handled = true;
+		}
+
+		private void HexTextChangedEvent(TextChangedEventArgs e)
+		{
+			if (!(e.Source is TextBox textBox))
+				return;
+
+			if (textBox.Text == "Msg Hex ID")
+				return;
+
+			uint id;
+			bool res = uint.TryParse(textBox.Text, System.Globalization.NumberStyles.HexNumber, null, out id);
+			if (res)
+			{
+				if (id > 0x7FF)
+				{
+					MessageBox.Show($"The ID 0x{id.ToString("X")} is larger than the legal ID limit");
+					e.Handled = true;
+				}
+			}
+		}
+
 		#endregion Methods
 
 		#region Commands
@@ -198,6 +263,11 @@ namespace DeviceHandler.ViewModels
 		public RelayCommand ConnectCommand { get; private set; }
 		[JsonIgnore]
 		public RelayCommand DisconnectCommand { get; private set; }
+
+		[JsonIgnore]
+		public RelayCommand<KeyEventArgs> HexKeyDownEventCommand { get; private set; }
+		[JsonIgnore]
+		public RelayCommand<TextChangedEventArgs> HexTextChangedEventCommand { get; private set; }
 
 		#endregion Commands
 
