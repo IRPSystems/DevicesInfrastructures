@@ -214,10 +214,10 @@ namespace DeviceCommunicators.MCU
 				return CommunicatorResultEnum.OK;
 			}
 
-			if (mcuParam.Cmd == "ate_get") 
-				ConvertToData(mcuParam, Convert.ToDouble(mcuParam.Value), ref id, ref buffer, true);
-			else
-                ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
+			if (mcuParam.GroupName.ToLower() == "ate") 
+				data.IsSet = true;
+			
+            ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
 
             uint idNum = (uint)(id[0] + (id[1] << 8) + (id[2] << 16));
 
