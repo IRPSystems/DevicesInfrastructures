@@ -1,5 +1,4 @@
 ﻿
-using DeviceCommunicators.ATEBox;
 using DeviceCommunicators.Models;
 using DeviceCommunicators.PowerSupplayBK;
 using DeviceHandler.Services;
