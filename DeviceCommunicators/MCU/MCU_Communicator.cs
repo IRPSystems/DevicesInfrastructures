@@ -214,7 +214,7 @@ namespace DeviceCommunicators.MCU
 				return CommunicatorResultEnum.OK;
 			}
 
-			if (mcuParam.GroupName.ToLower() == "ate") 
+			if (mcuParam.GroupName != null && mcuParam.GroupName.ToLower() == "ate") 
 				data.IsSet = true;
 			
             ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
