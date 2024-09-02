@@ -2,14 +2,7 @@
 using DeviceCommunicators.General;
 using Services.Services;
 using System;
-using System.Collections.Generic;
-using System.Threading;
 using DeviceCommunicators.Enums;
-using Entities.Models;
-using Entities.Enums;
-using Newtonsoft.Json;
-using System.Collections.ObjectModel;
-using System.IO;
 using DeviceCommunicators.Models;
 
 namespace DeviceCommunicators.PowerSupplayKeysight
@@ -118,10 +111,10 @@ namespace DeviceCommunicators.PowerSupplayKeysight
                 }
                 else if (cmd == "OUTP:COUP:CHAN")
 				{
-					if (value == 1)
-						cmd += " CH1";
-					else if (value == 2)
-						cmd += " CH2";
+					//if (value == 1)
+					//	cmd += " CH1";
+					//else if (value == 2)
+					//	cmd += " CH2";
 				}
 				else
                     cmd += " " + value.ToString();
@@ -147,17 +140,35 @@ namespace DeviceCommunicators.PowerSupplayKeysight
 
                 string cmd = $"{psKeySight.Command}?";
 
-                TCPCommService.Send(cmd + "\n");
+				string response = null;
+                DateTime startTime = DateTime.Now; 
+				for (int i = 0; i < 5; i++)
+                {
+                    TCPCommService.Send(cmd + "\n");
 
-				string response;
-				TCPCommService.Read(out response);
+                    while ((DateTime.Now - startTime) < TimeSpan.FromSeconds(50))
+                    {
+                        TCPCommService.Read(out response);
+                        if (!string.IsNullOrEmpty(response))
+                            break;
 
-				response = response.Trim(new char[] { '\0', '\n'});
+                        System.Threading.Thread.Sleep(1);
+                    }
+
+                    if (!string.IsNullOrEmpty(response))
+                        break;
+
+					System.Threading.Thread.Sleep(1);
+				}
+
 				if (string.IsNullOrEmpty(response))
 				{
 					callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
 					return;
 				}
+
+				response = response.Trim(new char[] { '\0', '\n' });
+
 
 				if (psKeySight.Command == "VOLTage" ||
 					psKeySight.Command == "CURRent")
