@@ -97,6 +97,7 @@ namespace DeviceCommunicators.NI_6002
 				if (!(param is NI6002_ParamData niParamData))
 					return;
 				//need add to send data
+				niParamData.Value = value;
 				var ret = Send_command(niParamData);
 				if(ret == null)
 				{
