@@ -131,6 +131,49 @@ namespace DeviceCommunicators.Services
 			mcu_ListHandler.ReadMCUDeviceData(path, deviceData);
 		}
 
+		public void ReadFromATEJson(
+			string path,
+			ObservableCollection<DeviceData> devicesList)
+		{
+
+			
+			if (File.Exists(path) == false)
+			{
+				LoggerService.Error(this, "The file \"" + path + "\" was not found");
+				return;
+			}
+
+			string jsonString = File.ReadAllText(path);
+
+			JsonSerializerSettings settings = new JsonSerializerSettings();
+			settings.Formatting = Formatting.Indented;
+			settings.TypeNameHandling = TypeNameHandling.All;
+			MCU_DeviceData device = JsonConvert.DeserializeObject(jsonString, settings) as MCU_DeviceData;
+			if (device == null)
+				return;
+
+			
+			devicesList.Add(device);
+
+			ParamGroup paramGroup = new ParamGroup()
+			{
+				GroupName = "ATE",
+				GroupDescription = "Group of the ATE parameters",
+				GroupType = GroupType.ATE,
+				ParamList = new ObservableCollection<MCU_ParamData>()
+			};
+			
+			foreach (var param in device.MCU_FullList)
+			{
+				param.Device = device;
+				paramGroup.ParamList.Add(param as MCU_ParamData);
+			}
+
+			device.MCU_GroupList = new ObservableCollection<ParamGroup>() { paramGroup };
+
+
+		}
+
 		public void InitBTMTempLogger(ObservableCollection<DeviceData> devicesList)
 		{
 			DeviceData btmTempLogger = new DeviceData()
