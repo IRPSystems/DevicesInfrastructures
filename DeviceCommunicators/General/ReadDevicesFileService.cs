@@ -57,6 +57,8 @@ namespace DeviceCommunicators.Services
 							mcuFilePath = path;
 						continue;
 					}
+					if (Path.GetFileName(file) == "ATE.json")
+						continue;
 
 					else if (Path.GetFileName(file) == "Dyno Communication.json" && dynoFilePath != null)
 						path = dynoFilePath;

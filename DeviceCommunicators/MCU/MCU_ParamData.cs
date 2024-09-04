@@ -260,7 +260,8 @@ namespace DeviceCommunicators.MCU
 		DRIVING_PROFILE = 2,
 		REAL_TIME = 3,
 		DEVICE_INFO = 4,
-		APP_CONFIG = 5
+		APP_CONFIG = 5,
+		ATE = 6,
 	}
 
 	
