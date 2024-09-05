@@ -109,13 +109,6 @@ namespace DeviceCommunicators.PowerSupplayKeysight
                     else if (value == 1)
                         cmd += " REMote";
                 }
-                else if (cmd == "OUTP:COUP:CHAN")
-				{
-					//if (value == 1)
-					//	cmd += " CH1";
-					//else if (value == 2)
-					//	cmd += " CH2";
-				}
 				else
                     cmd += " " + value.ToString();
 
