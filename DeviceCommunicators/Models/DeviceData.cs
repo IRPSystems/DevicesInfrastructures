@@ -17,6 +17,8 @@ namespace DeviceCommunicators.Models
 		[JsonIgnore]
 		public Visibility Visibility { get; set; }
 
+		public int AcquisitionRate { get; set; }
+
 
 		public string Name { get; set; }
 		public DeviceTypesEnum DeviceType { get; set; }
