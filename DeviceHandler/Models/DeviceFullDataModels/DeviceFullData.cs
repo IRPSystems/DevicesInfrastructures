@@ -278,7 +278,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
         protected virtual void GetRepository()
         {
-			ParametersRepository = new ParametersRepositoryService(DeviceCommunicator);
+			ParametersRepository = new ParametersRepositoryService(DeviceCommunicator, Device.AcquisitionRate);
 			ParametersRepository.Name = Device.DeviceType.ToString();
 		}
 

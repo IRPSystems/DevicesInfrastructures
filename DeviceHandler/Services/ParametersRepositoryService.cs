@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
+using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
 using DeviceHandler.Interfaces;
@@ -36,13 +37,18 @@ namespace DeviceHandler.Services
 		{
 			get
 			{
-				if (_acquisitionRate == 0)
-					_acquisitionRate = 5;
 				return _acquisitionRate;
 			}
 			set
 			{
 				_acquisitionRate = value;
+
+				if (_acquisitionRate == 0)
+					_acquisitionRate = 5;
+
+				if (!(_communicator is MCU_Communicator))
+					return;
+
 				if (_communicationTimer != null && _acquisitionRate != 0)
 				{
 					_communicationTimer.Stop();
@@ -83,13 +89,14 @@ namespace DeviceHandler.Services
 		#region Constructor
 
 		public ParametersRepositoryService(
-			DeviceCommunicator communicator)
+			DeviceCommunicator communicator,
+			int acquisitionRate)
 		{
 			_communicator = communicator;
 
 			_nameToRepositoryParamList = new ConcurrentDictionary<string, RepositoryParam>();
 
-			AcquisitionRate = 1;
+			AcquisitionRate = acquisitionRate;
 
 
 			_communicationTimer = new System.Timers.Timer(1000 / AcquisitionRate);
