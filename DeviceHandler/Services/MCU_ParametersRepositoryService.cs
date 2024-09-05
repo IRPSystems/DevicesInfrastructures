@@ -34,7 +34,7 @@ namespace DeviceHandler.Services
 
 		public MCU_ParametersRepositoryService(
 			DeviceCommunicator communicator):
-			base(communicator)
+			base(communicator, 0)
 		{
 			if (communicator is MCU_Communicator mcuCommunicator)
 			{
