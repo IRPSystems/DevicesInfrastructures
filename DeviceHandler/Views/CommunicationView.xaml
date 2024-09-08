@@ -31,6 +31,10 @@
             <local:NI6002ConncetView DataContext="{Binding }"/>
         </DataTemplate>
 
+        <DataTemplate x:Key="PrinterTSCConncetTemplate">
+            <local:PrinterTSCConncetView DataContext="{Binding }"/>
+        </DataTemplate>
+
         <DataTemplate x:Key="ModbusTCPConnectTemplate">
             <local:ModbusTCPConnectView DataContext="{Binding }"/>
         </DataTemplate>
