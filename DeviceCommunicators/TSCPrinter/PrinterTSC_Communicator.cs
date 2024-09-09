@@ -200,9 +200,8 @@ namespace DeviceCommunicators.TSCPrinter
 
         public override void Dispose()
 		{
-            
-
 			base.Dispose();
+            _isInitialized = false;
 		}
 
 		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
