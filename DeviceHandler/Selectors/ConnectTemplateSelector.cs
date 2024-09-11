@@ -20,7 +20,9 @@ namespace DeviceHandler.Selectors
 				return element.FindResource("TcpConnectTemplate") as DataTemplate;
 			if (item is YokogawaWT1804EConncetViewModel)
 				return element.FindResource("YokogawaWT1804EConnectTemplate") as DataTemplate;
-			if (item is NI6002ConncetViewModel)
+            if (item is PrinterTSCConncetViewModel)
+                return element.FindResource("PrinterTSCConncetTemplate") as DataTemplate;
+            if (item is NI6002ConncetViewModel)
 				return element.FindResource("NI6002ConnectTemplate") as DataTemplate;
 			if (item is ModbusTCPConnectViewModel)
 				return element.FindResource("ModbusTCPConnectTemplate") as DataTemplate;

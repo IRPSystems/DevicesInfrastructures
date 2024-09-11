@@ -272,6 +272,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				case DeviceTypesEnum.NI_6002_2: return new DeviceFullData_NI_6002_2(deviceData);
 				case DeviceTypesEnum.MCU_2: return new DeviceFullData_MCU_2(deviceData);
                 case DeviceTypesEnum.NumatoGPIO: return new DeviceFullData_NumatoGPIO(deviceData);
+                case DeviceTypesEnum.Printer_TSC: return new DeviceFullData_Printer_TSC(deviceData);
                 default: return null;
             }
         }
