@@ -193,6 +193,7 @@ namespace DeviceCommunicators.TSCPrinter
             if(printer)
             {
                 _isInitialized = true;
+                PrintTest();
             }
             InitBase();
 
@@ -236,7 +237,7 @@ namespace DeviceCommunicators.TSCPrinter
                 if (!(param is PrinterTSC_ParamData tscPrinter_Param))
                     return;
 
-                SendStringToPrinter(BuildPrinterCmd(tscPrinter_Param));
+                SendStringToPrinter(tscPrinter_Param.DataContent);
 
                 if (CheckPrinterStatusPostCommand())
                 {
@@ -264,9 +265,9 @@ namespace DeviceCommunicators.TSCPrinter
                     return;
 
                 //Connection Logic
-                sendcommand(tscPrinter_Param.Cmd);
+                sendcommand(tscPrinter_Param.DataContent);
 
-                if (tscPrinter_Param.Cmd == checkStatusString)
+                if (tscPrinter_Param.DataContent == checkStatusString)
                 {
                     PrinterStatus status = (PrinterStatus)usbportqueryprinter();
                     if (status != PrinterStatus.NoComm)
@@ -288,44 +289,6 @@ namespace DeviceCommunicators.TSCPrinter
         }
 
         #region Printer Functions
-
-        private string BuildPrinterCmd(PrinterTSC_ParamData param)
-        {
-            string printerDynamicCmd = param.Prn_Design;
-            try
-            {
-                DateTime currentDate = DateTime.Now;
-                // Dictionary to store variable replacements
-                var replacements = new Dictionary<string, string>
-                {
-                    { "{SN}", param.SerialNumber },
-                    { "{PN}", param.PartNumber },
-                    { "{CM PN}", param.CustomerPartNumber },
-                    { "{SP}", param.Spec },
-                    { "{HW}", param.HW_Version },
-                    { "{SW}", param.MCU_Version },
-                    { "{date}", currentDate.ToString("dd-MM-yyyy") }
-                };
-
-                // Replace variables in the input string using regular expressions
-                foreach (var replacement in replacements)
-                {
-                    if (replacement.Value != null)
-                    {
-                        string pattern = Regex.Escape(replacement.Key);
-                        printerDynamicCmd = Regex.Replace(printerDynamicCmd, pattern, replacement.Value);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions, such as file not found or permission issues.
-                MessageBox.Show("Printer Label Parsing Error: " + ex.Message);
-                return null;
-            }
-
-            return printerDynamicCmd;
-        }
 
         public bool SendStringToPrinter(string printerCmd)
         {
@@ -439,6 +402,42 @@ namespace DeviceCommunicators.TSCPrinter
             sendcommand("\u001b!F");
             PrinterStatus status = (PrinterStatus)usbportqueryprinter();
             closeport();
+        }
+
+        public bool PrintTest()
+        {
+            bool success;
+            IntPtr pBytes;
+            Int32 dwCount;
+
+            string aTmpRawString = $@"SIZE 52.10 mm, 25 mm
+                GAP 3 mm, 0 mm
+                SPEED 2
+                DENSITY 13
+                SET RIBBON ON
+                DIRECTION 0,0
+                REFERENCE 0,0
+                OFFSET 0 mm
+                SET PEEL OFF
+                SET CUTTER OFF
+                SET PARTIAL_CUTTER OFF
+                SET TEAR ON
+                CLS
+                CODEPAGE 1252
+                TEXT 313,147,""0"",180,39,36,""OK""
+                PRINT 1,1
+                ";
+
+            // How many characters are in the string?
+            dwCount = aTmpRawString.Length;
+            // Assume that the printer is expecting ANSI text, and then convert
+            // the string to ANSI text.
+            pBytes = Marshal.StringToCoTaskMemAnsi(aTmpRawString);
+            // Send the converted ANSI string to the printer.
+            success = SendBytesToPrinter(_comName, pBytes, dwCount);
+            Marshal.FreeCoTaskMem(pBytes);
+
+            return success;
         }
 
         #endregion
