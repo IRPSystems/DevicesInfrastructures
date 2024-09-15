@@ -8,6 +8,11 @@ using Entities.Enums;
 using CommunityToolkit.Mvvm.Input;
 using DeviceHandler.Models.DeviceFullDataModels;
 using DeviceHandler.Models;
+using System.Collections.ObjectModel;
+using Newtonsoft.Json.Linq;
+using DeviceCommunicators.MCU;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace DeviceHandler.Faults
 {
@@ -23,8 +28,7 @@ namespace DeviceHandler.Faults
 
 		#region Properties
 
-		public FaultsMCUHalfViewModel FaultsMCUHalf_LSB { get; set; }
-		public FaultsMCUHalfViewModel FaultsMCUHalf_MSB { get; set; }
+		public ObservableCollection<FaultsMCUHalfViewModel> FaultsMCUHalfList { get; set; }
 
 		public bool IsShowFaultsOnly 
 		{
@@ -32,8 +36,9 @@ namespace DeviceHandler.Faults
 			set
 			{
 				_isShowFaultsOnly = value;
-				FaultsMCUHalf_LSB.IsShowFaultsOnly = value;
-				FaultsMCUHalf_MSB.IsShowFaultsOnly = value;
+
+				foreach(FaultsMCUHalfViewModel vm in FaultsMCUHalfList)
+					vm.IsShowFaultsOnly = value;
 			}
 		}
 
@@ -44,8 +49,6 @@ namespace DeviceHandler.Faults
 		private bool _isShowFaultsOnly;
 		public bool IsLoaded;
 
-		private bool? _isErrorExist_LSB;
-		private bool? _isErrorExist_MSB;
 
 		private bool _isWindowOpen;
 
@@ -59,12 +62,7 @@ namespace DeviceHandler.Faults
 		{
 			_devicesContainer = devicesContainer;
 
-			FaultsMCUHalf_LSB = new FaultsMCUHalfViewModel("LSB", _devicesContainer);
-			FaultsMCUHalf_MSB = new FaultsMCUHalfViewModel("MSB", _devicesContainer);
-
-
-			FaultsMCUHalf_LSB.FaultEvent += FaultsMCUHalf_FaultEvent_LSB;
-			FaultsMCUHalf_MSB.FaultEvent += FaultsMCUHalf_FaultEvent_MSB;
+			
 
 			IsLoaded = false;
 
@@ -78,13 +76,11 @@ namespace DeviceHandler.Faults
 				DeviceFullData mcuFullData = _devicesContainer.TypeToDevicesFullData[DeviceTypesEnum.MCU];
 
 				mcuFullData.CheckCommunication.CommunicationStateReprotEvent += CheckCommunication_CommunicationStateReprotEvent;
+
+				InitFaultsMCUHalfList();
 			}
 
 		}
-
-		
-
-
 
 		#endregion Constructor
 
@@ -92,8 +88,8 @@ namespace DeviceHandler.Faults
 
 		public void Dispose()
 		{
-			FaultsMCUHalf_LSB.Dispose();
-			FaultsMCUHalf_MSB.Dispose();
+			foreach (FaultsMCUHalfViewModel vm in FaultsMCUHalfList)
+				vm.Dispose();
 			IsLoaded = false;
 		}
 
@@ -103,25 +99,22 @@ namespace DeviceHandler.Faults
 			if (!_isWindowOpen)
 				return;
 
-			FaultsMCUHalf_LSB.Start();
-			FaultsMCUHalf_MSB.Start();
+			if (FaultsMCUHalfList == null)
+				return;
+
+			foreach (FaultsMCUHalfViewModel vm in FaultsMCUHalfList)
+				vm.Start();
 		}
 
 		public void Stop()
 		{
-			FaultsMCUHalf_LSB.Stop();
-			FaultsMCUHalf_MSB.Stop();
+			if (FaultsMCUHalfList == null)
+				return;
+
+			foreach (FaultsMCUHalfViewModel vm in FaultsMCUHalfList)
+				vm.Stop();
 		}
 
-		private void FaultsMCUHalf_FaultEvent_LSB(bool? isFalutExist)
-		{
-			_isErrorExist_LSB = isFalutExist;
-		}
-
-		private void FaultsMCUHalf_FaultEvent_MSB(bool? isFalutExist)
-		{
-			_isErrorExist_MSB = isFalutExist;
-		}
 
 		private void Loaded()
 		{
@@ -133,6 +126,39 @@ namespace DeviceHandler.Faults
 		{
 			_isWindowOpen = false;
 			Stop();
+		}
+
+		private void InitFaultsMCUHalfList()
+		{
+			if (_devicesContainer.TypeToDevicesFullData.ContainsKey(DeviceTypesEnum.MCU) == false)
+				return;
+
+			DeviceFullData mcuFullData = _devicesContainer.TypeToDevicesFullData[DeviceTypesEnum.MCU];
+
+			ParamGroup paramGroup =
+				((MCU_DeviceData)mcuFullData.Device).MCU_GroupList.ToList().Find((g) =>
+				 g != null &&
+				 g.GroupName != null &&
+				 g.GroupName == "Monitor");
+
+			if (paramGroup == null)
+				return;
+
+			List<MCU_ParamData> paramDataList =
+				paramGroup.ParamList.ToList().Where((p) => p.Cmd.Contains("fltv")).ToList();
+			if (paramDataList == null || paramDataList.Count == 0)
+			{
+				LoggerService.Error(this, "Failed to find the faults parameter in the params list");
+				return;
+			}
+
+			FaultsMCUHalfList = new ObservableCollection<FaultsMCUHalfViewModel>();
+			foreach (var paramData in paramDataList)
+			{
+				FaultsMCUHalfViewModel faultsMCU = new FaultsMCUHalfViewModel(paramData);
+				FaultsMCUHalfList.Add(faultsMCU);
+			}
+
 		}
 
 		private void CheckCommunication_CommunicationStateReprotEvent(

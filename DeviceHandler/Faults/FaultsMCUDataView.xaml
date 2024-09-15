@@ -86,80 +86,35 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="5"/>
-            <RowDefinition Height="20"/>
-            <RowDefinition Height="5"/>
-            <RowDefinition Height="20"/>
-            <RowDefinition Height="5"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition Width="20"/>
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
-
         <CheckBox Content="Show active faults only" 
-              IsChecked="{Binding IsShowFaultsOnly, Mode=TwoWay}" />
+                  IsChecked="{Binding IsShowFaultsOnly, Mode=TwoWay}" />
 
-        <!--<Line Grid.Row="1" Grid.ColumnSpan="3" X1="1" Stretch="Fill" Stroke="{DynamicResource MahApps.Brushes.Accent2}" />-->
-        <!--<Line Grid.Row="3" Grid.ColumnSpan="3" X1="1" Stretch="Fill" Stroke="{DynamicResource MahApps.Brushes.Accent2}" />-->
-        <Line Grid.Row="5" Grid.ColumnSpan="3" X1="1" Stretch="Fill" Stroke="{DynamicResource MahApps.Brushes.Accent2}" />
-        <Line Grid.Row="2" Grid.RowSpan="7" Grid.Column="1" Y1="1" Stretch="Fill" Stroke="{DynamicResource MahApps.Brushes.Accent2}" />
+        <ListView Grid.Row="2"
+                 ItemsSource="{Binding FaultsMCUHalfList}"
+                  VerticalContentAlignment="Top">
 
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
 
-
-        <TextBlock Grid.Row="2"  Grid.Column="0" Text="LSB" FontWeight="DemiBold" FontSize="14" VerticalAlignment="Center"/>
-
-        <Grid Grid.Row="4" Grid.Column="0" Height="20" Margin="0,1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="30"/>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Grid.Column="0" Text="State" VerticalAlignment="Center"/>
-
-            <TextBlock Grid.Column="2" Text="Bit" VerticalAlignment="Center"/>
-
-            <TextBlock Grid.Column="4" Text="Description" VerticalAlignment="Center"/>
-
-        </Grid>
-
-        <ListView Grid.Row="6"  Grid.Column="0" 
-              ItemsSource="{Binding FaultsMCUHalf_LSB.FaultsList}" 
-              FontSize="14" 
-              ItemContainerStyle="{StaticResource ErrorLedStyle}"
-              HorizontalAlignment="Left"/>
-
-
-        <TextBlock Grid.Row="2"  Grid.Column="2" Text="MSB" FontWeight="DemiBold" FontSize="14" VerticalAlignment="Center"/>
-
-
-        <Grid Grid.Row="4" Grid.Column="2" Height="20" Margin="0,1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="30"/>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Grid.Column="0" Text="State" VerticalAlignment="Center"/>
-
-            <TextBlock Grid.Column="2" Text="Bit" VerticalAlignment="Center"/>
-
-            <TextBlock Grid.Column="4" Text="Description" VerticalAlignment="Center"/>
-
-        </Grid>
-
-        <ListView Grid.Row="6"  Grid.Column="2" 
-              ItemsSource="{Binding FaultsMCUHalf_MSB.FaultsList}" 
-              FontSize="14" 
-              ItemContainerStyle="{StaticResource ErrorLedStyle}"
-              HorizontalAlignment="Left"/>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListViewItem">
+                                <local:FaultMCU_SingleView DataContext="{Binding}" />
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.ItemContainerStyle>
+            
+        </ListView>
 
     </Grid>
 </UserControl>

@@ -19,9 +19,11 @@ namespace DeviceHandler.Faults
 {
 	public class FaultsMCUHalfViewModel : ObservableObject
 	{
-		
+
 
 		#region Properties
+
+		public MCU_ParamData FaultsParameter { get; set; }
 
 		public ObservableCollection<RegisterBitData> FaultsList { get; set; }
 		public bool IsShowFaultsOnly { get; set; }
@@ -31,10 +33,9 @@ namespace DeviceHandler.Faults
 		#region Fields
 
 
-
 		private System.Timers.Timer _setFaultsTimer;
 
-		private MCU_ParamData _faultsParameter;
+		
 
 
 
@@ -54,11 +55,11 @@ namespace DeviceHandler.Faults
 		#region Constructor
 
 		public FaultsMCUHalfViewModel(
-			string halfIdentifier,
-			DevicesContainer devicesContainer)
+			MCU_ParamData paramData)
 		{
-			_halfIdentifier = halfIdentifier;
-			_devicesContainer = devicesContainer;
+			FaultsParameter = paramData;
+
+			
 
 			_cancellationTokenSource = new CancellationTokenSource();
 			_cancellationToken = _cancellationTokenSource.Token;
@@ -97,7 +98,6 @@ namespace DeviceHandler.Faults
 		public void Stop()
 		{
 			_setFaultsTimer.Stop();
-			FaultEvent.Invoke(null);
 
 			if (FaultsList == null)
 				return;
@@ -112,35 +112,14 @@ namespace DeviceHandler.Faults
 		{
 			try
 			{
-				if (_devicesContainer.TypeToDevicesFullData.ContainsKey(DeviceTypesEnum.MCU) == false)
+				if (FaultsParameter == null)
 					return;
-				
-				DeviceFullData mcuFullData = _devicesContainer.TypeToDevicesFullData[DeviceTypesEnum.MCU];
-
-				
-				ParamGroup paramGroup =
-					((MCU_DeviceData)mcuFullData.Device).MCU_GroupList.ToList().Find((g) =>
-					 g != null &&
-					 g.GroupName != null &&
-					 g.GroupName == "Monitor");
-
-				if (paramGroup == null)
-					return;
-
-				_faultsParameter =
-					paramGroup.ParamList.ToList().Find((p) => p.Name == "Faults Vector " + _halfIdentifier);
-				if(_faultsParameter == null)					
-				{
-					LoggerService.Error(this, "Failed to find the faults parameter in the params list");
-					return; 
-				}
-
 
 
 				FaultsList = new ObservableCollection<RegisterBitData>();
 				int counter = 0;
 
-				foreach (DropDownParamData ddParam in _faultsParameter.DropDown)
+				foreach (DropDownParamData ddParam in FaultsParameter.DropDown)
 				{
 					if (ddParam.Value == "0")
 						continue;
@@ -149,6 +128,7 @@ namespace DeviceHandler.Faults
 					{
 						Name = ddParam.Name,
 						Index = counter++,
+						IsVisible = true,
 					};
 
 					FaultsList.Add(faultData);
@@ -171,7 +151,7 @@ namespace DeviceHandler.Faults
 
 			DeviceFullData mcuFullData = _devicesContainer.TypeToDevicesFullData[DeviceTypesEnum.MCU];
 
-			mcuFullData.DeviceCommunicator.GetParamValue(_faultsParameter, ResponseCallback);
+			mcuFullData.DeviceCommunicator.GetParamValue(FaultsParameter, ResponseCallback);
 		}
 
 		private void ResponseCallback(DeviceParameterData param, CommunicatorResultEnum result, string errDescription)
@@ -187,7 +167,7 @@ namespace DeviceHandler.Faults
 				while (!_cancellationToken.IsCancellationRequested)
 				{
 
-					HandleSingleParameter(_faultsParameter);
+					HandleSingleParameter(FaultsParameter);
 
 					_receivedEvent.WaitOne();
 
@@ -203,7 +183,6 @@ namespace DeviceHandler.Faults
 				double dVal = 0;
 				if (param == null || param.Value == null)
 				{
-					FaultEvent?.Invoke(null);
 					return;
 				}
 
@@ -226,34 +205,13 @@ namespace DeviceHandler.Faults
 					bool res = double.TryParse(param.Value.ToString(), out dVal);
 					if (!res)
 					{
-						FaultEvent?.Invoke(null);
 						return;
 					}
-				}
-
-				if (dVal != 0)
-				{
-					FaultEvent?.Invoke(true);
-				}
-				else
-				{
-					FaultEvent?.Invoke(false);
 				}
 
 
 
 				SetErrorData(param, FaultsList, (uint)dVal);
-
-				//if (param?.DropDown?.Count > 0)
-				//{
-				//	/* Get drop-down item which matches recveived value */
-				//	var dropDownItem = param.DropDown.Find(item => item.Value == dVal.ToString());
-
-				//	if (dropDownItem != null)
-				//	{
-				//		param.Value = dropDownItem.Name;
-				//	}
-				//}
 			}
 			catch(Exception ex) 
 			{
@@ -303,7 +261,6 @@ namespace DeviceHandler.Faults
 
 		#region Events
 
-		public event Action<bool?> FaultEvent;
 
 		#endregion Events
 	}
