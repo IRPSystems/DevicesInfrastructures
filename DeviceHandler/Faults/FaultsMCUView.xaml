@@ -8,27 +8,9 @@
                      xmlns:local="clr-namespace:DeviceHandler.Faults"
                      mc:Ignorable="d"
                      Title="MCU Faults" Height="850" Width="800"
-                     Closing="MetroWindow_Closing">
+                     Closing="MetroWindow_Closing"
+                     Loaded="MetroWindow_Loaded">
     
-    
-
-    <i:Interaction.Triggers>
-
-        <i:EventTrigger EventName="Loaded">
-            <i:InvokeCommandAction Command="{Binding Path=DataContext.LoadedCommand, 
-                                                             Mode=OneWay, 
-                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" 
-                                   PassEventArgsToCommand="True"/>
-        </i:EventTrigger>
-
-        <i:EventTrigger EventName="Closing">
-            <i:InvokeCommandAction Command="{Binding Path=DataContext.ClosingCommand, 
-                                                             Mode=OneWay, 
-                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" 
-                                   PassEventArgsToCommand="False"/>
-        </i:EventTrigger>
-
-    </i:Interaction.Triggers>
 
     <local:FaultsMCUDataView DataContext="{Binding}" />
 
