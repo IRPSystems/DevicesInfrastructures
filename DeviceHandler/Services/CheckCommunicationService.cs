@@ -5,6 +5,7 @@ using DeviceCommunicators.Enums;
 using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
 using DeviceHandler.Models.DeviceFullDataModels;
+using Entities.Enums;
 using Entities.Models;
 using Services.Services;
 using System;
@@ -114,7 +115,10 @@ namespace DeviceHandler.Services
 				NotifyStatus(CommunicationStateEnum.Connected, null);
 				_isFirstMessageReceived = true;
 				_noReplyCounter = 0;
-				//LoggerService.Inforamtion(this, "_noReplyCounter=0");
+
+				uint uval = (uint)Convert.ToDouble(param.Value);
+				uint errorState = (uval >> 8) & 0xF;
+				FaultEvent?.Invoke((ActiveErrorLevelEnum)errorState);
 			}
 			else
 			{
@@ -207,6 +211,7 @@ namespace DeviceHandler.Services
 		#region Events
 
 		public event Action<CommunicationStateEnum, string> CommunicationStateReprotEvent;
+		public event Action<ActiveErrorLevelEnum> FaultEvent;
 
 		#endregion Events
 	}
