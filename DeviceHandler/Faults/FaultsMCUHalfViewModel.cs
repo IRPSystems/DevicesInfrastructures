@@ -160,10 +160,7 @@ namespace DeviceHandler.Faults
 			}
 		}
 
-		private void JsonHelper_OnLoadedParameterFile(object sender, EventArgs e)
-		{
-			LoadFaults();
-		}
+		
 
 
 
