@@ -116,13 +116,13 @@ namespace DeviceHandler.Faults
 		}
 
 
-		private void Loaded()
+		public void Loaded()
 		{
 			_isWindowOpen = true;
 			Start();
 		}
 
-		private void Closing()
+		public void Closing()
 		{
 			_isWindowOpen = false;
 			Stop();
@@ -155,7 +155,9 @@ namespace DeviceHandler.Faults
 			FaultsMCUHalfList = new ObservableCollection<FaultsMCUHalfViewModel>();
 			foreach (var paramData in paramDataList)
 			{
-				FaultsMCUHalfViewModel faultsMCU = new FaultsMCUHalfViewModel(paramData);
+				FaultsMCUHalfViewModel faultsMCU = new FaultsMCUHalfViewModel(
+					paramData,
+					_devicesContainer);
 				FaultsMCUHalfList.Add(faultsMCU);
 			}
 

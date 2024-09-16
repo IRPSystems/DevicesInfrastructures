@@ -55,9 +55,11 @@ namespace DeviceHandler.Faults
 		#region Constructor
 
 		public FaultsMCUHalfViewModel(
-			MCU_ParamData paramData)
+			MCU_ParamData paramData,
+			DevicesContainer devicesContainer)
 		{
 			FaultsParameter = paramData;
+			_devicesContainer = devicesContainer;
 
 			
 
