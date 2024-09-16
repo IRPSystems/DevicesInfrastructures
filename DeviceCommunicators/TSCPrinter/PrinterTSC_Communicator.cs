@@ -236,7 +236,7 @@ namespace DeviceCommunicators.TSCPrinter
                 if (!(param is PrinterTSC_ParamData tscPrinter_Param))
                     return;
 
-                SendStringToPrinter(BuildPrinterCmd(tscPrinter_Param));
+                SendStringToPrinter(tscPrinter_Param.DataContent);
 
                 if (CheckPrinterStatusPostCommand())
                 {
@@ -264,9 +264,9 @@ namespace DeviceCommunicators.TSCPrinter
                     return;
 
                 //Connection Logic
-                sendcommand(tscPrinter_Param.Cmd);
+                sendcommand(tscPrinter_Param.DataContent);
 
-                if (tscPrinter_Param.Cmd == checkStatusString)
+                if (tscPrinter_Param.DataContent == checkStatusString)
                 {
                     PrinterStatus status = (PrinterStatus)usbportqueryprinter();
                     if (status != PrinterStatus.NoComm)
@@ -288,44 +288,6 @@ namespace DeviceCommunicators.TSCPrinter
         }
 
         #region Printer Functions
-
-        private string BuildPrinterCmd(PrinterTSC_ParamData param)
-        {
-            string printerDynamicCmd = param.Prn_Design;
-            try
-            {
-                DateTime currentDate = DateTime.Now;
-                // Dictionary to store variable replacements
-                var replacements = new Dictionary<string, string>
-                {
-                    { "{SN}", param.SerialNumber },
-                    { "{PN}", param.PartNumber },
-                    { "{CM PN}", param.CustomerPartNumber },
-                    { "{SP}", param.Spec },
-                    { "{HW}", param.HW_Version },
-                    { "{SW}", param.MCU_Version },
-                    { "{date}", currentDate.ToString("dd-MM-yyyy") }
-                };
-
-                // Replace variables in the input string using regular expressions
-                foreach (var replacement in replacements)
-                {
-                    if (replacement.Value != null)
-                    {
-                        string pattern = Regex.Escape(replacement.Key);
-                        printerDynamicCmd = Regex.Replace(printerDynamicCmd, pattern, replacement.Value);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions, such as file not found or permission issues.
-                MessageBox.Show("Printer Label Parsing Error: " + ex.Message);
-                return null;
-            }
-
-            return printerDynamicCmd;
-        }
 
         public bool SendStringToPrinter(string printerCmd)
         {
