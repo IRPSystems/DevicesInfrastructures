@@ -1,4 +1,5 @@
-﻿using DeviceCommunicators.Models;
+﻿using DeviceCommunicators.Enums;
+using DeviceCommunicators.Models;
 using Entities.Models;
 using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
@@ -14,5 +15,9 @@ namespace DeviceCommunicators.NI_6002
         public int portLine { set; get; }
         public double shunt_resistor { set; get; }
         public List<DropDownParamData> DropDown { get; set; }
+        public eThermistorType ThermistorType { set; get; }
+        public List<DropDownParamData> ThermistorTypeList { get; set; }
+        public bool IsThermistorUsed { get; set; } 
+
     }
 }

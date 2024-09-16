@@ -1,6 +1,12 @@
 ﻿namespace DeviceCommunicators.Enums
 {
-    
+    public enum eThermistorType
+    {
+        None = 0,
+        PT1000 = 1,
+        PT100 = 2,
+
+    }
 
     public enum AO_Output
     {

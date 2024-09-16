@@ -214,10 +214,15 @@ namespace DeviceCommunicators.MCU
 				return CommunicatorResultEnum.OK;
 			}
 
-			if (mcuParam.GroupName != null && mcuParam.GroupName.ToLower() == "ate") 
+			if (mcuParam is ATE_ParamData ateparam)
+			{
 				data.IsSet = true;
-			
-            ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
+                ConvertToData(mcuParam, Convert.ToDouble(ateparam.Value), ref id, ref buffer, data.IsSet);
+            }
+			else
+                ConvertToData(mcuParam, data.Value, ref id, ref buffer, data.IsSet);
+
+
 
             uint idNum = (uint)(id[0] + (id[1] << 8) + (id[2] << 16));
 
@@ -395,7 +400,7 @@ namespace DeviceCommunicators.MCU
 			if (setValue is double dSetValue)
 			{
 				int dsetValue = (int)Math.Round(dSetValue * mcuParam.Scale);
-				if (isSet && value != (int?)dsetValue)
+				if (isSet && value != (int?)dsetValue && !(mcuParam is ATE_ParamData))
 				{
 					LoggerService.Error(this,
 						mcuParam.Name + ": ValueNotSet: Original=" + dsetValue + "; Ack=" + value);

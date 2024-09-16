@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using DeviceCommunicators.Interfaces;
 using DeviceCommunicators.Models;
+using System.Collections.Generic;
 
 namespace DeviceCommunicators.NI_6002
 {
@@ -16,6 +17,15 @@ namespace DeviceCommunicators.NI_6002
 
 
 		public INiCommands _commmand_to_device;
+
+		private const int vRef = 5; // Volt
+		private const int resRef = 10; // Kohm
+
+        private static readonly Dictionary<double, double> LookupTablePT1000 = new Dictionary<double, double>
+		{
+			{807,  -4900},
+			{1707, 18600}
+		};
 
 
 
@@ -184,6 +194,9 @@ namespace DeviceCommunicators.NI_6002
                 case "analog input":
                     data = _commmand_to_device.Anolog_input(port);
                     break;
+				case "analog input thermistor":
+                    data = (ConvertToTemp(_commmand_to_device.Anolog_input(port),niParamData.ThermistorType)/ 100).ToString();
+                    break;
                 case "analog output":
                     value = Convert.ToDouble(niParamData.Value);
                     _commmand_to_device.Anolog_output(port, value);
@@ -203,6 +216,59 @@ namespace DeviceCommunicators.NI_6002
 
 			return data;
 		}
+
+		private double ConvertToTemp(string volt ,eThermistorType Thermistor)
+		{
+			double temp, calc, resistence ;
+			calc = Convert.ToDouble(volt);
+
+			resistence = (calc * resRef) / (vRef - calc);
+
+			switch (Thermistor)
+			{
+				case eThermistorType.PT1000:
+					temp = CalculateTemp(Thermistor, resistence * 1000, LookupTablePT1000);
+                    break;
+				case eThermistorType.PT100:
+					temp = 0;
+					break;
+				default:
+					return 0;
+			}
+
+			return temp;
+		}
+
+		private double CalculateTemp(eThermistorType Thermistor , double resistence , Dictionary<double,double> ThermTable)
+		{
+			double result;
+			int lowerbound = 0,upperbound = 1;
+
+			var keys = new List<double>(ThermTable.Keys);
+
+			for (int i = 0; i < keys.Count - 1; i++)
+			{
+				if(resistence >= keys[i] && resistence <= keys[i+1])
+				{
+					lowerbound = i ;
+					upperbound = i + 1;
+				}										
+			}
+
+			double m;
+			double temp1,temp2;
+
+			ThermTable.TryGetValue(keys[lowerbound], out temp1);
+            ThermTable.TryGetValue(keys[upperbound], out temp2);
+
+            m = (temp1 - temp2) / (keys[lowerbound] - keys[upperbound]);
+
+			result = m*(resistence - keys[lowerbound]) + temp1;
+
+			return result;
+		}
+
+
 
 		//private bool HandleVandVCommands(NI6002_ParamData niParamData)
 		//{
