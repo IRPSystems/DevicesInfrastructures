@@ -212,7 +212,7 @@ namespace DeviceHandler.Faults
 			}
 		}
 
-		private void SETTINGS_UPDATEDMessageHandler(object sender, SETTINGS_UPDATEDMessage e)
+		public void SETTINGS_UPDATEDMessageHandler(object sender, SETTINGS_UPDATEDMessage e)
 		{
 			Stop();
 			InitFaultsMCUHalfList();
