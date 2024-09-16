@@ -1,0 +1,80 @@
+﻿<UserControl x:Class="DeviceHandler.Faults.FaultMCU_SingleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DeviceHandler.Faults"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+
+        <DataTemplate x:Key="ErrorLedTemplate">
+
+            <Ellipse Height="20" Width="20"
+                     Margin="0,1" 
+                     Name="elps"
+                     Stroke="{DynamicResource MahApps.Brushes.Gray1}"
+                     Fill="Gray"/>
+
+
+            <DataTemplate.Triggers>
+
+                <DataTrigger Binding="{Binding IsOn}" Value="True">
+                    <Setter TargetName="elps" Property="Fill" Value="Green" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding IsOn}" Value="False">
+                    <Setter TargetName="elps" Property="Fill" Value="Red" />
+                </DataTrigger>
+
+            </DataTemplate.Triggers>
+
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+    <Grid>
+        
+        <Grid Margin="5,0,10,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" 
+                       Text="{Binding FaultsParameter.Name}" 
+                       FontWeight="DemiBold" 
+                       FontSize="14" 
+                       VerticalAlignment="Center"/>
+
+            <DataGrid Grid.Row="2"
+                      ItemsSource="{Binding FaultsList}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False">
+
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </Style>
+                </DataGrid.RowStyle>
+
+                <DataGrid.Columns>
+
+                    <DataGridTemplateColumn Header="State" CellTemplate="{StaticResource ErrorLedTemplate}" />
+                    <DataGridTextColumn Header="Bit" Binding="{Binding Index}" />
+                    <DataGridTextColumn Header="Description" Binding="{Binding Name}" />
+
+                </DataGrid.Columns>
+
+            </DataGrid>
+
+        </Grid>
+
+        <Line Y1="1" Stroke="{DynamicResource MahApps.Brushes.Accent2}" Stretch="Fill" 
+              HorizontalAlignment="Right"/>
+
+    </Grid>
+</UserControl>

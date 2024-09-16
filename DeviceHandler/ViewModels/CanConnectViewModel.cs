@@ -68,7 +68,7 @@ namespace DeviceHandler.ViewModels
 
 		#region Fields
 
-		private string _syncNodeID_Text;
+		//private string _syncNodeID_Text;
 		private uint _syncNodeID;
 
 		#endregion Fields

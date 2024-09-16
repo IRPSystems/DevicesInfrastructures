@@ -48,8 +48,8 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				this,
 				new MCU_ParamData()
 				{
-					Cmd = "",
-					Name = "Check MCU Comm",
+					Cmd = "flthi",
+					Name = "Highest Active Fault",
 				},
 				"MCU");
 		}

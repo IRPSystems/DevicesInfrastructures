@@ -117,13 +117,12 @@ namespace DeviceCommunicators.TSCPrinter
         private bool _isInitialized;
         public override bool IsInitialized => _isInitialized;
 
-        private string TempCurrentDynamicInfo;
 
-        private bool isTestLabelPrinted = false;
+       // private bool isTestLabelPrinted = false;
 
-        private string preBuildPrintCmd = null;
+        //private string preBuildPrintCmd = null;
 
-        private string commonSnVarIndicator = "{SN}";
+        //private string commonSnVarIndicator = "{SN}";
 
         private string checkStatusString = "<ESC>!?";
 
@@ -132,12 +131,12 @@ namespace DeviceCommunicators.TSCPrinter
         private string _comName = String.Empty;
 
         //This command forces / restarts the printer after a fault (Triggering the button)
-        private string feedButtonCmd = "\u001b!F";
+        //private string feedButtonCmd = "\u001b!F";
 
         IntPtr hPrinter;
 
-        string WT1 = "TSC Printers";
-        string B1 = "20080101";
+        //string WT1 = "TSC Printers";
+        //string B1 = "20080101";
         byte[] result_unicode = System.Text.Encoding.GetEncoding("utf-16").GetBytes("unicode test");
         byte[] result_utf8 = System.Text.Encoding.UTF8.GetBytes("TEXT 40,620,\"ARIAL.TTF\",0,12,12,\"utf8 test Wörter auf Deutsch\"");
 
@@ -193,6 +192,7 @@ namespace DeviceCommunicators.TSCPrinter
             if(printer)
             {
                 _isInitialized = true;
+                PrintTest();
             }
             InitBase();
 
@@ -346,7 +346,7 @@ namespace DeviceCommunicators.TSCPrinter
                     dwError = Marshal.GetLastWin32Error();
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 bSuccess = false;
             }
@@ -401,6 +401,42 @@ namespace DeviceCommunicators.TSCPrinter
             sendcommand("\u001b!F");
             PrinterStatus status = (PrinterStatus)usbportqueryprinter();
             closeport();
+        }
+
+        public bool PrintTest()
+        {
+            bool success;
+            IntPtr pBytes;
+            Int32 dwCount;
+
+            string aTmpRawString = $@"SIZE 52.10 mm, 25 mm
+                GAP 3 mm, 0 mm
+                SPEED 2
+                DENSITY 13
+                SET RIBBON ON
+                DIRECTION 0,0
+                REFERENCE 0,0
+                OFFSET 0 mm
+                SET PEEL OFF
+                SET CUTTER OFF
+                SET PARTIAL_CUTTER OFF
+                SET TEAR ON
+                CLS
+                CODEPAGE 1252
+                TEXT 313,147,""0"",180,39,36,""OK""
+                PRINT 1,1
+                ";
+
+            // How many characters are in the string?
+            dwCount = aTmpRawString.Length;
+            // Assume that the printer is expecting ANSI text, and then convert
+            // the string to ANSI text.
+            pBytes = Marshal.StringToCoTaskMemAnsi(aTmpRawString);
+            // Send the converted ANSI string to the printer.
+            success = SendBytesToPrinter(_comName, pBytes, dwCount);
+            Marshal.FreeCoTaskMem(pBytes);
+
+            return success;
         }
 
         #endregion
