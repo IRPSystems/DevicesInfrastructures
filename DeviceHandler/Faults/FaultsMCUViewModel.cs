@@ -13,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using DeviceCommunicators.MCU;
 using System.Linq;
 using System.Collections.Generic;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace DeviceHandler.Faults
 {
@@ -79,6 +80,9 @@ namespace DeviceHandler.Faults
 
 				InitFaultsMCUHalfList();
 			}
+
+			WeakReferenceMessenger.Default.Register<SETTINGS_UPDATEDMessage>(
+				this, new MessageHandler<object, SETTINGS_UPDATEDMessage>(SETTINGS_UPDATEDMessageHandler));
 
 		}
 
@@ -206,6 +210,13 @@ namespace DeviceHandler.Faults
 			{
 				LoggerService.Error(this, "Failed to set connection status", ex);
 			}
+		}
+
+		private void SETTINGS_UPDATEDMessageHandler(object sender, SETTINGS_UPDATEDMessage e)
+		{
+			Stop();
+			InitFaultsMCUHalfList();
+			Start();
 		}
 
 
