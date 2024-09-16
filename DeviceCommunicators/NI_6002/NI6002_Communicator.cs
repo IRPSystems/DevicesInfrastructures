@@ -145,9 +145,14 @@ namespace DeviceCommunicators.NI_6002
 
 
 				Thread.Sleep(10);
+                LoggerService.Inforamtion(this, "message : " + message);
+                double value;
+				if (message.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+				{
+					message = message.Substring(2);
+				}
 
-				double value;
-				bool res = double.TryParse(message, out value);
+                bool res = double.TryParse(message, out value);
 				if (res)
 				{
 					param.Value = value;
