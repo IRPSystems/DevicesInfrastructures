@@ -117,13 +117,12 @@ namespace DeviceCommunicators.TSCPrinter
         private bool _isInitialized;
         public override bool IsInitialized => _isInitialized;
 
-        private string TempCurrentDynamicInfo;
 
-        private bool isTestLabelPrinted = false;
+       // private bool isTestLabelPrinted = false;
 
-        private string preBuildPrintCmd = null;
+        //private string preBuildPrintCmd = null;
 
-        private string commonSnVarIndicator = "{SN}";
+        //private string commonSnVarIndicator = "{SN}";
 
         private string checkStatusString = "<ESC>!?";
 
@@ -132,12 +131,12 @@ namespace DeviceCommunicators.TSCPrinter
         private string _comName = String.Empty;
 
         //This command forces / restarts the printer after a fault (Triggering the button)
-        private string feedButtonCmd = "\u001b!F";
+        //private string feedButtonCmd = "\u001b!F";
 
         IntPtr hPrinter;
 
-        string WT1 = "TSC Printers";
-        string B1 = "20080101";
+        //string WT1 = "TSC Printers";
+        //string B1 = "20080101";
         byte[] result_unicode = System.Text.Encoding.GetEncoding("utf-16").GetBytes("unicode test");
         byte[] result_utf8 = System.Text.Encoding.UTF8.GetBytes("TEXT 40,620,\"ARIAL.TTF\",0,12,12,\"utf8 test Wörter auf Deutsch\"");
 
@@ -347,7 +346,7 @@ namespace DeviceCommunicators.TSCPrinter
                     dwError = Marshal.GetLastWin32Error();
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 bSuccess = false;
             }

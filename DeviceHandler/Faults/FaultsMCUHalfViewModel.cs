@@ -44,8 +44,7 @@ namespace DeviceHandler.Faults
 
 		private AutoResetEvent _receivedEvent;
 
-		private string _halfIdentifier;
-
+		
 		public bool IsLoaded;
 
 		private DevicesContainer _devicesContainer;
