@@ -393,7 +393,9 @@ namespace DeviceCommunicators.MCU
 				{
 					LoggerService.Error(this,
 						mcuParam.Name + ": ValueNotSet: Original=" + dsetValue + "; Ack=" + value);
-					return CommunicatorResultEnum.ValueNotSet;
+
+					mcuParam.Value = dvalue;
+                    return CommunicatorResultEnum.ValueNotSet;
 				}
 			}
 
