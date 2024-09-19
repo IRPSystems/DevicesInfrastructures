@@ -79,8 +79,7 @@ namespace DeviceHandler.ViewModels
 				deviceSetupUserData.MCUJsonPath,
 				deviceSetupUserData.MCUB2BJsonPath,
 				deviceSetupUserData.DynoCommunicationPath,
-				deviceSetupUserData.NI6002CommunicationPath,
-				isAddDataLoggers);
+				deviceSetupUserData.NI6002CommunicationPath);
 			DevicesSourceList = new ObservableCollection<DeviceData>();
 			foreach (DeviceData device in _devicesSourceList_Full)
 			{
