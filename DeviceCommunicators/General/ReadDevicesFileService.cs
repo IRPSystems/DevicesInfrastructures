@@ -2,14 +2,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.BrainChild;
 using DeviceCommunicators.BTMTempLogger;
-using DeviceCommunicators.EvvaDevice;
 using DeviceCommunicators.FieldLogger;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using Entities.Enums;
-using Entities.Models;
 using ExcelDataReader;
-using NationalInstruments.Restricted;
 using Newtonsoft.Json;
 using Services.Services;
 using System;
@@ -30,8 +27,7 @@ namespace DeviceCommunicators.Services
 			string mcuFilePath,
 			string mcuB2BFilePath,
 			string dynoFilePath,
-			string ni6002FilePath,
-			bool isAddDataLoggers = true)
+			string ni6002FilePath)
 		{
 			if (!Directory.Exists(dir))
 				return null;
@@ -97,13 +93,6 @@ namespace DeviceCommunicators.Services
 					devicesList,
 					"MCU - B2B",
 					DeviceTypesEnum.MCU_B2B);
-			}
-
-			if (isAddDataLoggers)
-			{
-				InitBTMTempLogger(devicesList);
-				InitFieldLogger(devicesList);
-				InitBrainChild(devicesList);
 			}
 
 
@@ -172,84 +161,6 @@ namespace DeviceCommunicators.Services
 			device.MCU_GroupList = new ObservableCollection<ParamGroup>() { paramGroup };
 
 
-		}
-
-		public void InitBTMTempLogger(ObservableCollection<DeviceData> devicesList)
-		{
-			DeviceData btmTempLogger = new DeviceData()
-			{
-				Name = "BTM Temp Logger",
-				DeviceType = DeviceTypesEnum.BTMTempLogger,
-			};
-
-			btmTempLogger.ParemetersList = new ObservableCollection<DeviceParameterData>();
-			for (int i = 1; i <= 12; i++)
-			{
-				DeviceParameterData param = new BTMTempLogger_ParamData()
-				{
-					Channel = i,
-					Name = "Channel " + i,
-					Units = "°C",
-					DeviceType = DeviceTypesEnum.BTMTempLogger,
-					Device = btmTempLogger,
-				};
-
-				btmTempLogger.ParemetersList.Add(param);
-			}
-
-			devicesList.Add(btmTempLogger);
-		}
-
-		public void InitFieldLogger(ObservableCollection<DeviceData> devicesList)
-		{
-			DeviceData fieldLogger = new DeviceData()
-			{
-				Name = "Field Logger",
-				DeviceType = DeviceTypesEnum.FieldLogger,
-			};
-
-			fieldLogger.ParemetersList = new ObservableCollection<DeviceParameterData>();
-			for (int i = 1; i <= 8; i++)
-			{
-				DeviceParameterData param = new FieldLogger_ParamData()
-				{
-					Channel = i,
-					Name = "Channel " + i,
-					Units = "°C",
-					DeviceType = DeviceTypesEnum.FieldLogger,
-					Device = fieldLogger,
-				};
-
-				fieldLogger.ParemetersList.Add(param);
-			}
-
-			devicesList.Add(fieldLogger);
-		}
-
-		public void InitBrainChild(ObservableCollection<DeviceData> devicesList)
-		{
-			DeviceData brainChild = new DeviceData()
-			{
-				Name = "Brain Child",
-				DeviceType = DeviceTypesEnum.BrainChild,
-			};
-
-			brainChild.ParemetersList = new ObservableCollection<DeviceParameterData>();
-			for (int i = 1; i <= 8; i++)
-			{
-				DeviceParameterData param = new BrainChild_ParamData()
-				{
-					Channel = i,
-					Name = "Channel " + i,
-					Units = "°C",
-					DeviceType = DeviceTypesEnum.BrainChild,
-					Device = brainChild,
-				};
-
-				brainChild.ParemetersList.Add(param);
-			}
-
-			devicesList.Add(brainChild);
 		}
 
 		public void ReadFromJson(
