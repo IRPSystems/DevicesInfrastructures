@@ -148,6 +148,8 @@ namespace DeviceCommunicators.FieldLogger
 				{
 					byte[] buffer;
 					ModbusTCPSevice.Read(out buffer);
+					if (buffer == null)
+						continue;
 
 					_channelsValue.Clear();
 
