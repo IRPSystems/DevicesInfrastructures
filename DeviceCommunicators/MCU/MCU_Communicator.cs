@@ -1,5 +1,5 @@
 ﻿
-#define _SAVE_TIME
+//#define _SAVE_TIME
 using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
