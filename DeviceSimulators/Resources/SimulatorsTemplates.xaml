@@ -80,7 +80,7 @@
 
             <ListView Grid.Row="2" 
                       ItemsSource="{Binding ParametersList}" 
-                      ItemContainerStyle="{StaticResource DeviceParamsListStyle}"
+                      ItemTemplate="{StaticResource DeviceParamsListTemplate}"
                       Visibility="{Binding ElementName=cb, Path=IsChecked, Converter={StaticResource BoolToVisibility}}"
                       MaxHeight="180"/>
 
