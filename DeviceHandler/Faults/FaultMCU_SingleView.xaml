@@ -64,8 +64,8 @@
                 <DataGrid.Columns>
 
                     <DataGridTemplateColumn Header="State" CellTemplate="{StaticResource ErrorLedTemplate}" />
-                    <DataGridTextColumn Header="Bit" Binding="{Binding Index}" />
-                    <DataGridTextColumn Header="Description" Binding="{Binding Name}" />
+                    <DataGridTextColumn Header="Bit" Binding="{Binding Index}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Description" Binding="{Binding Name}" IsReadOnly="True"/>
 
                 </DataGrid.Columns>
 
