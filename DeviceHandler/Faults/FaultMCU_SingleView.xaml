@@ -56,7 +56,7 @@
                       CanUserDeleteRows="False">
 
                 <DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow">
+                    <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow}">
                         <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </Style>
                 </DataGrid.RowStyle>
@@ -64,8 +64,8 @@
                 <DataGrid.Columns>
 
                     <DataGridTemplateColumn Header="State" CellTemplate="{StaticResource ErrorLedTemplate}" />
-                    <DataGridTextColumn Header="Bit" Binding="{Binding Index}" />
-                    <DataGridTextColumn Header="Description" Binding="{Binding Name}" />
+                    <DataGridTextColumn Header="Bit" Binding="{Binding Index}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Description" Binding="{Binding Name}" IsReadOnly="True"/>
 
                 </DataGrid.Columns>
 
