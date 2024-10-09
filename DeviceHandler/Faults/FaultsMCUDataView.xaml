@@ -17,7 +17,7 @@
         </Grid.RowDefinitions>
 
         <CheckBox Content="Show active faults only" 
-                  IsChecked="{Binding IsShowFaultsOnly, Mode=TwoWay}" />
+                  IsChecked="{Binding IsShowFaultsOnly, Mode=TwoWay}"/>
 
         <ListView Grid.Row="2"
                   ItemsSource="{Binding FaultsMCUHalfList}"
@@ -34,7 +34,8 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ListViewItem">
-                                <local:FaultMCU_SingleView DataContext="{Binding}" />
+                                <local:FaultMCU_SingleView DataContext="{Binding}" 
+                                                           Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"/>
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
