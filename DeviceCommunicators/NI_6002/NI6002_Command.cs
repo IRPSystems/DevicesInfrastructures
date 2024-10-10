@@ -99,7 +99,13 @@ namespace DeviceCommunicators.NI_6002
                     ChannelLineGrouping.OneChannelForAllLines);
             DigitalSingleChannelReader DI_readerPort = new DigitalSingleChannelReader(digReadTaskPort.Stream);
             UInt32 DigIndatapPort = DI_readerPort.ReadSingleSamplePortUInt32();
-            
+
+            if(DigIndatapPort > 0)
+            {
+                DigIndatapPort = 1;
+            }
+
+            LoggerService.Inforamtion(this, "result: "+ DigIndatapPort);
 
             return String.Format("0x{0:X}", DigIndatapPort);
         }
@@ -163,6 +169,8 @@ namespace DeviceCommunicators.NI_6002
                 double tempSamplesToReadNumeric = 1000;
                 double currentSensorMeasGain = 2000;
 
+                if (shuntResistor == 0)
+                    shuntResistor = 17.8;
                 Thread.Sleep(1000);
 
                 // Create a new task
