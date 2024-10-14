@@ -55,6 +55,10 @@ namespace DeviceHandler.Faults
 
 		private DevicesContainer _devicesContainer;
 
+		private System.Timers.Timer _ceckIfFaultExistTimer;
+
+		private bool _isFulatExist;
+
 		#endregion Fields
 
 		#region Constructor
@@ -67,8 +71,8 @@ namespace DeviceHandler.Faults
 
 			IsLoaded = false;
 
-			LoadedCommand = new RelayCommand(Loaded);
-			ClosingCommand = new RelayCommand(Closing);
+			//LoadedCommand = new RelayCommand(Loaded);
+			//ClosingCommand = new RelayCommand(Closing);
 
 			_isWindowOpen = false;
 
@@ -80,6 +84,10 @@ namespace DeviceHandler.Faults
 
 				InitFaultsMCUHalfList();
 			}
+
+			_ceckIfFaultExistTimer = new System.Timers.Timer(1000);
+			_ceckIfFaultExistTimer.Elapsed += _ceckIfErrorFaultTimer_Elapsed;
+			_ceckIfFaultExistTimer.Start();
 
 			WeakReferenceMessenger.Default.Register<SETTINGS_UPDATEDMessage>(
 				this, new MessageHandler<object, SETTINGS_UPDATEDMessage>(SETTINGS_UPDATEDMessageHandler));
@@ -100,8 +108,8 @@ namespace DeviceHandler.Faults
 
 		public void Start()
 		{
-			if (!_isWindowOpen)
-				return;
+			//if (!_isWindowOpen)
+			//	return;
 
 			if (FaultsMCUHalfList == null)
 				return;
@@ -120,17 +128,17 @@ namespace DeviceHandler.Faults
 		}
 
 
-		public void Loaded()
-		{
-			_isWindowOpen = true;
-			Start();
-		}
+		//public void Loaded()
+		//{
+		//	_isWindowOpen = true;
+		//	Start();
+		//}
 
-		public void Closing()
-		{
-			_isWindowOpen = false;
-			Stop();
-		}
+		//public void Closing()
+		//{
+		//	_isWindowOpen = false;
+		//	Stop();
+		//}
 
 		private void InitFaultsMCUHalfList()
 		{
@@ -220,14 +228,35 @@ namespace DeviceHandler.Faults
 		}
 
 
+
+		private void _ceckIfErrorFaultTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+		{
+			_isFulatExist = false;
+			foreach(FaultsMCUHalfViewModel faultsHalf in FaultsMCUHalfList)
+			{
+				_isFulatExist |= faultsHalf.GetIsFaultExist();
+			}			
+		}
+
+		public bool GetIsFaultExist()
+		{
+			return _isFulatExist;
+		}
+
 		#endregion Methods
 
 		#region Commands
 
-		public RelayCommand LoadedCommand { get; private set; }
-		public RelayCommand ClosingCommand { get; private set; }
+		//public RelayCommand LoadedCommand { get; private set; }
+		//public RelayCommand ClosingCommand { get; private set; }
 
 		#endregion Commands
+
+		#region Events
+
+
+
+		#endregion Events
 
 	}
 
