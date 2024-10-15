@@ -100,8 +100,12 @@ namespace DeviceHandler.Faults
 
 		public void Dispose()
 		{
-			foreach (FaultsMCUHalfViewModel vm in FaultsMCUHalfList)
-				vm.Dispose();
+			if (FaultsMCUHalfList != null)
+			{
+				foreach (FaultsMCUHalfViewModel vm in FaultsMCUHalfList)
+					vm.Dispose();
+			}
+
 			IsLoaded = false;
 		}
 
@@ -231,6 +235,9 @@ namespace DeviceHandler.Faults
 
 		private void _ceckIfErrorFaultTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
 		{
+			if (FaultsMCUHalfList == null)
+				return;
+
 			_isFulatExist = false;
 			foreach(FaultsMCUHalfViewModel faultsHalf in FaultsMCUHalfList)
 			{
