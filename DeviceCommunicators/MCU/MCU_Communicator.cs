@@ -117,6 +117,10 @@ namespace DeviceCommunicators.MCU
 			{
 				//CommService = new CanSlokiService(baudrate, syncID, syncID);
 			}
+			else if (canAdapterType == "IXXAT")
+			{
+				CommService = new CanIxxatService(baudrate, hwId, syncID, syncID, asyncID);
+			}
 			else if (canAdapterType == "UDP Simulator")
 			{
 				CommService = new CanUdpSimulationService(baudrate, syncID, syncID, rxPort, txPort, address, asyncID);
