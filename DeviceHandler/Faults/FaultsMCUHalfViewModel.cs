@@ -49,6 +49,8 @@ namespace DeviceHandler.Faults
 
 		private DevicesContainer _devicesContainer;
 
+		private bool _isFaultExist;
+
 		#endregion Fields
 
 		#region Constructor
@@ -210,6 +212,7 @@ namespace DeviceHandler.Faults
 					}
 				}
 
+				_isFaultExist = (dVal > 0);
 
 
 				SetErrorData(param, FaultsList, (uint)dVal);
@@ -248,6 +251,11 @@ namespace DeviceHandler.Faults
 			}
 			
 
+		}
+
+		public bool GetIsFaultExist()
+		{
+			return _isFaultExist;
 		}
 
 		#endregion Methods
