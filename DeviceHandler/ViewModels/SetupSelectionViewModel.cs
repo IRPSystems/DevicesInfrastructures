@@ -81,9 +81,13 @@ namespace DeviceHandler.ViewModels
 				deviceSetupUserData.DynoCommunicationPath,
 				deviceSetupUserData.NI6002CommunicationPath);
 			DevicesSourceList = new ObservableCollection<DeviceData>();
-			foreach (DeviceData device in _devicesSourceList_Full)
+
+			if (_devicesSourceList_Full != null)
 			{
-				DevicesSourceList.Add(device);
+				foreach (DeviceData device in _devicesSourceList_Full)
+				{
+					DevicesSourceList.Add(device);
+				}
 			}
 
 			DevicesList = new ObservableCollection<DeviceData>();
