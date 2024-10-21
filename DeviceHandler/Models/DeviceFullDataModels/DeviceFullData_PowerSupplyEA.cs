@@ -156,28 +156,33 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			if (!(ConnectionViewModel is SerialAndTCPViewModel serialTcpConncet))
 				return;
 
-			Application.Current.Dispatcher.Invoke(() =>
+			if (Application.Current != null)
 			{
-				serialTcpConncet.TcpConncetVM.SearchNoticeVisibility =
-					System.Windows.Visibility.Visible;
-				serialTcpConncet.IsEnabled = false;
-			});
+				Application.Current.Dispatcher.Invoke(() =>
+				{
+					serialTcpConncet.TcpConncetVM.SearchNoticeVisibility =
+						System.Windows.Visibility.Visible;
+					serialTcpConncet.IsEnabled = false;
+				});
+			}
 
 			List<string> ipsList = eaCommunicator.FindEaIPs();
 
 
 
-
-			Application.Current.Dispatcher.Invoke(() =>
+			if (Application.Current != null)
 			{
-				serialTcpConncet.TcpConncetVM.EAIPsList =
-				new ObservableCollection<string>(ipsList);
-				serialTcpConncet.TcpConncetVM.Address = ipsList[0];
+				Application.Current.Dispatcher.Invoke(() =>
+				{
+					serialTcpConncet.TcpConncetVM.EAIPsList =
+					new ObservableCollection<string>(ipsList);
+					serialTcpConncet.TcpConncetVM.Address = ipsList[0];
 
-				serialTcpConncet.TcpConncetVM.SearchNoticeVisibility =
-					System.Windows.Visibility.Collapsed;
-				serialTcpConncet.IsEnabled = true;
-			});
+					serialTcpConncet.TcpConncetVM.SearchNoticeVisibility =
+						System.Windows.Visibility.Collapsed;
+					serialTcpConncet.IsEnabled = true;
+				});
+			}
 
 			InitCheckConnection();
 		}
