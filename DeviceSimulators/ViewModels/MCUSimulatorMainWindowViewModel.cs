@@ -861,10 +861,13 @@ namespace DeviceSimulators.ViewModels
 				CanMessageData canMessage = new CanMessageData()
 				{ Id = id, Message = message };
 
-				Application.Current.Dispatcher.Invoke(() =>
+				if (Application.Current != null)
 				{
-					CanMessagesList.Add(canMessage);
-				});
+					Application.Current.Dispatcher.Invoke(() =>
+					{
+						CanMessagesList.Add(canMessage);
+					});
+				}
 
 			}
 			catch { }

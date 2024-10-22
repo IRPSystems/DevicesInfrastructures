@@ -10,73 +10,71 @@
 
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
-    <Style x:Key="DeviceParamsListStyle" TargetType="ListViewItem">
+    <Style TargetType="ListViewItem">
         <Setter Property="Visibility" Value="{Binding Visibility}"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ListViewItem">
-                    <Grid Margin="2">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="150" />
-                            <ColumnDefinition Width="5" />
-                            <ColumnDefinition Width="50" />
-                            <ColumnDefinition Width="5" />
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="2" />
-                            <ColumnDefinition Width="30" />
-                            <ColumnDefinition Width="2" />
-                            <ColumnDefinition Width="30" />
-                            <ColumnDefinition Width="2" />
-                            <ColumnDefinition Width="30" />
-                        </Grid.ColumnDefinitions>
+    </Style>
 
-                        <TextBlock Text="{Binding Name}" Grid.Column="0" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding Units}" Grid.Column="2" VerticalAlignment="Center"/>
-                        
-                        <TextBox Name="tbValue" Text="{Binding Value}" Grid.Column="4" ToolTip="{Binding Value}"/>
-                        <TextBox Name="tbEditValue" Text="{Binding EditValue}" Grid.Column="4" ToolTip="{Binding Value}"
+    <DataTemplate x:Key="DeviceParamsListTemplate">
+        
+        <Grid Margin="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="2" />
+                <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="2" />
+                <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="2" />
+                <ColumnDefinition Width="30" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="{Binding Name}" Grid.Column="0" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding Units}" Grid.Column="2" VerticalAlignment="Center"/>
+
+            <TextBox Name="tbValue" Text="{Binding Value}" Grid.Column="4" ToolTip="{Binding Value}"/>
+            <TextBox Name="tbEditValue" Text="{Binding EditValue}" Grid.Column="4" ToolTip="{Binding Value}"
                                  BorderThickness="2"/>
 
-                        <ToggleButton Grid.Column="6"
-                                      Style="{StaticResource ToggleButtonWithIconStyle}"
-                                      Width="25"
-                                      ToolTip="Edit"
-                                      Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=controls:EmptyListView}}"
-                                      CommandParameter="{Binding}"
-                                      Visibility="{Binding GetSetVisibility}"
-                                      IsChecked="{Binding IsEditing}">
-                            <iconPacks:PackIconMaterial Kind="LeadPencil" Width="15" Height="15"/>
-                        </ToggleButton>
+            <ToggleButton Grid.Column="6"
+                          Style="{StaticResource ToggleButtonWithIconStyle}"
+                          Width="25"
+                          ToolTip="Edit"
+                          Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=controls:EmptyListView}}"
+                          CommandParameter="{Binding}"
+                          Visibility="{Binding GetSetVisibility}"
+                          IsChecked="{Binding IsEditing}">
+                <iconPacks:PackIconMaterial Kind="LeadPencil" Width="15" Height="15"/>
+            </ToggleButton>
 
-                        <Button Grid.Column="8" 
-                                Command="{Binding DataContext.SetCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=controls:EmptyListView}}" 
-                                CommandParameter="{Binding}" 
-                                Content="Set"
-                                Visibility="{Binding GetSetVisibility}"/>
-                        <Button Grid.Column="10" 
-                                Command="{Binding DataContext.GetCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=controls:EmptyListView}}" 
-                                CommandParameter="{Binding}" 
-                                Content="Get"
-                                Visibility="{Binding GetSetVisibility}"/>
+            <Button Grid.Column="8" 
+                    Command="{Binding DataContext.SetCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=controls:EmptyListView}}" 
+                    CommandParameter="{Binding}" 
+                    Content="Set"
+                    Visibility="{Binding GetSetVisibility}"/>
+            <Button Grid.Column="10" 
+                    Command="{Binding DataContext.GetCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=controls:EmptyListView}}" 
+                    CommandParameter="{Binding}" 
+                    Content="Get"
+                    Visibility="{Binding GetSetVisibility}"/>
 
-                    </Grid>
+        </Grid>
 
-                    <ControlTemplate.Triggers>
+        <DataTemplate.Triggers>
 
-                        <DataTrigger Binding="{Binding IsEditing}" Value="False">
-                            <Setter TargetName="tbValue" Property="Visibility" Value="Visible"/>
-                            <Setter TargetName="tbEditValue" Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
+            <DataTrigger Binding="{Binding IsEditing}" Value="False">
+                <Setter TargetName="tbValue" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="tbEditValue" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
 
-                        <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                            <Setter TargetName="tbValue" Property="Visibility" Value="Collapsed"/>
-                            <Setter TargetName="tbEditValue" Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                        
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+            <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                <Setter TargetName="tbValue" Property="Visibility" Value="Collapsed"/>
+                <Setter TargetName="tbEditValue" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+
+        </DataTemplate.Triggers>
+    </DataTemplate>
 
 </ResourceDictionary>
