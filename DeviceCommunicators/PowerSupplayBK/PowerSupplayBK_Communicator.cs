@@ -130,7 +130,7 @@ namespace DeviceCommunicators.PowerSupplayBK
                 if (!(param is PowerSupplayBK_ParamData supplay_Parameter))
                     return;
 
-                send_comand_to_supply(supplay_Parameter.Name, value);
+                send_comand_to_supply(supplay_Parameter, value);
 				callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 			}
 			catch (Exception ex)
@@ -150,7 +150,7 @@ namespace DeviceCommunicators.PowerSupplayBK
 
                 request_commad_from_supply(supplay_Parameter);
 
-                Thread.Sleep(10);
+                Thread.Sleep(100);
 
 
                 param.Value = receive_value_from_supply(supplay_Parameter.Name);
@@ -171,12 +171,14 @@ namespace DeviceCommunicators.PowerSupplayBK
 
 
 
-		private void send_comand_to_supply(string command, double value)
+		private void send_comand_to_supply(
+			PowerSupplayBK_ParamData supplay_Parameter, 
+			double value)
         {
             if (_serial_port == null)
                 return;
 
-            if (command == "Remote command")
+            if (supplay_Parameter.Name == "Remote command")
             {
                 if (value == 1)
                 {
@@ -187,39 +189,30 @@ namespace DeviceCommunicators.PowerSupplayBK
 					_serial_port.Send("SYST:LOC");
                 }
             }
-            else if (command == "Choose channel")
+            else if (supplay_Parameter.Name == "Choose channel")
             {
-                if (value == 1)
-                {
-					_serial_port.Send("INST CH1");
-                }
-                else if (value == 2)
-                {
-					_serial_port.Send("INST CH2");
-                }
-                else if (value == 3)
-                {
-					_serial_port.Send("INST CH3");
-                }
-            }
-            else if (command == "Turn ON channel")
+				string cmd = $"{supplay_Parameter.Command} CH{value}";
+				_serial_port.Send(cmd);
+			}
+            else if (supplay_Parameter.Name == "Turn ON channel")
             {
-                if (value == 0)
+				string cmd = supplay_Parameter.Command;
+				
+				if (value == 0)
                 {
-					_serial_port.Send("CHANnel:OUTPut OFF");
+					cmd += " OFF";
                 }
                 else if (value == 1)
                 {
-					_serial_port.Send("CHANnel:OUTPut ON");
-                }
-            }
-            else if (command == "Voltage")
+					cmd += " ON";
+				}
+
+				_serial_port.Send(cmd);
+			}
+            else
             {
-				_serial_port.Send("VOLTage "+ value);
-            }
-            else if (command == "Current")
-            {
-				_serial_port.Send("Current " + value);
+				string cmd = $"{supplay_Parameter.Command} {value}";
+				_serial_port.Send(cmd);
             }
         }
 
@@ -241,6 +234,8 @@ namespace DeviceCommunicators.PowerSupplayBK
                 return null;
 
 			string internal_buffer;
+
+			if (name == "Choose channel") { }
 			_serial_port.Read(out internal_buffer);
 
             if (string.IsNullOrEmpty(internal_buffer))
