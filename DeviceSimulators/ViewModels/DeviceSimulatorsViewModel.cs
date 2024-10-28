@@ -100,6 +100,9 @@ namespace DeviceSimulators.ViewModels
 					case DeviceTypesEnum.ScopeKeysight:
 						break;
 
+					case DeviceTypesEnum.Yokogawa_WT1804E:
+						break;
+
 				}
 			}
 
