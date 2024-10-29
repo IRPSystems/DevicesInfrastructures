@@ -64,6 +64,11 @@ namespace DeviceSimulators.ViewModels
 			_timerChangeValue.Elapsed += TimerChangeValueElapsedEventHandler;
 			//	_timerChangeValue.Start();
 
+			ParametersList.Add(new PowerSupplayBK_ParamData()
+			{
+				Command = "*IDN",
+				Name = "Identification"
+			});
 
 			SetValuesToParams();
 
@@ -91,10 +96,10 @@ namespace DeviceSimulators.ViewModels
 				if (_paramsNotToUpdateList.Contains(deviceData.Name))
 					continue;
 
-				if(deviceData.Command == "MEASure:SCALar:VOLTage:ALL:DC?" ||
-					deviceData.Command == "VAPPLY:VOLTage:LEVel?" ||
-					deviceData.Command == "APPLY:CURRent:LEVel?" ||
-					deviceData.Command == "APPLY:OUTput?")
+				if(deviceData.Command == "MEASure:SCALar:VOLTage:ALL:DC" ||
+					deviceData.Command == "VAPPLY:VOLTage:LEVel" ||
+					deviceData.Command == "APPLY:CURRent:LEVel" ||
+					deviceData.Command == "APPLY:OUTput")
 				{
 					string str = "";
 					for(int i = 0; i < 3; i++)
@@ -107,7 +112,7 @@ namespace DeviceSimulators.ViewModels
 					deviceData.Value = str;
 				}
 				else
-					//deviceData.Value = value++;
+					deviceData.Value = (value++).ToString();
 
 
 
@@ -205,80 +210,17 @@ namespace DeviceSimulators.ViewModels
 
 
 
-					PowerSupplayBK_ParamData data = null;
+					
 
-					if(message != "MEASure:SCALar:VOLTage:ALL:DC?") { }
-					switch (message)
+					message = message.Trim('\n');
+
+					if (message.EndsWith("?"))
 					{
-						case "SYST:REM":
-							SetParam("SYST", 1);
-							break;
-
-						case "SYST:LOC":
-							SetParam("SYST", 0); 
-							break;
-
-						case "INST CH1":
-							SetParam("INST", 1); 
-							break;
-
-						case "INST CH2":
-							SetParam("INST", 2); 
-							break;
-
-						case "INST CH3":
-							SetParam("INST", 3); 
-							break;
-
-						case "CHANnel:OUTPut OFF":
-							SetParam("CHANnel:OUTPut", 0);
-							break;
-
-						case "CHANnel:OUTPut ON":
-							SetParam("CHANnel:OUTPut", 1); 
-							break;
-
-
-
-						case "MEASure:SCALar:VOLTage:ALL:DC?":
-						case "VAPPLY:VOLTage:LEVel?":
-						case "APPLY:CURRent:LEVel?":
-						case "APPLY:OUTput?":
-							data = ParametersList.ToList().Find((p) => (p as PowerSupplayBK_ParamData).Command == message)
-								as PowerSupplayBK_ParamData;
-							if (data == null)
-								continue;
-
-							_commService.Send(data.Value as string);
-							break;
-
-						default:
-
-
-							string command = "";
-							string valueStr = "";
-							if (message.StartsWith("VOLTage"))
-							{
-								valueStr = message.Replace("VOLTage ", string.Empty);
-								command = "VOLTage";
-							}
-							else if (message.StartsWith("Current"))
-							{
-								valueStr = message.Replace("Current ", string.Empty);
-								command = "Current";
-							}
-
-							data = ParametersList.ToList().Find((p) => (p as PowerSupplayBK_ParamData).Command.Trim() == command)
-								as PowerSupplayBK_ParamData;
-							if (data == null)
-								continue;
-
-							double value;
-							bool res = double.TryParse(valueStr, out value);
-							data.Value = value;
-
-							break;
-
+						HandleGetValue(message);
+					}
+					else
+					{
+						HandleSetValue(message);
 					}
 
 
@@ -290,15 +232,31 @@ namespace DeviceSimulators.ViewModels
 			}, _cancellationToken);
 		}
 
-		private void SetParam(
-			string command,
-			double value)
+		private void HandleGetValue(string message)
 		{
+			string msg = message.Trim('?');
+			PowerSupplayBK_ParamData data = ParametersList.ToList().Find((p) => (p as PowerSupplayBK_ParamData).Command == msg)
+				as PowerSupplayBK_ParamData;
+			if (data == null)
+				return;
+
+			_commService.Send(data.Value as string);
+		}
+
+
+
+		private void HandleSetValue(
+			string message)
+		{
+			string[] splitMessage = message.Split(" ");
+
+			string command = splitMessage[0];
 			PowerSupplayBK_ParamData data = ParametersList.ToList().Find((p) => (p as PowerSupplayBK_ParamData).Command.Trim() == command)
 								as PowerSupplayBK_ParamData;
 			if (data == null)
 				return;
-			data.Value = value;
+
+			data.Value = splitMessage[1];
 		}
 
 
