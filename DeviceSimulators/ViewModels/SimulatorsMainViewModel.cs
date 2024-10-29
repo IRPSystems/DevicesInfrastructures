@@ -10,6 +10,8 @@ using DeviceSimulators.Models;
 using Entities.Enums;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
 
 namespace DeviceSimulators.ViewModels
 {
@@ -38,6 +40,7 @@ namespace DeviceSimulators.ViewModels
 		{
 			LoadCommand = new RelayCommand(Load);
 			AddSimulatorCommand = new RelayCommand(AddSimulator);
+			ClosingCommand = new RelayCommand<CancelEventArgs>(Closing);
 
 			IsDevicesListEnable = false;
 
@@ -51,11 +54,39 @@ namespace DeviceSimulators.ViewModels
 
 			_deviceSimulatorsUserData = 
 				DeviceSimulatorsUserData.LoadDeviceSimulatorsUserData("DeviceSimulators");
+
+			if(_deviceSimulatorsUserData.DeviceTypesList.Count > 0)
+			{
+				Load(_deviceSimulatorsUserData.DevicesFilesDir);
+
+				foreach(DeviceTypesEnum type in _deviceSimulatorsUserData.DeviceTypesList)
+				{
+					DeviceData deviceData = DevicesList.ToList().Find(x => x.DeviceType == type);
+					if (deviceData == null)
+						continue;
+
+					SelectedDevice = deviceData;
+					AddSimulator();
+				}
+			}
 		}
 
 		#endregion Constructor
 
 		#region Methods
+
+		private void Closing(CancelEventArgs e)
+		{
+			_deviceSimulatorsUserData.DeviceTypesList.Clear();
+			foreach (DeviceData device in _devicesContainer.DevicesList)
+			{
+				_deviceSimulatorsUserData.DeviceTypesList.Add(device.DeviceType);
+			}
+
+			DeviceSimulatorsUserData.SaveDeviceSimulatorsUserData(
+				"DeviceSimulators",
+				_deviceSimulatorsUserData);
+		}
 
 		private void AddSimulator()
 		{
@@ -74,21 +105,28 @@ namespace DeviceSimulators.ViewModels
 		private void Load()
 		{
 			var dialog = new System.Windows.Forms.FolderBrowserDialog();
-			if(string.IsNullOrEmpty(_deviceSimulatorsUserData.DevicesFilesDir) == false)
+			if (string.IsNullOrEmpty(_deviceSimulatorsUserData.DevicesFilesDir) == false)
 				dialog.InitialDirectory = _deviceSimulatorsUserData.DevicesFilesDir;
 			var result = dialog.ShowDialog();
 			if (result != System.Windows.Forms.DialogResult.OK)
 				return;
 
-			_deviceSimulatorsUserData.DevicesFilesDir = dialog.SelectedPath;
+			Load(dialog.SelectedPath);
+		}
+
+		private void Load(string path)
+		{
+			
+
+			_deviceSimulatorsUserData.DevicesFilesDir = path;
 
 			ReadDevicesFileService readDevicesFile = new ReadDevicesFileService();
 			DevicesList = readDevicesFile.ReadAllFiles(
-				dialog.SelectedPath,
-				dialog.SelectedPath + "\\param_defaults.json",
-				dialog.SelectedPath + "\\param_defaults.json",
-				dialog.SelectedPath + "\\Dyno Communication.json",
-				dialog.SelectedPath + "\\NI_6002.json");
+				path,
+				path + "\\param_defaults.json",
+				path + "\\param_defaults.json",
+				path + "\\Dyno Communication.json",
+				path + "\\NI_6002.json");
 			if(DevicesList != null && DevicesList.Count > 0) 
 				IsDevicesListEnable = true;
 		}
@@ -99,6 +137,9 @@ namespace DeviceSimulators.ViewModels
 
 		public RelayCommand LoadCommand { get; private set; }
 		public RelayCommand AddSimulatorCommand { get; private set; }
+
+
+		public RelayCommand<CancelEventArgs> ClosingCommand { get; private set; }
 
 		#endregion Commands
 	}
