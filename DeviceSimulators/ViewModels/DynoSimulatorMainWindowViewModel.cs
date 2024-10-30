@@ -42,7 +42,7 @@ namespace DeviceSimulators.ViewModels
 
 			_timerChangeValue = new System.Timers.Timer(500);
 			_timerChangeValue.Elapsed += TimerChangeValueElapsedEventHandler;
-			_timerChangeValue.Start();
+			//_timerChangeValue.Start();
 
 			BuildUniqueIdDict();
 			SetValuesToParams();
