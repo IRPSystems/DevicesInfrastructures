@@ -97,7 +97,9 @@ namespace DeviceSimulators.ViewModels
 						ViewModelsList.Add(new TKSimulatorMainWindowViewModel(deviceFullData.Device));
 						break;
 
-					case DeviceTypesEnum.ScopeKeysight:
+					case DeviceTypesEnum.PowerSupplyKeysight:
+						ViewModelsList.Add(new PSKeysightSimulatorMainWindowViewModel(deviceFullData.Device));
+
 						break;
 
 					case DeviceTypesEnum.Yokogawa_WT1804E:
