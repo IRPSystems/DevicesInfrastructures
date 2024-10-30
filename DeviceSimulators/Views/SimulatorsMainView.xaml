@@ -34,7 +34,11 @@
                 <ColumnDefinition Width="5"/>
                 <ColumnDefinition Width="120"/>
                 <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="120"/>
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0" Content="Load" Command="{Binding LoadCommand}" />
@@ -53,6 +57,8 @@
             </ComboBox>
 
             <Button Grid.Column="4" Content="Add Simulator" Command="{Binding AddSimulatorCommand}" />
+            <Button Grid.Column="6" Content="Remove Simulator" Command="{Binding RemoveSimulatorCommand}" />
+            <Button Grid.Column="8" Content="Remove All" Command="{Binding RemoveAllCommand}" />
 
         </Grid>
 

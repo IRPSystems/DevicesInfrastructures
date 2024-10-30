@@ -40,7 +40,10 @@ namespace DeviceSimulators.ViewModels
 		{
 			LoadCommand = new RelayCommand(Load);
 			AddSimulatorCommand = new RelayCommand(AddSimulator);
+			RemoveSimulatorCommand = new RelayCommand(RemoveSimulator);
+			RemoveAllCommand = new RelayCommand(RemoveAll);
 			ClosingCommand = new RelayCommand<CancelEventArgs>(Closing);
+
 
 			IsDevicesListEnable = false;
 
@@ -88,6 +91,8 @@ namespace DeviceSimulators.ViewModels
 				_deviceSimulatorsUserData);
 		}
 
+		#region Add/Remove simulator
+
 		private void AddSimulator()
 		{
 			DeviceFullData deviceFullData = DeviceFullData.Factory(SelectedDevice);
@@ -101,6 +106,34 @@ namespace DeviceSimulators.ViewModels
 
 			DeviceSimulators.UpdateDevices();
 		}
+
+		private void RemoveSimulator()
+		{
+			if (_devicesContainer.TypeToDevicesFullData.ContainsKey(SelectedDevice.DeviceType) == false)
+				return;
+
+			DeviceFullData deviceFullData =
+				_devicesContainer.TypeToDevicesFullData[SelectedDevice.DeviceType];
+			deviceFullData.Disconnect();
+
+			_devicesContainer.DevicesFullDataList.Remove(deviceFullData);
+			_devicesContainer.DevicesList.Remove(SelectedDevice);
+			_devicesContainer.TypeToDevicesFullData.Remove(SelectedDevice.DeviceType);
+
+			DeviceSimulators.Remove(deviceFullData.Device.DeviceType);
+		}
+
+		private void RemoveAll()
+		{
+			List<DeviceData> list = new List<DeviceData>(_devicesContainer.DevicesList);
+			foreach(DeviceData device in list)
+			{
+				SelectedDevice = device;
+				RemoveSimulator();
+			}
+		}
+
+		#endregion Add/Remove simulator
 
 		private void Load()
 		{
@@ -131,12 +164,16 @@ namespace DeviceSimulators.ViewModels
 				IsDevicesListEnable = true;
 		}
 
+		
+
 		#endregion Methods
 
 		#region Commands
 
 		public RelayCommand LoadCommand { get; private set; }
 		public RelayCommand AddSimulatorCommand { get; private set; }
+		public RelayCommand RemoveSimulatorCommand { get; private set; }
+		public RelayCommand RemoveAllCommand { get; private set; }
 
 
 		public RelayCommand<CancelEventArgs> ClosingCommand { get; private set; }

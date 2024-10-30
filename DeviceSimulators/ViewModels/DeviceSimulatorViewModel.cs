@@ -2,7 +2,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.Models;
 using DeviceHandler.Interfaces;
+using Entities.Enums;
 using Entities.Models;
+using LibUsbDotNet.DeviceNotify;
 using System.Collections.ObjectModel;
 
 namespace DeviceSimulators.ViewModels
@@ -12,6 +14,7 @@ namespace DeviceSimulators.ViewModels
 		#region Properties
 
 		public string DeviceName { get; set; }
+		public DeviceTypesEnum DeviceType { get; set; }
 
 		public IConnectionViewModel ConnectVM { get; set; }
 
@@ -25,6 +28,7 @@ namespace DeviceSimulators.ViewModels
 				return;
 
 			DeviceName = deviceData.Name;
+			DeviceType = deviceData.DeviceType;
 
 			ParametersList = new ObservableCollection<DeviceParameterData>();
 
