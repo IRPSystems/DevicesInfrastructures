@@ -8,6 +8,7 @@ using Entities.Enums;
 using Entities.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -97,7 +98,12 @@ namespace DeviceSimulators.ViewModels
 						ViewModelsList.Add(new TKSimulatorMainWindowViewModel(deviceFullData.Device));
 						break;
 
-					case DeviceTypesEnum.ScopeKeysight:
+					case DeviceTypesEnum.PowerSupplyKeysight:
+						ViewModelsList.Add(new PSKeysightSimulatorMainWindowViewModel(deviceFullData.Device));
+
+						break;
+
+					case DeviceTypesEnum.Yokogawa_WT1804E:
 						break;
 
 				}
@@ -114,6 +120,15 @@ namespace DeviceSimulators.ViewModels
 			}
 
 			return false;
+		}
+
+		public void Remove(DeviceTypesEnum deviceTypes)
+		{
+
+			DeviceSimulatorViewModel sim = 
+				ViewModelsList.ToList().Find((d) => d.DeviceType == deviceTypes);
+			if(sim != null) 
+				ViewModelsList.Remove(sim);
 		}
 
 

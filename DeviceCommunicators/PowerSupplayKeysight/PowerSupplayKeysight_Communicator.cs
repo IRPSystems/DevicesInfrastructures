@@ -4,6 +4,7 @@ using Services.Services;
 using System;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.Models;
+using Communication.Interfaces;
 
 namespace DeviceCommunicators.PowerSupplayKeysight
 {
@@ -18,7 +19,7 @@ namespace DeviceCommunicators.PowerSupplayKeysight
 
 
        
-        private string _iPaddres;
+        private string _ipAddres;
         private int _port;
 
 
@@ -26,9 +27,9 @@ namespace DeviceCommunicators.PowerSupplayKeysight
 
         #region Properties
 
-        private TcpStaticService TCPCommService
+        private ITcpStaticService TCPCommService
         {
-            get => CommService as TcpStaticService;
+            get => CommService as ITcpStaticService;
         }
 
         #endregion Properties
@@ -46,17 +47,22 @@ namespace DeviceCommunicators.PowerSupplayKeysight
 
 		public void Init(
             bool isUSBSimulator,
-            string iPaddres, 
-            int port)
+            string ipAddres, 
+            int port,
+            int rxPort,
+			int txPort)
 		{
 
 			try
 			{
-				_iPaddres = iPaddres;
+				_ipAddres = ipAddres;
 				_port = port;
 
-				CommService = new TcpStaticService(_iPaddres, _port);
-				CommService.Init(true);
+                if(!isUSBSimulator) 
+				    CommService = new TcpStaticService(_ipAddres, _port);
+                else
+					CommService = new TcpUdpSimulationService(rxPort, txPort, ipAddres);
+				CommService.Init(false);
 
 
 
@@ -139,7 +145,7 @@ namespace DeviceCommunicators.PowerSupplayKeysight
                 {
                     TCPCommService.Send(cmd + "\n");
 
-                    while ((DateTime.Now - startTime) < TimeSpan.FromSeconds(50))
+                    while ((DateTime.Now - startTime) < TimeSpan.FromMilliseconds(50))
                     {
                         TCPCommService.Read(out response);
                         if (!string.IsNullOrEmpty(response))

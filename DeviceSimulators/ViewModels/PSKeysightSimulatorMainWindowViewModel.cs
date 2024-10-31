@@ -12,15 +12,18 @@ using System.Linq;
 using DeviceCommunicators.PowerSupplayBK;
 using DeviceHandler.ViewModels;
 using DeviceCommunicators.Models;
+using DeviceCommunicators.PowerSupplayKeysight;
+using System.Net.Sockets;
+using System.Net;
 
 namespace DeviceSimulators.ViewModels
 {
-    public class PSBKSimulatorMainWindowViewModel : DeviceSimulatorViewModel
+    public class PSKeysightSimulatorMainWindowViewModel : DeviceSimulatorViewModel
 	{
 
 		#region Fields
 
-		private ISerialService _commService;
+		private ITcpStaticService _commService;
 
 		private System.Timers.Timer _timerChangeValue;
 		private Random _rand;
@@ -33,20 +36,24 @@ namespace DeviceSimulators.ViewModels
 
 		private BlockingCollection<byte[]> _recievedMessagesQueue;
 
-		private SerialConncetViewModel _serialConncetViewModel
+		private TcpConncetViewModel _tcpConncetViewModel
 		{
-			get => ConnectVM as SerialConncetViewModel;
+			get => ConnectVM as TcpConncetViewModel;
 		}
+
+		private string Address { get; set; }
 
 		#endregion Fields
 
 		#region Constructor
 
-		public PSBKSimulatorMainWindowViewModel(DeviceData deviceData) :
+		public PSKeysightSimulatorMainWindowViewModel(DeviceData deviceData) :
 			base(deviceData)
 		{
-			
-			ConnectVM = new SerialConncetViewModel(115200, "COM1", 13320, 13323);
+			GetIpAddress();
+
+
+			ConnectVM = new TcpConncetViewModel(5025, 21350, 21353, Address);
 			ConnectVM.ConnectEvent += Connect;
 			ConnectVM.DisconnectEvent += Disconnect;
 
@@ -64,7 +71,7 @@ namespace DeviceSimulators.ViewModels
 			_timerChangeValue.Elapsed += TimerChangeValueElapsedEventHandler;
 			//	_timerChangeValue.Start();
 
-			ParametersList.Add(new PowerSupplayBK_ParamData()
+			ParametersList.Add(new PowerSupplayKeysight_ParamData()
 			{
 				Command = "*IDN",
 				Name = "Identification"
@@ -76,11 +83,25 @@ namespace DeviceSimulators.ViewModels
 			HandleReceiveMessages();
 		}
 
+
+
 		#endregion Constructor
 
 		#region Methods
 
-		
+		private void GetIpAddress()
+		{
+			Address = null;
+			var host = Dns.GetHostEntry(Dns.GetHostName());
+			foreach (var ip in host.AddressList)
+			{
+				if (ip.AddressFamily == AddressFamily.InterNetwork)
+				{
+					Address = ip.ToString();
+				}
+			}
+		}
+
 
 		#region Set Values
 
@@ -90,29 +111,14 @@ namespace DeviceSimulators.ViewModels
 			int value = _rand.Next(0, 1000);
 			foreach (DeviceParameterData data in ParametersList)
 			{
-				if(!(data is PowerSupplayBK_ParamData deviceData))
+				if(!(data is PowerSupplayKeysight_ParamData deviceData))
 					continue;
 
 				if (_paramsNotToUpdateList.Contains(deviceData.Name))
 					continue;
 
-				if(deviceData.Command == "MEASure:SCALar:VOLTage:ALL:DC" ||
-					deviceData.Command == "VAPPLY:VOLTage:LEVel" ||
-					deviceData.Command == "APPLY:CURRent:LEVel" ||
-					deviceData.Command == "APPLY:OUTput")
-				{
-					string str = "";
-					for(int i = 0; i < 3; i++)
-					{
-						str += value++ + ",";
-					}
-
-					str = str.TrimEnd(',');
-
-					deviceData.Value = str;
-				}
-				else
-					deviceData.Value = (value++).ToString();
+				
+				deviceData.Value = (value++).ToString();
 
 
 
@@ -139,13 +145,14 @@ namespace DeviceSimulators.ViewModels
 
 		private void Connect()
 		{
-			if (_serialConncetViewModel.IsUdpSimulation == false)
+			if (_tcpConncetViewModel.IsUdpSimulation == false)
 			{
-				_commService = new SerialService(_serialConncetViewModel.SelectedCOM, _serialConncetViewModel.SelectedBaudrate);
+				_commService = new TcpStaticService(Address, _tcpConncetViewModel.Port);
+					//T(_tcpConncetViewModel.SelectedCOM, _tcpConncetViewModel.SelectedBaudrate);
 			}
 			else 
 			{
-				_commService = new SerialUdpSimulationService(_serialConncetViewModel.RxPort, _serialConncetViewModel.TxPort, _serialConncetViewModel.Address);
+				_commService = new TcpUdpSimulationService(_tcpConncetViewModel.RxPort, _tcpConncetViewModel.TxPort, _tcpConncetViewModel.Address);
 			}
 
 
@@ -153,7 +160,6 @@ namespace DeviceSimulators.ViewModels
 
 			_commService.Init(true);
 
-			_commService.MessageReceivedEvent += MessageReceivedEventHandler;
 
 			ConnectVM.IsConnectButtonEnabled = false;
 			ConnectVM.IsDisconnectButtonEnabled = true;
@@ -174,17 +180,6 @@ namespace DeviceSimulators.ViewModels
 
 		#region Receive
 
-		private void MessageReceivedEventHandler(byte[] buffer)
-		{
-			try
-			{
-				_recievedMessagesQueue.Add(buffer, _cancellationToken);
-			}
-			catch (OperationCanceledException)
-			{
-
-			}
-		}
 
 		private void HandleReceiveMessages()
 		{
@@ -235,8 +230,8 @@ namespace DeviceSimulators.ViewModels
 		private void HandleGetValue(string message)
 		{
 			string msg = message.Trim('?');
-			PowerSupplayBK_ParamData data = ParametersList.ToList().Find((p) => (p as PowerSupplayBK_ParamData).Command == msg)
-				as PowerSupplayBK_ParamData;
+			PowerSupplayKeysight_ParamData data = ParametersList.ToList().Find((p) => (p as PowerSupplayKeysight_ParamData).Command == msg)
+				as PowerSupplayKeysight_ParamData;
 			if (data == null)
 				return;
 
@@ -251,8 +246,8 @@ namespace DeviceSimulators.ViewModels
 			string[] splitMessage = message.Split(" ");
 
 			string command = splitMessage[0];
-			PowerSupplayBK_ParamData data = ParametersList.ToList().Find((p) => (p as PowerSupplayBK_ParamData).Command.Trim() == command)
-								as PowerSupplayBK_ParamData;
+			PowerSupplayKeysight_ParamData data = ParametersList.ToList().Find((p) => (p as PowerSupplayKeysight_ParamData).Command.Trim() == command)
+								as PowerSupplayKeysight_ParamData;
 			if (data == null)
 				return;
 

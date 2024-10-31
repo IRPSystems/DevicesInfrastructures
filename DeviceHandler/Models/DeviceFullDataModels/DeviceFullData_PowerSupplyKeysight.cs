@@ -57,7 +57,9 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			(DeviceCommunicator as PowerSupplayKeysight_Communicator).Init(
 				false,
 				(ConnectionViewModel as TcpConncetViewModel).Address,
-				(ConnectionViewModel as TcpConncetViewModel).Port);
+				(ConnectionViewModel as TcpConncetViewModel).Port,
+				(ConnectionViewModel as TcpConncetViewModel).RxPort,
+				(ConnectionViewModel as TcpConncetViewModel).TxPort);
 		}
 
 		protected override void InitSimulationCommunicator()
@@ -65,7 +67,9 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			(DeviceCommunicator as PowerSupplayKeysight_Communicator).Init(
 				true,
 				(ConnectionViewModel as TcpConncetViewModel).Address,
-				(ConnectionViewModel as TcpConncetViewModel).Port);
+				(ConnectionViewModel as TcpConncetViewModel).Port,
+				(ConnectionViewModel as TcpConncetViewModel).RxPort,
+				(ConnectionViewModel as TcpConncetViewModel).TxPort);
 		}
 
 		protected override bool IsSumulation()

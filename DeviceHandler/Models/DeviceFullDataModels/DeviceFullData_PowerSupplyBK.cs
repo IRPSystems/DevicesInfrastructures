@@ -41,11 +41,13 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as DeviceParameterData).Name == "MEASure voltage in supply");
-
 			CheckCommunication = new CheckCommunicationService(
 				this,
-				data,
+				new PowerSupplayBK_ParamData()
+				{
+					Command = "*IDN",
+					Name = "Identification",
+				},
 				"PSBK");
 		}
 

@@ -1,7 +1,9 @@
 ﻿
 using CommunityToolkit.Mvvm.ComponentModel;
+using Entities.Enums;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace DeviceSimulators.Models
@@ -11,6 +13,12 @@ namespace DeviceSimulators.Models
 		
 		public string DevicesFilesDir { get; set; }
 
+		public List<DeviceTypesEnum> DeviceTypesList { get; set; }
+
+		public DeviceSimulatorsUserData() 
+		{
+			DeviceTypesList = new List<DeviceTypesEnum>();
+		}
 
 
 		public static DeviceSimulatorsUserData LoadDeviceSimulatorsUserData(string dirName)

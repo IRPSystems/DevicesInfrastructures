@@ -3,8 +3,10 @@ using Communication.Interfaces;
 using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
+using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using Entities.Models;
+using Newtonsoft.Json.Linq;
 using Services.Services;
 using System;
 using System.Collections.Concurrent;
@@ -20,16 +22,20 @@ namespace DeviceCommunicators.Dyno
 
 		public ConcurrentDictionary<int, string> _dynoErrorToDescription;
 
-
+		private ConcurrentDictionary<uint, BlockingCollection<CommunicatorIOData>> _idArrayToData;
 
 		private const int _maxNumOfMessages = 500;
+
+
+		private const int _getResponseRepeats = 5;
+		public const int GetResponsesTimeout = 50;
 
 		private BlockingCollection<byte[]> _buffersPool;
 
 		private System.Timers.Timer _poolBuildTimer;
 
-		private bool _isTimeout;
-		private System.Timers.Timer _timeoutTimer;
+		//private bool _isTimeout;
+		//private System.Timers.Timer _timeoutTimer;
 
 
 		private List<TimeSpan> _commTimeList;
@@ -60,6 +66,8 @@ namespace DeviceCommunicators.Dyno
 			_poolBuildTimer.Elapsed += PoolBuildTimerElapsed;
 
 			_commTimeList = new List<TimeSpan>();
+
+			_idArrayToData = new ConcurrentDictionary<uint, BlockingCollection<CommunicatorIOData>>();
 		}
 
 		#endregion Constructor
@@ -126,11 +134,12 @@ namespace DeviceCommunicators.Dyno
 				CommService = new CanUdpSimulationService(baudrate, 0x600 + _nodeId, 0x580 + _nodeId, rxPort, txPort, address, 0x580 + _nodeId);
 			}
 
-			CommService.Init(false);
+			CommService.Init(true);
 			CommService.Name = "Dyno_Communicator";
+			CanService.MessageReceivedEvent += CanService_MessageReceivedEvent;
 
-			_timeoutTimer = new System.Timers.Timer(2000);
-			_timeoutTimer.Elapsed += TimoutElapsedEventHandler;
+			//_timeoutTimer = new System.Timers.Timer(2000);
+			//_timeoutTimer.Elapsed += TimoutElapsedEventHandler;
 
 			_poolBuildTimer.Start();
 
@@ -144,7 +153,7 @@ namespace DeviceCommunicators.Dyno
 		{
 			LoggerService.Inforamtion(this, "Disposing");
 
-			_isTimeout = true;
+			//_isTimeout = true;
 
 			if (_cancellationTokenSource != null)
 				_cancellationTokenSource.Cancel();
@@ -152,8 +161,8 @@ namespace DeviceCommunicators.Dyno
 			if (_poolBuildTimer != null)
 				_poolBuildTimer.Stop();
 
-			if (_timeoutTimer != null)
-				_timeoutTimer.Stop();
+			//if (_timeoutTimer != null)
+			//	_timeoutTimer.Stop();
 
 			FireConnectionEvent();
 
@@ -175,82 +184,153 @@ namespace DeviceCommunicators.Dyno
 
 
 
-		private void HandleSetParams(CommunicatorIOData data)
+		//private void HandleSetParams(CommunicatorIOData data)
+		//{
+
+
+		//	if (!(data.Parameter is Dyno_ParamData dynoParam))
+		//		return;
+
+		//	LoggerService.Debug(this,
+		//		"Setting parameter - Nane: " + dynoParam +
+		//		" - Value: " + data.Value);
+
+		//	int uniqueID = Dyno_ParamData.BaseUniqueParamID - dynoParam.Index;
+		//	uniqueID = uniqueID << 8;
+		//	int uniqueParamID =
+		//		Dyno_ParamData.SetFirstByte +
+		//		uniqueID;
+
+
+		//	double value = data.Value;
+		//	value = value * (1 / dynoParam.Coefficient);
+
+		//	if (value < 0)
+		//	{
+		//		value = Math.Pow(2, 32) + value;
+		//	}
+
+
+		//	byte[] buffer = _buffersPool.Take(_cancellationToken);
+
+		//	int index = 0;
+
+		//	SetDataToBuffer(uniqueParamID, buffer, index, 3);
+		//	index += 3;
+
+		//	buffer[index] = dynoParam.SubIndex;
+		//	index++;
+
+
+		//	buffer[index++] = Convert.ToByte(value % 256);
+		//	value = (value - value % 256) / 256;
+		//	buffer[index++] = Convert.ToByte(value % 256);
+		//	value = (value - value % 256) / 256;
+		//	buffer[index++] = Convert.ToByte(value % 256);
+		//	value = (value - value % 256) / 256;
+		//	buffer[index++] = Convert.ToByte(value);
+
+
+
+		//	if (_idArrayToData.ContainsKey((uint)uniqueParamID) == false)
+		//		_idArrayToData[(uint)uniqueParamID] = new BlockingCollection<CommunicatorIOData>();
+
+		//	data.SendCounter++;
+		//	data.SendBuffer = buffer;
+		//	data.SendId = (uint)uniqueID;
+		//	data.TimeoutEvent += Data_TimeoutEvent;
+		//	_idArrayToData[(uint)uniqueID].Add(data);
+
+
+
+		//	data.SendTimoutTimer.Start();
+
+
+		//	CanService.Send(buffer, 0x600 + _nodeId, false);
+
+
+
+		//	//WaitForResponse(
+		//	//	dynoParam,
+		//	//	data.Callback,
+		//	//	true);
+
+
+
+		//}
+
+		
+
+		//private void HandleGetParams(CommunicatorIOData data)
+		//{
+
+
+		//	if (!(data.Parameter is Dyno_ParamData dynoParam))
+		//		return;
+
+		//	LoggerService.Debug(this,
+		//		"Getting parameter - Nane: " + dynoParam);
+
+		//	int uniqueID = Dyno_ParamData.BaseUniqueParamID - dynoParam.Index;
+		//	uniqueID = uniqueID << 8;
+		//	int uniqueParamID =
+		//		Dyno_ParamData.GetFirstByte +
+		//		uniqueID;
+
+		//	byte[] buffer = _buffersPool.Take(_cancellationToken);
+
+		//	int index = 0;
+
+		//	SetDataToBuffer(uniqueParamID, buffer, index, 3);
+		//	index += 3;
+
+		//	buffer[index] = dynoParam.SubIndex;
+		//	index++;
+
+		//	if (_idArrayToData.ContainsKey((uint)uniqueParamID) == false)
+		//		_idArrayToData[(uint)uniqueParamID] = new BlockingCollection<CommunicatorIOData>();
+
+		//	data.SendCounter++;
+		//	data.SendBuffer = buffer;
+		//	data.SendId = (uint)uniqueID;
+		//	data.TimeoutEvent += Data_TimeoutEvent;
+		//	_idArrayToData[(uint)uniqueID].Add(data);
+
+
+
+		//	data.SendTimoutTimer.Start();
+
+		//	CanService.Send(buffer, 0x600 + _nodeId, false);
+
+
+
+
+		//	//WaitForResponse(
+		//	//	dynoParam,
+		//	//	data.Callback,
+		//	//	false);
+
+
+		//}
+
+		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
 		{
-
-
 			if (!(data.Parameter is Dyno_ParamData dynoParam))
-				return;
-
-			LoggerService.Debug(this,
-				"Setting parameter - Nane: " + dynoParam +
-				" - Value: " + data.Value);
-
-			int uniqueID = Dyno_ParamData.BaseUniqueParamID - dynoParam.Index;
-			int val = uniqueID << 8;
-			int uniqueParamID =
-				Dyno_ParamData.SetFirstByte +
-				val;
-
-
-			double value = data.Value;
-			value = value * (1 / dynoParam.Coefficient);
-
-			if (value < 0)
-			{
-				value = Math.Pow(2, 32) + value;
-			}
-
-
-			byte[] buffer = _buffersPool.Take(_cancellationToken);
-
-			int index = 0;
-
-			SetDataToBuffer(uniqueParamID, buffer, index, 3);
-			index += 3;
-
-			buffer[index] = dynoParam.SubIndex;
-			index++;
-
-
-			buffer[index++] = Convert.ToByte(value % 256);
-			value = (value - value % 256) / 256;
-			buffer[index++] = Convert.ToByte(value % 256);
-			value = (value - value % 256) / 256;
-			buffer[index++] = Convert.ToByte(value % 256);
-			value = (value - value % 256) / 256;
-			buffer[index++] = Convert.ToByte(value);
-
-			CanService.Send(buffer, 0x600 + _nodeId, false);
-
-
-
-			WaitForResponse(
-				dynoParam,
-				data.Callback,
-				true);
-
-
-
-		}
-
-
-
-		private void HandleGetParams(CommunicatorIOData data)
-		{
-
-
-			if (!(data.Parameter is Dyno_ParamData dynoParam))
-				return;
+				return CommunicatorResultEnum.InvalidUniqueId;
 
 			LoggerService.Debug(this,
 				"Getting parameter - Nane: " + dynoParam);
 
 			int uniqueID = Dyno_ParamData.BaseUniqueParamID - dynoParam.Index;
-			int val = uniqueID << 8;
+
+			int firstByte = Dyno_ParamData.GetFirstByte;
+			if(data.IsSet)
+				firstByte = Dyno_ParamData.SetFirstByte;
+
+			uniqueID = uniqueID << 8;
 			int uniqueParamID =
-				Dyno_ParamData.GetFirstByte +
-				val;
+				firstByte +
+				uniqueID;
 
 			byte[] buffer = _buffersPool.Take(_cancellationToken);
 
@@ -262,121 +342,206 @@ namespace DeviceCommunicators.Dyno
 			buffer[index] = dynoParam.SubIndex;
 			index++;
 
+			if (data.IsSet)
+			{
+				double value = data.Value;
+				value = value * (1 / dynoParam.Coefficient);
+
+				if (value < 0)
+				{
+					value = Math.Pow(2, 32) + value;
+				}
+
+				buffer[index++] = Convert.ToByte(value % 256);
+				value = (value - value % 256) / 256;
+				buffer[index++] = Convert.ToByte(value % 256);
+				value = (value - value % 256) / 256;
+				buffer[index++] = Convert.ToByte(value % 256);
+				value = (value - value % 256) / 256;
+				buffer[index++] = Convert.ToByte(value);
+			}
+
+			if (_idArrayToData.ContainsKey((uint)uniqueID) == false)
+				_idArrayToData[(uint)uniqueID] = new BlockingCollection<CommunicatorIOData>();
+
+			data.SendCounter++;
+			data.SendBuffer = buffer;
+			data.SendId = (uint)uniqueID;
+			data.TimeoutEvent += Data_TimeoutEvent;
+			_idArrayToData[(uint)uniqueID].Add(data);
+
+
+
+			data.SendTimoutTimer.Start();
 
 			CanService.Send(buffer, 0x600 + _nodeId, false);
 
-
-
-
-			WaitForResponse(
-				dynoParam,
-				data.Callback,
-				false);
-
-
-		}
-		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
-		{
-
-			if (data.IsSet)
-			{
-				HandleSetParams(data);
-			}
-			else
-			{
-				HandleGetParams(data);
-			}
 
 			return CommunicatorResultEnum.OK;
 
 		}
 
+
+		private void Data_TimeoutEvent(CommunicatorIOData data)
+		{
+			data.SendTimoutTimer.Stop();
+			if (_idArrayToData == null || _idArrayToData.Count == 0)
+				return;
+
+			try
+			{
+				data = _idArrayToData[data.SendId].Take(_cancellationToken);
+			}
+			catch (OperationCanceledException)
+			{
+				return;
+			}
+
+
+
+			// If retrys eanded, return error
+			if (data.SendCounter > _getResponseRepeats)
+			{
+				data.TimeoutEvent -= Data_TimeoutEvent;
+				data.Callback?.Invoke(data.Parameter, CommunicatorResultEnum.NoResponse, "");
+				return;
+			}
+
+			Retry(data);
+		}
+
+		private void Retry(CommunicatorIOData data)
+		{
+			//LoggerService.Inforamtion(this, $"Retry {data.SendCounter}");
+
+			data.SendCounter++;
+			_idArrayToData[data.SendId].Add(data);
+			data.SendTimoutTimer.Start();
+			CommService.Send(data.SendBuffer);
+		}
+
 		#region Response
 
+		private void CanService_MessageReceivedEvent(byte[] buffer)
+		{
+			try
+			{
+#if _SAVE_TIME
+				DateTime start = DateTime.Now;
+				//if(_prevStart.Year != 1)
+				//{
+				//	_commTimeList.Add((data.SendStartTime - _prevStart, data.Parameter.Name, CommunicatorResultEnum.None));
+				//}
+
+				//_prevStart = data.SendStartTime;
+#endif
+				int uniqueId = (int)GetDataFromBuffer(buffer, 1, 2);
+
+				uint idNum = (uint)(Dyno_ParamData.BaseUniqueParamID - uniqueId);
+				idNum = (uint)(uniqueId << 8);
+				//idNum += buffer[3];
+
+				if (_idArrayToData.ContainsKey(idNum) == false || _idArrayToData[idNum].Count == 0)
+				{
+					//LoggerService.Inforamtion(this, $"ID of received message not found: {idNum}");
+					return;
+				}
+
+				CommunicatorIOData data = null;
+				try
+				{
+					data = _idArrayToData[idNum].Take(_cancellationToken);
+				}
+				catch (OperationCanceledException)
+				{
+					return;
+				}
+
+				data.SendTimoutTimer.Stop();
+
+				string errorDescription = string.Empty;
+				CommunicatorResultEnum isSuccess = HandleBuffer(
+					buffer,
+					data.Parameter as Dyno_ParamData,
+					data.Callback,
+					data.IsSet);
+
+#if _SAVE_TIME
+			_commTimeList.Add((DateTime.Now - start, data.Parameter.Name, isSuccess));
+#endif
+
+				if (isSuccess == CommunicatorResultEnum.OK)
+				{
+					data.TimeoutEvent -= Data_TimeoutEvent;
+					data.Callback?.Invoke(data.Parameter, isSuccess, errorDescription);
+					return;
+				}
+
+				// If retrys eanded, return error
+				if (data.SendCounter > _getResponseRepeats)
+				{
+					data.TimeoutEvent -= Data_TimeoutEvent;
+					data.Callback?.Invoke(data.Parameter, isSuccess, errorDescription);
+					return;
+				}
+
+				Retry(data);
+			}
+			catch (Exception ex)
+			{
+				LoggerService.Error(this, "Failed to handle a received message", ex);
+			}
+		}
+
+
+
+
 		private object _lockObj = new object();
-		private void WaitForResponse(
+		private CommunicatorResultEnum HandleBuffer(
+			byte[] readBuffer,
 			Dyno_ParamData dynoParam,
 			Action<DeviceParameterData, CommunicatorResultEnum, string> callback,
 			bool isSet,
 			int setValue = 0)
 		{
-			lock (_lockObj)
+			CommunicatorResultEnum response = CommunicatorResultEnum.OK;
+
+			if (readBuffer != null)
 			{
-
-				_isTimeout = false;
-				_timeoutTimer.Start();
-
-				byte[] readBuffer = null;
-				uint readNode = 0;
-
-				while (readBuffer == null)
+				byte commandByte = readBuffer[0];
+				commandByte = (byte)(commandByte >> 4);
+				switch (commandByte)
 				{
-					if (_isTimeout)
+					case 0x4:
+						response = GetResponse(
+							dynoParam,
+							readBuffer);
 						break;
 
-
-					CanService.Read(out readBuffer, out readNode);
-
-
-
-					if (readBuffer != null)
-					{
-						if (readNode != (_nodeId + 0x580))
-						{
-							readBuffer = null;
-							continue;
-						}
-
-
+					case 0x6:
+						response = SetResponse(
+							dynoParam,
+							readBuffer);
 						break;
-					}
 
-					System.Threading.Thread.Sleep(1);
-
+					case 0x8:
+						response = ErrorResponse(
+							dynoParam,
+							readBuffer);
+						break;
 				}
-
-
-
-				if (readBuffer != null)
-				{
-					byte commandByte = readBuffer[0];
-					commandByte = (byte)(commandByte >> 4);
-					switch (commandByte)
-					{
-						case 0x4:
-							GetResponse(
-								dynoParam,
-								readBuffer,
-								callback);
-							break;
-
-						case 0x6:
-							SetResponse(
-								dynoParam,
-								readBuffer,
-								callback);
-							break;
-
-						case 0x8:
-							ErrorResponse(
-								dynoParam,
-								readBuffer,
-								callback);
-							break;
-					}
-
-				}
-
-				if (readBuffer == null || _isTimeout)
-				{
-					callback?.Invoke(dynoParam, CommunicatorResultEnum.NoResponse, null);
-				}
-
-				_timeoutTimer.Stop();
-				_isTimeout = false;
-
 
 			}
+
+			if (readBuffer == null)
+			{
+				return CommunicatorResultEnum.NoResponse;
+			}
+
+			//_timeoutTimer.Stop();
+			//_isTimeout = false;
+
+			return CommunicatorResultEnum.OK;
 		}
 
 		private bool IsUniqueIdOk(
@@ -406,16 +571,14 @@ namespace DeviceCommunicators.Dyno
 			return true;
 		}
 
-		private void ErrorResponse(
+		private CommunicatorResultEnum ErrorResponse(
 			Dyno_ParamData dynoParam,
-			byte[] readBuffer,
-			Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
+			byte[] readBuffer)
 		{
 			bool isUniqueIdOk = IsUniqueIdOk(dynoParam, readBuffer, true);
 			if (!isUniqueIdOk)
 			{
-				callback?.Invoke(dynoParam, CommunicatorResultEnum.InvalidUniqueId, null);
-				return;
+				return CommunicatorResultEnum.InvalidUniqueId;
 			}
 
 			int errCode = (int)GetDataFromBuffer(readBuffer, 4, 4);
@@ -428,13 +591,12 @@ namespace DeviceCommunicators.Dyno
 				"Error response - Nane: " + dynoParam +
 				" - " + errDescription);
 
-			callback?.Invoke(dynoParam, CommunicatorResultEnum.Error, errDescription);
+			return CommunicatorResultEnum.Error;
 		}
 
-		private void SetResponse(
+		private CommunicatorResultEnum SetResponse(
 			Dyno_ParamData dynoParam,
-			byte[] readBuffer,
-			Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
+			byte[] readBuffer)
 		{
 			LoggerService.Debug(this,
 				"Response for set - Nane: " + dynoParam);
@@ -442,17 +604,15 @@ namespace DeviceCommunicators.Dyno
 			bool isUniqueIdOk = IsUniqueIdOk(dynoParam, readBuffer);
 			if (!isUniqueIdOk)
 			{
-				callback?.Invoke(dynoParam, CommunicatorResultEnum.InvalidUniqueId, null);
-				return;
+				return CommunicatorResultEnum.InvalidUniqueId;
 			}
 
-			callback?.Invoke(dynoParam, CommunicatorResultEnum.OK, null);
+			return CommunicatorResultEnum.OK;
 		}
 
-		private void GetResponse(
+		private CommunicatorResultEnum GetResponse(
 			Dyno_ParamData dynoParam,
-			byte[] readBuffer,
-			Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
+			byte[] readBuffer)
 		{
 			LoggerService.Debug(this,
 				"Response for get - Nane: " + dynoParam);
@@ -460,8 +620,7 @@ namespace DeviceCommunicators.Dyno
 			bool isUniqueIdOk = IsUniqueIdOk(dynoParam, readBuffer);
 			if (!isUniqueIdOk)
 			{
-				callback?.Invoke(dynoParam, CommunicatorResultEnum.InvalidUniqueId, null);
-				return;
+				return CommunicatorResultEnum.InvalidUniqueId;
 			}
 
 			double value = (int)GetDataFromBuffer(readBuffer, 4, 4);
@@ -487,7 +646,7 @@ namespace DeviceCommunicators.Dyno
 			}
 
 			dynoParam.Value = value / (1 / dynoParam.Coefficient);
-			callback?.Invoke(dynoParam, CommunicatorResultEnum.OK, null);
+			return CommunicatorResultEnum.OK;
 		}
 
 		#endregion Response
@@ -518,10 +677,10 @@ namespace DeviceCommunicators.Dyno
 			return l;
 		}
 
-		private void TimoutElapsedEventHandler(object sender, ElapsedEventArgs e)
-		{
-			_isTimeout = true;
-		}
+		//private void TimoutElapsedEventHandler(object sender, ElapsedEventArgs e)
+		//{
+		//	_isTimeout = true;
+		//}
 
 
 		public static async Task WaitWhile(Func<bool> condition, int frequency = 25, int timeout = -1)
