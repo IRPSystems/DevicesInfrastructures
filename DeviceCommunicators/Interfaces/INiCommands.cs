@@ -10,19 +10,7 @@ namespace DeviceCommunicators.Interfaces
 
 
 
-         string _deviceName { get; set; } // Replace with the actual device name
-         string _Port_Io { get; set; }
-         double _Min_level_voltage { get; set; }
-         double _Max_level_voltage { get; set; }
-
-
-
-
-        // Parameter to test 
-         bool[] Digital_port_input { get; set; } 
-         double[] Analog_port_input { get; set; } 
-         int[] Digital_port_output { get; set; } 
-         double[] Analog_port_output { get; set; } 
+         
 
 
         void DigitalIO_output(int port , int portLine, int State);

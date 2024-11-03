@@ -109,13 +109,13 @@ namespace DeviceCommunicators.NI_6002
 				//need add to send data
 				niParamData.Value = value;
 				var ret = Send_command(niParamData);
-				if(ret == null)
-				{
-					callback?.Invoke(param, CommunicatorResultEnum.Error, null);
-					return;
-				}
+				//if(ret == null)
+				//{
+				//	callback?.Invoke(param, CommunicatorResultEnum.Error, null);
+				//	return;
+				//}
 
-				if ((bool)ret)
+				if (ret != null)
 					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 				else
 					callback?.Invoke(param, CommunicatorResultEnum.Error, null);
