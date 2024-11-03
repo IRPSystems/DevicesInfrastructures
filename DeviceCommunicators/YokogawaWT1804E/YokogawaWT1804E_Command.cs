@@ -2,6 +2,8 @@
 using Services.Services;
 using System;
 using System.Text;
+using System.Windows.Documents;
+using System.Windows;
 using TmctlAPINet;
 
 namespace DeviceCommunicators.YokogawaWT1804E
@@ -38,10 +40,10 @@ namespace DeviceCommunicators.YokogawaWT1804E
                 if(ret == 0)
                     IsInitialized = true;
 
-                send("COMMunicate:REMote ON");
-                send(":*IDN?");
-                send(":NUMERIC:NORMAL:NUMBER 1");
-                send(":NUMERIC:FORMAT ASCII");
+                Send("COMMunicate:REMote ON");
+                Send(":*IDN?");
+                Send(":NUMERIC:NORMAL:NUMBER 1");
+                Send(":NUMERIC:FORMAT ASCII");
 
             }
             catch (Exception ex)
@@ -60,7 +62,7 @@ namespace DeviceCommunicators.YokogawaWT1804E
 		}
 
 
-        public bool send(string data)
+        public bool Send(string data)
         {
             int ret = _yokogawa.Send(device_index, data);
             //if (ret != 0)
@@ -82,11 +84,16 @@ namespace DeviceCommunicators.YokogawaWT1804E
 			//	return null;
 
 			return temp.ToString();
-        }
+		}
 
+		public int Receive(out StringBuilder temp)
+		{
+			int rln = 1000;
+			temp = new StringBuilder(41000);
+			int ret = _yokogawa.Receive(0, temp, 1000, ref rln);
 
-
-
+            return ret;
+		}
 
 
 

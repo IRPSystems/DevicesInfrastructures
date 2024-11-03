@@ -29,7 +29,7 @@ namespace DeviceCommunicators.YokogawaWT1804E
 
         Stopwatch time = new Stopwatch();
 
-        private TMCTL _connct_to_yoko = new TMCTL();
+       // private TMCTL _connct_to_yoko = new TMCTL();
 		private StringBuilder _temp = new StringBuilder(1000);
 		private YokogawaWT1804E_ParamData _data = new YokogawaWT1804E_ParamData();
 		private string _send_to_yoko = ":NUM:NUM 28 ;ITEM1   URMS,1; ITEM2    URMS,2;ITEM3    URMS,3;ITEM4    udc,4;" +
@@ -135,8 +135,6 @@ namespace DeviceCommunicators.YokogawaWT1804E
                 if (isUdpSimulation == false)
                 {
                     _yokogawa_communicator = new YokogawaWT1804E_Command();
-
-					_timer.Start();
                 }
                 else
                 {
@@ -145,9 +143,11 @@ namespace DeviceCommunicators.YokogawaWT1804E
                 }
 
                 _yokogawa_communicator.Init(ip);
-                _connct_to_yoko.Send(0, _send_to_yoko);
+				_yokogawa_communicator.Send(_send_to_yoko);
                 InitBase();
-            }
+
+				_timer.Start();
+			}
             catch (Exception ex)
             {
                 LoggerService.Error(this, "Failed to init the WT1804E", ex);
@@ -196,7 +196,7 @@ namespace DeviceCommunicators.YokogawaWT1804E
                 if (!(param is YokogawaWT1804E_ParamData Yoko))
                     return;
 
-                bool isOK = _yokogawa_communicator.send(Yoko.Command + " " + Yoko.data);
+                bool isOK = _yokogawa_communicator.Send(Yoko.Command + " " + value);
                 if (isOK)
                 {
                    callback?.Invoke(param, CommunicatorResultEnum.OK, null);
@@ -219,8 +219,9 @@ namespace DeviceCommunicators.YokogawaWT1804E
                 if (!(param is YokogawaWT1804E_ParamData yoko))
                     return;
 
+                if(yoko.Name != "Controller Efficiency") { }
 
-                bool isOK = Read_command(yoko);
+				bool isOK = Read_command(yoko);
 
 
              //   Thread.Sleep(10);
@@ -298,8 +299,8 @@ namespace DeviceCommunicators.YokogawaWT1804E
 				int ret = -1;
 				for (int i = 0; i < 3; i++)
                 {
-                    _connct_to_yoko.Send(0, "NUMeric:NORMal:VALue?");
-                    ret = _connct_to_yoko.Receive(0, _temp, 1000, ref rln);
+					_yokogawa_communicator.Send("NUMeric:NORMal:VALue?");
+                    ret = _yokogawa_communicator.Receive(out _temp);
                     if (ret != 1)
                         break;
                     System.Threading.Thread.Sleep(1);
@@ -313,9 +314,10 @@ namespace DeviceCommunicators.YokogawaWT1804E
                         param.value = null;
                     }
                 }
-                else
-                  
-                parsing_to_parameters(_temp);
+                else                  
+                    parsing_to_parameters(_temp);
+
+
                 end_time= time.ElapsedMilliseconds;
 
                 sum_time = end_time - start_time;
