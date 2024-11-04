@@ -1,11 +1,5 @@
 ﻿using DeviceCommunicators.Interfaces;
 using System;
-using DeviceCommunicators.Enums;
-using System.Collections.Generic;
-using Entities.Models;
-using NationalInstruments.DAQmx;
-using System.Threading;
-using System.Windows;
 
 namespace DeviceCommunicators.NI_6002
 {
@@ -21,10 +15,8 @@ namespace DeviceCommunicators.NI_6002
 
 
         // Parameter to test 
-        public bool[] Digital_port_input { get; set; } = new bool[8];
-        public double[] Analog_port_input { get; set; } = new double[8];
-        public int[] Digital_port_output { get; set; } = new int[8];
-        public double[] Analog_port_output { get; set; } = new double[8];
+        public bool[] Digital_port { get; set; } = new bool[8];
+        public double[] Analog_port { get; set; } = new double[8];
 
 
 
@@ -45,7 +37,7 @@ namespace DeviceCommunicators.NI_6002
 
             for (int i = (random_number-1); i < 7;i=i+random_number) 
             {
-                Digital_port_input[i] = true;
+                Digital_port[i] = true;
             }
 
 
@@ -53,7 +45,7 @@ namespace DeviceCommunicators.NI_6002
 
             for (int i = 1; i < 7; i++)
             {
-                Analog_port_input[i] = random_number+i;
+                Analog_port[i] = random_number+i;
             }
 
 
@@ -68,11 +60,11 @@ namespace DeviceCommunicators.NI_6002
         {
             if (State > 0)
             {
-                Digital_port_output[(int)output] = Convert.ToInt32(Math.Pow(2, (int)output));
+                Digital_port[(int)output] = true;
             }
             else
             {
-                Digital_port_output[(int)output] = 0;
+                Digital_port[(int)output] = false;
             }
          
             
@@ -88,14 +80,14 @@ namespace DeviceCommunicators.NI_6002
         public string DigitalIO_input(int input, int line)
         {
 
-           if (Digital_port_input[(int)input] ==true)
+           if (Digital_port[(int)input] == true)
             {
                
-                return "0X"+((int)Math.Pow(2, (int)input)).ToString("X");
+                return "1";
             }
             else
             {
-                return Convert.ToString(0);
+                return "0";
             }
            
         }
@@ -104,19 +96,19 @@ namespace DeviceCommunicators.NI_6002
        public void Anolog_output(int  output, double volt)
         {
 
-            Analog_port_output[(int)output] = volt;
+            Analog_port[(int)output] = volt;
            
         }
         
         public string Anolog_input(int input)
         {
-            return Convert.ToString(Analog_port_input[(int)input]);
+            return Convert.ToString(Analog_port[(int)input]);
           
         }
 
         public string Anolog_input_current(int input, double shuntResistor)
         {
-            return Convert.ToString(Analog_port_input[(int)input]);
+            return Convert.ToString(Analog_port[(int)input]);
         }
 
         public string Digital_Counter()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace DeviceCommunicators.Interfaces
 {
@@ -12,8 +13,10 @@ namespace DeviceCommunicators.Interfaces
 
 		void Init(string IP);
         void Dispose();
-        bool send(string data);
+        bool Send(string data);
         string Read_data();
-    }
+        int Receive(out StringBuilder temp);
+
+	}
 
 }
