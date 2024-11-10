@@ -166,17 +166,20 @@ namespace DeviceCommunicators.NI_6002
                 double sample;
                 double tempMinValueNumeric = 0;
                 double tempMaxValueNumeric = 0.020;
-                double tempSamplesToReadNumeric = 1000;
+                double tempSamplesToReadNumeric = 500;
                 double currentSensorMeasGain = 2000;
 
                 if (shuntResistor == 0)
                     shuntResistor = 17.8;
-                Thread.Sleep(1000);
+
+                Thread.Sleep(50);
 
                 // Create a new task
                 myTask = new Task();
 
                 string commannd_to_device = "";
+
+                //_deviceName = "Dev2";
 
                 LoggerService.Error(this, "Analog input current: Port" + port.ToString() + " shuntresistor: " + shuntResistor.ToString());
 
@@ -230,8 +233,8 @@ namespace DeviceCommunicators.NI_6002
                 myCounterReader = new CounterSingleChannelReader(myTask.Stream);
 
                 myTask.Start();
-                Timer_counterTryRead.Interval = 10000;
-                Timer_revolutions.Interval = 2000000;
+                Timer_counterTryRead.Interval = 2000;
+                Timer_revolutions.Interval = 20000000;
 
                 Timer_counterTryRead.Start();
                 Timer_revolutions.Start();
@@ -273,7 +276,6 @@ namespace DeviceCommunicators.NI_6002
             try
             {
                 countReading = myCounterReader.ReadSingleSampleUInt32();
-
                 //debug
                 //countReading++;
             }
@@ -289,6 +291,7 @@ namespace DeviceCommunicators.NI_6002
         private void CalculateRevolutions(object sender, MicroTimerEventArgs e)
         {
             uint _countReading = countReading;
+            double time = stopwatch.Elapsed.TotalMilliseconds;
             revoultionsTimerElapsed = stopwatch.Elapsed.TotalMilliseconds / 1000;
             rpm = (_countReading * 60) / revoultionsTimerElapsed;
 
