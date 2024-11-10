@@ -308,7 +308,7 @@ namespace DeviceHandler.Services
 
 				if (result != CommunicatorResultEnum.OK)
 				{
-					LoggerService.Inforamtion(this, $"{Name} - Setting NaN");
+					//LoggerService.Inforamtion(this, $"{Name} - Setting NaN");
 					param.Value = double.NaN;
 				}
 
