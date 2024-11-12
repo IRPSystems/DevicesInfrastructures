@@ -5,6 +5,7 @@ using DeviceCommunicators.Models;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using Services.Services;
 using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
@@ -21,21 +22,22 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		{
 			return "DynoCanConnect.json";
 		}
-		protected override void ConstructCommunicator()
+		protected override void ConstructCommunicator(LogLineListService logLineList)
 		{
-			DeviceCommunicator = new Dyno_Communicator();
+			DeviceCommunicator = new Dyno_Communicator(logLineList);
 		}
 
 		protected override void DeserializeConnectionViewModel(
 			string jsonString,
-			JsonSerializerSettings settings)
+			JsonSerializerSettings settings,
+			LogLineListService logLineList)
 		{
 			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as CanConnectViewModel;
 			if ((ConnectionViewModel as CanConnectViewModel).SyncNodeID == 0)
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID = 1;
 		}
 
-		protected override void ConstructConnectionViewModel()
+		protected override void ConstructConnectionViewModel(LogLineListService logLineList)
 		{
 			ConnectionViewModel = new CanConnectViewModel(250000, 1, 1, 11223, 11220);
 		}

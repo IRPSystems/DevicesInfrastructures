@@ -52,13 +52,15 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
         #region Methodes
 
-        public void Init(string appName)
+        public void Init(
+            string appName,
+            LogLineListService logLineList)
         {
 			_appName = appName;
 
 			LoggerService.Inforamtion(this, "Initiating " + Device.DeviceType);
             string fileName = GetConnectionFileName();
-            ConstructCommunicator();
+            ConstructCommunicator(logLineList);
 
 			
 
@@ -82,7 +84,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
                 
                 try
                 {
-                    DeserializeConnectionViewModel(jsonString, settings);
+                    DeserializeConnectionViewModel(jsonString, settings, logLineList);
                 }
                 catch
                 {
@@ -93,7 +95,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
             if (ConnectionViewModel == null)
             {
                 LoggerService.Inforamtion(this, "Communication file DON'T exit");
-                ConstructConnectionViewModel();
+                ConstructConnectionViewModel(logLineList);
             }
 
             if (ConnectionViewModel == null)
@@ -284,11 +286,12 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		}
 
         protected abstract string GetConnectionFileName();
-		protected abstract void ConstructCommunicator();
+		protected abstract void ConstructCommunicator(LogLineListService logLineList);
         protected abstract void DeserializeConnectionViewModel(
 			string jsonString,
-			JsonSerializerSettings settings);
-        protected abstract void ConstructConnectionViewModel();
+			JsonSerializerSettings settings,
+            LogLineListService logLineList);
+        protected abstract void ConstructConnectionViewModel(LogLineListService logLineList);
 		protected abstract void ConstructCheckConnection();
         protected abstract void InitRealCommunicator();
 		protected abstract void InitSimulationCommunicator();

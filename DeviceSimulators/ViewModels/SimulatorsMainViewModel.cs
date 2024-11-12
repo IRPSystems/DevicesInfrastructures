@@ -97,7 +97,7 @@ namespace DeviceSimulators.ViewModels
 		{
 			DeviceFullData deviceFullData = DeviceFullData.Factory(SelectedDevice);
 
-			deviceFullData.Init("DeviceSimulators");
+			deviceFullData.Init("DeviceSimulators", null);
 
 			_devicesContainer.DevicesFullDataList.Add(deviceFullData);
 			_devicesContainer.DevicesList.Add(SelectedDevice);

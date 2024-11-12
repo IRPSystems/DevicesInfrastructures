@@ -4,6 +4,7 @@ using DeviceCommunicators.Models;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using Services.Services;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
@@ -22,7 +23,8 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void DeserializeConnectionViewModel(
 			string jsonString,
-			JsonSerializerSettings settings)
+			JsonSerializerSettings settings,
+			LogLineListService logLineList)
 		{
 			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as CanConnectViewModel;
 			if (!(ConnectionViewModel is CanConnectViewModel))
@@ -31,7 +33,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID = 0xAB;
 		}
 
-		protected override void ConstructConnectionViewModel()
+		protected override void ConstructConnectionViewModel(LogLineListService logLineList)
 		{
 			ConnectionViewModel = new CanConnectViewModel(500000, 0xAB, 0xAA, 15523, 15220);
 		}

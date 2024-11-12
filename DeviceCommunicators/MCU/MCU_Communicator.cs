@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Timers;
 using System.Windows.Markup;
+using System.Windows.Media;
 
 namespace DeviceCommunicators.MCU
 {
@@ -63,7 +64,8 @@ namespace DeviceCommunicators.MCU
 
 		#region Constructor
 
-		public MCU_Communicator()
+		public MCU_Communicator(LogLineListService logLineList) :
+			base(logLineList)
 		{
 
 			_buffersPool = new BlockingCollection<byte[]>();
@@ -428,6 +430,18 @@ namespace DeviceCommunicators.MCU
 			}
 			else
 				mcuParam.Value = dvalue;
+
+			if(mcuParam.Cmd != "")
+			{
+				_logLineList.AddLine(
+					new LogLineData()
+					{
+						Time = new TimeSpan(),
+						Data = $"{mcuParam.Name} = {mcuParam.Value}",
+						Background = Brushes.Blue,
+						Foreground = Brushes.White,
+					});
+			}
 
 			return CommunicatorResultEnum.OK;
 

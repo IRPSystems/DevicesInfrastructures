@@ -28,7 +28,8 @@ namespace DeviceCommunicators.ZimmerPowerMeter
 
 		#region Constructor
 
-		public ZimmerPowerMeter_Communicator()
+		public ZimmerPowerMeter_Communicator(LogLineListService logLineList) :
+			base(logLineList)
 		{
 			
 		}

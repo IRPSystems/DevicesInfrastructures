@@ -27,6 +27,12 @@ namespace DeviceCommunicators.NumatoGPIO
 
         #endregion Properties
 
+        public NumatoGPIO_Communicator(LogLineListService logLineList) :
+			base(logLineList)
+		{
+
+        }
+
         public void Init(
             bool isUdpSimulation,
             string comName,

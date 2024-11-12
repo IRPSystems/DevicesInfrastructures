@@ -70,8 +70,9 @@ namespace DeviceCommunicators.Dyno3
 
         #region Constructor
 
-        public Dyno3_Comunicator()
-        {
+        public Dyno3_Comunicator(LogLineListService logLineList) :
+			base(logLineList)
+		{
             _isInitialized = false;
         }
 

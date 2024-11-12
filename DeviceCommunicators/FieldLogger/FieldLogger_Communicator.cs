@@ -43,7 +43,8 @@ namespace DeviceCommunicators.FieldLogger
 
 		#region Constructor
 
-		public FieldLogger_Communicator()
+		public FieldLogger_Communicator(LogLineListService logLineList) :
+			base(logLineList)
         {
 			_channelsValue = new ObservableCollection<short>();
 		}

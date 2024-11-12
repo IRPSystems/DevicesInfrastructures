@@ -31,13 +31,19 @@ namespace DeviceCommunicators.NI_6002
         const int portToTest = 1;
         const int lineToTest = 2;
 
-        #region Constructor 
+        private LogLineListService _logLineList;
 
+		#region Constructor 
 
-        #endregion Constructor
+		public NI6002_Init(LogLineListService logLineList)
+        {
+            _logLineList = logLineList;
+        }
 
-        #region Methods
-        static public List<string> ReturnCurrentDeviceList()
+		#endregion Constructor
+
+		#region Methods
+		static public List<string> ReturnCurrentDeviceList()
         {
             return ConnectedNIDevices;
         }
@@ -59,7 +65,7 @@ namespace DeviceCommunicators.NI_6002
             UpdateDeviceList();
             if (ConnectedNIDevices.Count >= 2)
             {
-                NI6002_Communicator nitemp = new NI6002_Communicator();
+                NI6002_Communicator nitemp = new NI6002_Communicator(_logLineList);
                 nitemp._commmand_to_device = new NI6002_Command(ConnectedNIDevices[0]);
 
                 if (IdentifyDeviceByWiring(nitemp))

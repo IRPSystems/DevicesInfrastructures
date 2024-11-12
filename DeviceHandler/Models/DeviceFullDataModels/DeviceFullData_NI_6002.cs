@@ -8,6 +8,7 @@ using DeviceCommunicators.SwitchRelay32;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using Services.Services;
 using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
@@ -24,19 +25,20 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		{
 			return "NI_6002Connect.json";
 		}
-		protected override void ConstructCommunicator()
+		protected override void ConstructCommunicator(LogLineListService logLineList)
 		{
-			DeviceCommunicator = new NI6002_Communicator();
+			DeviceCommunicator = new NI6002_Communicator(logLineList);
 		}
 
 		protected override void DeserializeConnectionViewModel(
 			string jsonString,
-			JsonSerializerSettings settings)
+			JsonSerializerSettings settings,
+			LogLineListService logLineList)
 		{
 			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as NI6002ConncetViewModel;
 		}
 
-		protected override void ConstructConnectionViewModel()
+		protected override void ConstructConnectionViewModel(LogLineListService logLineList)
 		{
 			ConnectionViewModel = new NI6002ConncetViewModel();
 		}

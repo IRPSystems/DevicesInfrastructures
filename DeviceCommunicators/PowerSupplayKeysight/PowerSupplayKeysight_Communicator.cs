@@ -36,8 +36,9 @@ namespace DeviceCommunicators.PowerSupplayKeysight
 
         #region Constructor
 
-        public PowerSupplayKeysight_Communicator ()
-        { 
+        public PowerSupplayKeysight_Communicator (LogLineListService logLineList) :
+			base(logLineList)
+		{ 
             
         }
 

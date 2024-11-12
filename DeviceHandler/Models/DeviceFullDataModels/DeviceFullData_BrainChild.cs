@@ -5,6 +5,7 @@ using DeviceCommunicators.Models;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using Services.Services;
 using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
@@ -21,19 +22,20 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		{
 			return "BrainChildSerialConnect.json";
 		}
-		protected override void ConstructCommunicator()
+		protected override void ConstructCommunicator(LogLineListService logLineList)
 		{
-			DeviceCommunicator = new BrainChild_Communicator();
+			DeviceCommunicator = new BrainChild_Communicator(logLineList);
 		}
 
 		protected override void DeserializeConnectionViewModel(
 			string jsonString,
-			JsonSerializerSettings settings)
+			JsonSerializerSettings settings,
+			LogLineListService logLineList)
 		{
 			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as ModbusRTUConnectViewModel;
 		}
 
-		protected override void ConstructConnectionViewModel()
+		protected override void ConstructConnectionViewModel(LogLineListService logLineList)
 		{
 			ConnectionViewModel = new ModbusRTUConnectViewModel("COM6", 9600, 255, 1, 8, 2);
 		}

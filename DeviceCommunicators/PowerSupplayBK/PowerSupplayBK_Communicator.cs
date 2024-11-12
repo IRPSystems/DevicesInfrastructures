@@ -35,7 +35,8 @@ namespace DeviceCommunicators.PowerSupplayBK
 
 		#region Constructor
 
-		public PowerSupplayBK_Communicator()
+		public PowerSupplayBK_Communicator(LogLineListService logLineList) :
+			base(logLineList)
 		{
 			
 		}

@@ -38,7 +38,8 @@ namespace DeviceCommunicators.TorqueKistler
 
 		#region Constructor
 
-		public TorqueKistler_Communicator()
+		public TorqueKistler_Communicator(LogLineListService logLineList) :
+			base(logLineList)
 		{
 			_timeoutTimer = new System.Timers.Timer(1000);
 			_timeoutTimer.Elapsed += TimoutElapsedEventHandler;

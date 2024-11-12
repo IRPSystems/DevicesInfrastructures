@@ -4,6 +4,7 @@ using DeviceCommunicators.PowerSupplayGK;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using Services.Services;
 using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
@@ -20,21 +21,22 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		{
 			return "PSGKSerialConnect.json";
 		}
-		protected override void ConstructCommunicator()
+		protected override void ConstructCommunicator(LogLineListService logLineList)
 		{
-			DeviceCommunicator = new PowerSupplayGK_Communicator();
+			DeviceCommunicator = new PowerSupplayGK_Communicator(logLineList);
 		}
 
 		protected override void DeserializeConnectionViewModel(
 			string jsonString,
-			JsonSerializerSettings settings)
+			JsonSerializerSettings settings,
+			LogLineListService logLineList)
 		{
 			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as TcpConncetViewModel;
 			if (ConnectionViewModel == null)
-				ConstructConnectionViewModel();
+				ConstructConnectionViewModel(logLineList);
 		}
 
-		protected override void ConstructConnectionViewModel()
+		protected override void ConstructConnectionViewModel(LogLineListService logLineList)
 		{
 			ConnectionViewModel = new TcpConncetViewModel(502, 255, 255, "192.168.2.250");
 		}

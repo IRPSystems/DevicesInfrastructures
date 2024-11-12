@@ -55,7 +55,8 @@ namespace DeviceCommunicators.Dyno
 
 		#region Constructor
 
-		public Dyno_Communicator()
+		public Dyno_Communicator(LogLineListService logLineList) :
+			base(logLineList)
 		{
 
 			InitErrorsDictionary();

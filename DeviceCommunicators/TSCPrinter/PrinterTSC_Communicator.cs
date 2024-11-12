@@ -144,7 +144,8 @@ namespace DeviceCommunicators.TSCPrinter
 
         #region Constructor
 
-        public PrinterTSC_Communicator()
+        public PrinterTSC_Communicator(LogLineListService logLineList) :
+			base(logLineList)
 		{
             hPrinter = new IntPtr(0);
             _isInitialized = false;

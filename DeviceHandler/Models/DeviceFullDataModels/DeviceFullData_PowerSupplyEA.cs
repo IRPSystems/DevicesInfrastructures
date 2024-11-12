@@ -9,6 +9,7 @@ using DeviceHandler.Interfaces;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using Services.Services;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -49,17 +50,18 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		{
 			return "PSEASerialConnect.json";
 		}
-		protected override void ConstructCommunicator()
+		protected override void ConstructCommunicator(LogLineListService logLineList)
 		{
 			//DeviceCommunicator = new PowerSupplayEA_Communicator();
 		}
 
 		protected override void DeserializeConnectionViewModel(
 			string jsonString,
-			JsonSerializerSettings settings)
+			JsonSerializerSettings settings,
+			LogLineListService logLineList)
 		{
 			SerialAndTCPViewModel connectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialAndTCPViewModel;
-			ConstructConnectionViewModel();
+			ConstructConnectionViewModel(logLineList);
 			if(connectionViewModel!= null) 
 			{
 				(ConnectionViewModel as SerialAndTCPViewModel).Copy(connectionViewModel);
@@ -67,22 +69,22 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 			ConnectionViewModel.RefreshProperties();
 
-			_eapsCommunicator = new PowerSupplayEA_Communicator();
-			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp();
+			_eapsCommunicator = new PowerSupplayEA_Communicator(logLineList);
+			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp(logLineList);
 
 			
 		}
 
 		
 
-		protected override void ConstructConnectionViewModel()
+		protected override void ConstructConnectionViewModel(LogLineListService logLineList)
 		{
 			ConnectionViewModel = new SerialAndTCPViewModel(
 				115200, "COM1", 14323, 14320,
 				502, "", "Serial");
 
-			_eapsCommunicator = new PowerSupplayEA_Communicator();
-			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp();
+			_eapsCommunicator = new PowerSupplayEA_Communicator(logLineList);
+			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp(logLineList);
 
 			(ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.EASearchIPEvent +=
 				TcpConncetVM_EASearchIPEvent;

@@ -42,8 +42,9 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		#region Constructor
 
-		public PowerSupplayEA_Communicator()
-        {
+		public PowerSupplayEA_Communicator(LogLineListService logLineList) :
+			base(logLineList)
+		{
 
 			_onOffCommands = new List<string>() { "SYST:LOCK", "OUTP" };
 			_isUseRampForOnOff = true;

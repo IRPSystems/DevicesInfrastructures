@@ -6,6 +6,7 @@ using DeviceHandler.Interfaces;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using Services.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,19 +27,20 @@ namespace DeviceHandler.Models.DeviceFullDataModels
         {
             return "Numato GPIO.json";
         }
-        protected override void ConstructCommunicator()
+        protected override void ConstructCommunicator(LogLineListService logLineList)
         {
-            DeviceCommunicator = new NumatoGPIO_Communicator();
+            DeviceCommunicator = new NumatoGPIO_Communicator(logLineList);
         }
 
         protected override void DeserializeConnectionViewModel(
             string jsonString,
-            JsonSerializerSettings settings)
+            JsonSerializerSettings settings,
+			LogLineListService logLineList)
         {
             ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
         }
 
-        protected override void ConstructConnectionViewModel()
+        protected override void ConstructConnectionViewModel(LogLineListService logLineList)
         {
             ConnectionViewModel = new SerialConncetViewModel(115200, "COM1", 14323, 14320);
         }

@@ -33,6 +33,8 @@ namespace DeviceCommunicators.General
 
 		protected object _lockObject;
 
+		protected LogLineListService _logLineList;
+
 #if _SAVE_TIME
 		private List<(TimeSpan, string)> _commTimeList;
 #endif
@@ -55,8 +57,10 @@ namespace DeviceCommunicators.General
 
 		#region Constructor
 
-		public DeviceCommunicator()
+		public DeviceCommunicator(LogLineListService logLineList)
 		{
+			_logLineList = logLineList;
+
 #if _SAVE_TIME
 			_commTimeList = new List<(TimeSpan, string)>();
 #endif

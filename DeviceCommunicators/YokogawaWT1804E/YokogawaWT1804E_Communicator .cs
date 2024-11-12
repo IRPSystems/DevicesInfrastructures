@@ -109,8 +109,9 @@ namespace DeviceCommunicators.YokogawaWT1804E
 
         #region Constructor
 
-        public YokogawaWT1804E_Communicator()
-        {
+        public YokogawaWT1804E_Communicator(LogLineListService logLineList) :
+			base(logLineList)
+		{
 
             _timer = new System.Timers.Timer(50);
             _timer.Elapsed += timer_ElapsedEventHandler;
@@ -293,7 +294,6 @@ namespace DeviceCommunicators.YokogawaWT1804E
                 DateTime startTime = DateTime.Now;
                 
 
-                int rln = 1000;
                 start_time = time.ElapsedMilliseconds;
 
 				int ret = -1;

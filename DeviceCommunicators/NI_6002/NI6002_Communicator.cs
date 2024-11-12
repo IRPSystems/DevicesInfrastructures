@@ -38,7 +38,8 @@ namespace DeviceCommunicators.NI_6002
 
 		#region Constructor
 
-		public NI6002_Communicator()
+		public NI6002_Communicator(LogLineListService logLineList) :
+			base(logLineList)
 		{
 			_isInitialized = false;
 		}

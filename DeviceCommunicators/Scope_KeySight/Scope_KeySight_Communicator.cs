@@ -114,8 +114,9 @@ namespace DeviceCommunicators.Scope_KeySight
 
         #region Constructor
 
-        public Scope_KeySight_Communicator ()
-        { 
+        public Scope_KeySight_Communicator (LogLineListService logLineList) :
+			base(logLineList)
+		{ 
             
         }
 

@@ -9,6 +9,7 @@ using DeviceCommunicators.TSCPrinter;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using Services.Services;
 using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
@@ -26,19 +27,20 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			//TODO Do i need json?
 			return "Printer_TSCConnect.json";
 		}
-		protected override void ConstructCommunicator()
+		protected override void ConstructCommunicator(LogLineListService logLineList)
 		{
-			DeviceCommunicator = new PrinterTSC_Communicator();
+			DeviceCommunicator = new PrinterTSC_Communicator(logLineList);
 		}
 
 		protected override void DeserializeConnectionViewModel(
 			string jsonString,
-			JsonSerializerSettings settings)
+			JsonSerializerSettings settings,
+			LogLineListService logLineList)
 		{
 			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as PrinterTSCConncetViewModel;
 		}
 
-		protected override void ConstructConnectionViewModel()
+		protected override void ConstructConnectionViewModel(LogLineListService logLineList)
 		{
 			ConnectionViewModel = new PrinterTSCConncetViewModel();
 		}

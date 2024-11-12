@@ -48,8 +48,9 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		#region Constructor
 
-		public PowerSupplayEA_ModbusTcp()
-        {
+		public PowerSupplayEA_ModbusTcp(LogLineListService logLineList) :
+			base(logLineList)
+		{
 			_waitForResponse = new AutoResetEvent(false);
 
 		}

@@ -58,8 +58,9 @@ namespace DeviceCommunicators.BTMTempLogger
 
 		#region Constructor
 
-		public BTMTempLogger_Communicator()
-        {
+		public BTMTempLogger_Communicator(LogLineListService logLineList) :
+			base(logLineList)
+		{
 			_channelTemp = new ConcurrentDictionary<int, double>();
 
 

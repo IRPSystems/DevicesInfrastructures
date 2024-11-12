@@ -54,7 +54,8 @@ namespace DeviceCommunicators.PowerSupplayGK
 
 		#region Constructor
 
-		public PowerSupplayGK_Communicator()
+		public PowerSupplayGK_Communicator(LogLineListService logLineList) :
+			base(logLineList)
 		{
 			_waitForResponse = new AutoResetEvent(false);
 			_getLockObj = new object();

@@ -4,6 +4,7 @@ using DeviceCommunicators.PowerSupplayBK;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using Services.Services;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
@@ -25,19 +26,20 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			return null;
 		}
 
-		protected override void ConstructCommunicator()
+		protected override void ConstructCommunicator(LogLineListService logLineList)
 		{
 			
 		}
 
 		protected override void DeserializeConnectionViewModel(
 			string jsonString,
-			JsonSerializerSettings settings)
+			JsonSerializerSettings settings,
+			LogLineListService logLineList)
 		{
 			
 		}
 
-		protected override void ConstructConnectionViewModel()
+		protected override void ConstructConnectionViewModel(LogLineListService logLineList)
 		{
 			
 		}

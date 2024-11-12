@@ -31,8 +31,9 @@ namespace DeviceCommunicators.SwitchRelay32
 
 		#region Constructor
 
-		public SwitchCommunicator()
-        {
+		public SwitchCommunicator(LogLineListService logLineList) :
+			base(logLineList)
+		{
 		}
 
 		#endregion Constructor

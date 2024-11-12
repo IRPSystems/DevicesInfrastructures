@@ -9,6 +9,7 @@ using DeviceCommunicators.YokogawaWT1804E;
 using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
+using Services.Services;
 using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
@@ -25,19 +26,20 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		{
 			return "Yokogawa_WT1804EConnect.json";
 		}
-		protected override void ConstructCommunicator()
+		protected override void ConstructCommunicator(LogLineListService logLineList)
 		{
-			DeviceCommunicator = new YokogawaWT1804E_Communicator();
+			DeviceCommunicator = new YokogawaWT1804E_Communicator(logLineList);
 		}
 
 		protected override void DeserializeConnectionViewModel(
 			string jsonString,
-			JsonSerializerSettings settings)
+			JsonSerializerSettings settings,
+			LogLineListService logLineList)
 		{
 			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as YokogawaWT1804EConncetViewModel;
 		}
 
-		protected override void ConstructConnectionViewModel()
+		protected override void ConstructConnectionViewModel(LogLineListService logLineList)
 		{
 			ConnectionViewModel = new YokogawaWT1804EConncetViewModel();
 		}

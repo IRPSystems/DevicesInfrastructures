@@ -43,7 +43,8 @@ namespace DeviceCommunicators.BrainChild
 
 		#region Constructor
 
-		public BrainChild_Communicator()
+		public BrainChild_Communicator(LogLineListService logLineList):
+			base(logLineList)
         {
 			_channelsValue = new ObservableCollection<short>();
 		}
