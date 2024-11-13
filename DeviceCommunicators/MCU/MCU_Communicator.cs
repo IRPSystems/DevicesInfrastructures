@@ -431,17 +431,17 @@ namespace DeviceCommunicators.MCU
 			else
 				mcuParam.Value = dvalue;
 
-			if(mcuParam.Cmd != "")
-			{
-				_logLineList.AddLine(
-					new LogLineData()
-					{
-						Time = new TimeSpan(),
-						Data = $"{mcuParam.Name} = {mcuParam.Value}",
-						Background = Brushes.Blue,
-						Foreground = Brushes.White,
-					});
-			}
+			//if(mcuParam.Cmd != "")
+			//{
+			//	_logLineList.AddLine(
+			//		new LogLineData()
+			//		{
+			//			Time = new TimeSpan(),
+			//			Data = $"{mcuParam.Name} = {mcuParam.Value}",
+			//			Background = Brushes.Blue,
+			//			Foreground = Brushes.White,
+			//		});
+			//}
 
 			return CommunicatorResultEnum.OK;
 
