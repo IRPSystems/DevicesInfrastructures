@@ -42,7 +42,7 @@ namespace DeviceHandler.ViewModels
 
 		private DeviceSetupUserData _deviceSetupUserData;
 
-		private ObservableCollection<DeviceData> _devicesSourceList_Full;
+		public ObservableCollection<DeviceData> DevicesSourceList_Full;
 
 		#endregion Fields
 
@@ -74,7 +74,7 @@ namespace DeviceHandler.ViewModels
 			MoveDeviceToSourceCommand = new RelayCommand(MoveDeviceToSource);
 
 
-			_devicesSourceList_Full = readDevicesFile.ReadAllFiles(
+			DevicesSourceList_Full = readDevicesFile.ReadAllFiles(
 				@"Data\Device Communications\",
 				deviceSetupUserData.MCUJsonPath,
 				deviceSetupUserData.MCUB2BJsonPath,
@@ -82,9 +82,9 @@ namespace DeviceHandler.ViewModels
 				deviceSetupUserData.NI6002CommunicationPath);
 			DevicesSourceList = new ObservableCollection<DeviceData>();
 
-			if (_devicesSourceList_Full != null)
+			if (DevicesSourceList_Full != null)
 			{
-				foreach (DeviceData device in _devicesSourceList_Full)
+				foreach (DeviceData device in DevicesSourceList_Full)
 				{
 					DevicesSourceList.Add(device);
 				}
@@ -353,7 +353,7 @@ namespace DeviceHandler.ViewModels
 
 			foreach ((string, DeviceTypesEnum) device in devicesList) 
 			{
-				DeviceData deviceBase = _devicesSourceList_Full.ToList().Find((d) => d.DeviceType == device.Item2);
+				DeviceData deviceBase = DevicesSourceList_Full.ToList().Find((d) => d.DeviceType == device.Item2);
 				if(deviceBase == null) 
 					continue;
 
