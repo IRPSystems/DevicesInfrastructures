@@ -8,6 +8,7 @@ using System.Windows;
 using System.Threading;
 using MicroLibrary;
 using System.Diagnostics;
+using NationalInstruments;
 
 
 namespace DeviceCommunicators.NI_6002
@@ -42,6 +43,7 @@ namespace DeviceCommunicators.NI_6002
         MicroTimer Timer_revolutions = new MicroTimer();
         private Stopwatch stopwatch = new Stopwatch();
         private static double revoultionsTimerElapsed = 0; // Track elapsed seconds
+        double counterTimerElapsed = 0;
 
         #endregion Fields
 
@@ -222,9 +224,12 @@ namespace DeviceCommunicators.NI_6002
             //timer
             try
             {
+                isReachedCounts = false;
+                counterTimerElapsed = 0;
                 LoggerService.Error(this, "Digital_Counter");
                 rpmCounterAutoResetEvent.Reset();
                 myTask = new Task();
+                countReading = 0;
                 string commannd_to_device = _deviceName + "/" + "ctr0";
 
                 myTask.CIChannels.CreateCountEdgesChannel(commannd_to_device, "Count Edges",
@@ -232,13 +237,17 @@ namespace DeviceCommunicators.NI_6002
 
                 myCounterReader = new CounterSingleChannelReader(myTask.Stream);
 
+                
+                Timer_counterTryRead.Interval = 1000;
+                //Timer_revolutions.Interval = 20000000;
                 myTask.Start();
-                Timer_counterTryRead.Interval = 2000;
-                Timer_revolutions.Interval = 20000000;
-
                 Timer_counterTryRead.Start();
-                Timer_revolutions.Start();
+                //Timer_revolutions.Start();
+                
+                
                 stopwatch.Start();
+                
+                
 
                 rpmCounterAutoResetEvent.WaitOne();
 
@@ -271,13 +280,23 @@ namespace DeviceCommunicators.NI_6002
             Timer_revolutions.Stop();
         }
 
+        int numberOfCounts = 200;
+        bool isReachedCounts = false;
+
         private void CounterTryRead(object sender, MicroTimerEventArgs e)
         {
             try
             {
                 countReading = myCounterReader.ReadSingleSampleUInt32();
-                //debug
-                //countReading++;
+                if(countReading >= numberOfCounts && !isReachedCounts)
+                {
+                    double timeElapsed = stopwatch.Elapsed.TotalMilliseconds;
+                    Timer_counterTryRead.Stop();
+                    stopwatch.Reset();
+                    isReachedCounts = true;
+                    rpm = (numberOfCounts * 60) / (timeElapsed / 1000);
+                    rpmCounterAutoResetEvent.Set();
+                }
             }
             catch (DaqException exception)
             {
@@ -288,18 +307,20 @@ namespace DeviceCommunicators.NI_6002
                 return;
             }
         }
+
         private void CalculateRevolutions(object sender, MicroTimerEventArgs e)
         {
-            uint _countReading = countReading;
-            double time = stopwatch.Elapsed.TotalMilliseconds;
-            revoultionsTimerElapsed = stopwatch.Elapsed.TotalMilliseconds / 1000;
-            rpm = (_countReading * 60) / revoultionsTimerElapsed;
+            //ReadOnce();
+            //uint _countReading = countReading;
+            //double time = stopwatch.Elapsed.TotalMilliseconds;
+            //revoultionsTimerElapsed = stopwatch.Elapsed.TotalMilliseconds / 1000;
+            //rpm = (_countReading * 60) / revoultionsTimerElapsed;
 
-            LoggerService.Error(this, "RPM: " + rpm.ToString() + " TimerElapsed: " + revoultionsTimerElapsed.ToString());
-            revoultionsTimerElapsed = 0;
-            // Reset revolution count for the next interval
-            countReading = 0;
-            rpmCounterAutoResetEvent.Set();
+            //LoggerService.Error(this, "RPM: " + rpm.ToString() + " TimerElapsed: " + revoultionsTimerElapsed.ToString());
+            //revoultionsTimerElapsed = 0;
+            //// Reset revolution count for the next interval
+            //countReading = 0;
+            //rpmCounterAutoResetEvent.Set();
         }
 
         #endregion command 
