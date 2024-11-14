@@ -36,6 +36,9 @@ namespace DeviceHandler.ViewModels
 		[JsonIgnore]
 		public bool IsDisconnectButtonEnabled { get; set; }
 
+		[JsonIgnore]
+		public Visibility ThisVisibility { get; set; }
+
 		//[JsonIgnore]
 		//public string SyncNodeID_Text
 		//{
