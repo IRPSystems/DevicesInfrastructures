@@ -57,7 +57,7 @@ namespace DeviceHandler.Faults
 
 		private System.Timers.Timer _ceckIfFaultExistTimer;
 
-		private bool _isFulatExist;
+		private bool? _isFulatExist;
 
 		#endregion Fields
 
@@ -241,11 +241,15 @@ namespace DeviceHandler.Faults
 			_isFulatExist = false;
 			foreach(FaultsMCUHalfViewModel faultsHalf in FaultsMCUHalfList)
 			{
-				_isFulatExist |= faultsHalf.GetIsFaultExist();
+				bool? halfFaultExist = faultsHalf.GetIsFaultExist();
+				if(halfFaultExist ==  null)
+					_isFulatExist = null;
+				else
+					_isFulatExist |= faultsHalf.GetIsFaultExist();
 			}			
 		}
 
-		public bool GetIsFaultExist()
+		public bool? GetIsFaultExist()
 		{
 			return _isFulatExist;
 		}
