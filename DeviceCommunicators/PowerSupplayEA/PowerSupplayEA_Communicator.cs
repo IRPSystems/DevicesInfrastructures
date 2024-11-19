@@ -168,7 +168,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 				string cmd = ea_ParamData.Cmd;
 				cmd = ea_ParamData.Cmd + "?";
 
-				LoggerService.Inforamtion(this, "Getting \"" + ea_ParamData.Name + "\" - cmd: " + cmd);
+				//LoggerService.Inforamtion(this, "Getting \"" + ea_ParamData.Name + "\" - cmd: " + cmd);
 
 				_serial_port.Send(cmd);
 
