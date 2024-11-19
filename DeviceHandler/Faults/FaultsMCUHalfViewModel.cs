@@ -49,7 +49,7 @@ namespace DeviceHandler.Faults
 
 		private DevicesContainer _devicesContainer;
 
-		private bool _isFaultExist;
+		private bool? _isFaultExist;
 
 		#endregion Fields
 
@@ -159,6 +159,12 @@ namespace DeviceHandler.Faults
 
 		private void ResponseCallback(DeviceParameterData param, CommunicatorResultEnum result, string errDescription)
 		{
+			if (result != CommunicatorResultEnum.OK)
+			{
+				_isFaultExist = null;
+				return;
+			}
+
 			_receivedEvent.Set();
 		}
 	
@@ -253,7 +259,7 @@ namespace DeviceHandler.Faults
 
 		}
 
-		public bool GetIsFaultExist()
+		public bool? GetIsFaultExist()
 		{
 			return _isFaultExist;
 		}
