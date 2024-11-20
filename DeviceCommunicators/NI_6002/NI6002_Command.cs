@@ -22,6 +22,7 @@ namespace DeviceCommunicators.NI_6002
         public string _Port_Io { get; set; } = "port0";
         public double _Min_level_voltage { get; set; } = -10;
         public double _Max_level_voltage { get; set; } = 10;
+        public int numberOfCounts { get; set; } = 200;
 
 
         // Parameter to test
@@ -219,11 +220,12 @@ namespace DeviceCommunicators.NI_6002
             }
         }
 
-        public string Digital_Counter()
+        public string Digital_Counter(int numofcounts)
         {
             //timer
             try
             {
+                numberOfCounts = numofcounts;
                 isReachedCounts = false;
                 counterTimerElapsed = 0;
                 LoggerService.Error(this, "Digital_Counter");
@@ -280,7 +282,6 @@ namespace DeviceCommunicators.NI_6002
             Timer_revolutions.Stop();
         }
 
-        int numberOfCounts = 200;
         bool isReachedCounts = false;
 
         private void CounterTryRead(object sender, MicroTimerEventArgs e)

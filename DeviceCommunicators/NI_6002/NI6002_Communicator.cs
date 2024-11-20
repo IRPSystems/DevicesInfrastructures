@@ -178,6 +178,7 @@ namespace DeviceCommunicators.NI_6002
 
 			int port = niParamData.Io_port;
 			int line = niParamData.portLine;
+			int numofcounts = niParamData.numofcounts;
 
             object data;
 
@@ -212,7 +213,7 @@ namespace DeviceCommunicators.NI_6002
                     data = _commmand_to_device.Anolog_input_current(port, niParamData.shunt_resistor);
                     break;
                 case "digital counter":
-                    data = _commmand_to_device.Digital_Counter();
+                    data = _commmand_to_device.Digital_Counter(numofcounts);
                     break;
 
 

@@ -14,6 +14,7 @@ namespace DeviceCommunicators.NI_6002
         public string command_to_device { set; get; }
         public int portLine { set; get; }
         public double shunt_resistor { set; get; }
+        public int numofcounts { set; get; }
         public List<DropDownParamData> DropDown { get; set; }
         public eThermistorType ThermistorType { set; get; }
         public List<DropDownParamData> ThermistorTypeList { get; set; }
