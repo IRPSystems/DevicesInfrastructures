@@ -13,6 +13,7 @@ using DeviceHandler.Interfaces;
 using Communication.Services;
 using System.Globalization;
 using System.Windows.Input;
+using System.Collections.Generic;
 
 namespace DeviceHandler.ViewModels
 {
@@ -70,6 +71,7 @@ namespace DeviceHandler.ViewModels
 
 		//private string _syncNodeID_Text;
 		private uint _syncNodeID;
+		private uint? _requiredDeviceId;
 
 		#endregion Fields
 
@@ -80,8 +82,11 @@ namespace DeviceHandler.ViewModels
 			uint syncId,
 			uint asyncId,
 			int rxPort,
-			int txPort)
+			int txPort,
+			uint? requiredDeviceId = null)
 		{
+			_requiredDeviceId = requiredDeviceId;
+
 			LoggerService.Inforamtion(this, "Starting CanConnctViewModel");
 			ConnectCommand = new RelayCommand(Connect);
 			DisconnectCommand = new RelayCommand(Disconnect);
@@ -94,7 +99,7 @@ namespace DeviceHandler.ViewModels
 			BuildAdaptersList();
 			GetIpAddress();
 
-			HwIDsList = CanPCanService.GetHwIDs();
+			HWID_DropDownOpened();
 
 			UdpRowHeight = new GridLength(0);
 
@@ -189,6 +194,35 @@ namespace DeviceHandler.ViewModels
 		private void HWID_DropDownOpened()
 		{
 			HwIDsList = CanPCanService.GetHwIDs();
+
+			if (_requiredDeviceId == null)
+				return;
+
+			List<string> hwToRemove = new List<string>();
+			foreach (string hwIdDesc in HwIDsList)
+			{
+				ushort hwId = CanPCanService.GetHWId(hwIdDesc);
+				CanPCanService canPCan = new CanPCanService(
+					SelectedBaudrate,
+					hwId,
+					0xAB,
+					0xAB,
+					0);
+
+				uint deviceId = canPCan.GetDeviceId();
+				if(deviceId != _requiredDeviceId)
+					hwToRemove.Add(hwIdDesc);
+
+				canPCan = null;
+			}
+
+			GC.Collect();
+
+			foreach (string hwIdDesc in hwToRemove)
+				HwIDsList.Remove(hwIdDesc);
+
+			if (HwIDsList.Count == 0)
+				LoggerService.Error(this, "No PCAN with the correct Device ID was found");
 		}
 
 		private void Addapter_SelectionChanged(SelectionChangedEventArgs e)
