@@ -92,7 +92,7 @@ namespace DeviceCommunicators.NI_6002
 
             commannd_to_device = _deviceName + "/" + "port"+ port + "/line" + portLine;
 
-            LoggerService.Inforamtion(this, "command to device : " + commannd_to_device);
+            //LoggerService.Inforamtion(this, "command to device : " + commannd_to_device);
 
 
             Task digReadTaskPort = new Task();         
@@ -108,7 +108,7 @@ namespace DeviceCommunicators.NI_6002
                 DigIndatapPort = 1;
             }
 
-            LoggerService.Inforamtion(this, "result: "+ DigIndatapPort);
+            //LoggerService.Inforamtion(this, "result: "+ DigIndatapPort);
 
             return String.Format("0x{0:X}", DigIndatapPort);
         }
@@ -153,7 +153,7 @@ namespace DeviceCommunicators.NI_6002
                 }
                 catch(Exception ex)
                 {
-					LoggerService.Error(this, "Failed to get analog input", ex);
+				//LoggerService.Error(this, "Failed to get analog input", ex);
 					return "Error";
                 }
             }
