@@ -11,7 +11,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 {
 	public class DeviceFullData_MCU_2 : DeviceFullData_MCU
 	{
-		public const uint MCU_2_DeviceID = 0xABAB;
+		public const uint MCU_2_DeviceID = 0xCC;
 
 		public DeviceFullData_MCU_2(DeviceData deviceData) :
 			base(deviceData)
@@ -34,6 +34,8 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				ConnectionViewModel = new CanConnectViewModel(500000, 0xAB, 0xAA, 15523, 15520, MCU_2_DeviceID);
 			if ((ConnectionViewModel as CanConnectViewModel).SyncNodeID == 0)
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID = 0xAB;
+			if ((ConnectionViewModel as CanConnectViewModel).RequiredDeviceId == null)
+				(ConnectionViewModel as CanConnectViewModel).SyncNodeID = MCU_2_DeviceID;
 		}
 
 		protected override void ConstructConnectionViewModel(LogLineListService logLineList)

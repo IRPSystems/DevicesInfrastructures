@@ -37,6 +37,8 @@ namespace DeviceHandler.ViewModels
 		[JsonIgnore]
 		public bool IsDisconnectButtonEnabled { get; set; }
 
+		public uint? RequiredDeviceId { get; set; }
+
 		//[JsonIgnore]
 		//public string SyncNodeID_Text
 		//{
@@ -71,7 +73,7 @@ namespace DeviceHandler.ViewModels
 
 		//private string _syncNodeID_Text;
 		private uint _syncNodeID;
-		private uint? _requiredDeviceId;
+		
 
 		#endregion Fields
 
@@ -85,7 +87,7 @@ namespace DeviceHandler.ViewModels
 			int txPort,
 			uint? requiredDeviceId = null)
 		{
-			_requiredDeviceId = requiredDeviceId;
+			RequiredDeviceId = requiredDeviceId;
 
 			LoggerService.Inforamtion(this, "Starting CanConnctViewModel");
 			ConnectCommand = new RelayCommand(Connect);
@@ -195,7 +197,7 @@ namespace DeviceHandler.ViewModels
 		{
 			HwIDsList = CanPCanService.GetHwIDs();
 
-			if (_requiredDeviceId == null)
+			if (RequiredDeviceId == null)
 				return;
 
 			List<string> hwToRemove = new List<string>();
@@ -210,7 +212,7 @@ namespace DeviceHandler.ViewModels
 					0);
 
 				uint deviceId = canPCan.GetDeviceId();
-				if(deviceId != _requiredDeviceId)
+				if(deviceId != RequiredDeviceId)
 					hwToRemove.Add(hwIdDesc);
 
 				canPCan = null;
