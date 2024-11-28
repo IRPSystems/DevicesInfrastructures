@@ -39,6 +39,9 @@ namespace DeviceHandler.ViewModels
 
 		public uint? RequiredDeviceId { get; set; }
 
+		[JsonIgnore]
+		public Visibility ThisVisibility { get; set; }
+
 		//[JsonIgnore]
 		//public string SyncNodeID_Text
 		//{

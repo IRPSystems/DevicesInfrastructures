@@ -8,7 +8,8 @@
              xmlns:controls_view="clr-namespace:Controls.Views;assembly=Controls"
              xmlns:local="clr-namespace:DeviceHandler.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="100" d:DesignWidth="1000">
+             d:DesignHeight="100" d:DesignWidth="1000"
+             Visibility="{Binding ThisVisibility}">
 
     <UserControl.Resources>
         <converter:TypeToNameConverter x:Key="ConnectionTypeStringConverter"/>
