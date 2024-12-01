@@ -202,7 +202,10 @@ namespace DeviceCommunicators.MCU
 
 			//_prevStart = data.SendStartTime;
 #endif
-
+			if(mcuParam.Cmd == "mancurrsp")
+			{
+				LoggerService.Inforamtion(this, $"Set -- \"Manual Torque Set Point\" = {data.Value}");
+			}
 
 			byte[] id = null;
 			byte[] buffer = null;
@@ -442,6 +445,11 @@ namespace DeviceCommunicators.MCU
 			//			Foreground = Brushes.White,
 			//		});
 			//}
+
+			if (mcuParam.Cmd == "mancurrsp")
+			{
+				LoggerService.Inforamtion(this, $"ACK -- \"Manual Torque Set Point\" = {mcuParam.Value}");
+			}
 
 			return CommunicatorResultEnum.OK;
 
