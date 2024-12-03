@@ -8,6 +8,8 @@ using Services.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Management;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace DeviceHandler.ViewModels
 {
@@ -48,23 +50,44 @@ namespace DeviceHandler.ViewModels
 
 			string query = "SELECT * FROM Win32_Printer";
 
-			// Create a ManagementObjectSearcher with the query
-			ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
+            // Set a timeout for the operation
+            using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(3)))
+            {
+                try
+                {
+                    // Run the search in a separate task with the cancellation token
+                    Task.Run(() =>
+                    {
+                        // Create a ManagementObjectSearcher with the query
+                        using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(query))
+                        {
+                            // Perform the query and get the collection of printers
+                            ManagementObjectCollection printers = searcher.Get();
 
-			// Perform the query and get the collection of printers
-			ManagementObjectCollection printers = searcher.Get();
+                            // Iterate over the printers and add their names to the list, add only connected printers
+                            foreach (ManagementObject printer in printers)
+                            {
+                                if (cts.Token.IsCancellationRequested)
+                                {
+                                    Console.WriteLine("Loop terminated due to timeout.");
+                                    break;
+                                }
 
-			//Iterate over the printers and add their names to the list, add only connected printers
-			foreach (ManagementObject printer in printers)
-			{
-				string printerName = printer["Name"] as string;
-				string printerStatus = printer["PrinterStatus"]?.ToString();
-				if (printerName.Contains("TSC"))
-				{
-					DeviceName = printerName;
-					DeviceList.Add(printerName);
-				}
-			}
+                                string printerName = printer["Name"] as string;
+                                if (printerName != null && printerName.Contains("TSC"))
+                                {
+                                    DeviceName = printerName;
+                                    DeviceList.Add(printerName);
+                                }
+                            }
+                        }
+                    }, cts.Token).Wait(cts.Token); // Wait for the task to complete or be canceled
+                }
+                catch (OperationCanceledException)
+                {
+                    Console.WriteLine("Operation timed out and was canceled.");
+                }
+            }
 		}
 
 		public void RefreshProperties() { }
