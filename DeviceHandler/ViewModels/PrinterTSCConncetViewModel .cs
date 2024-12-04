@@ -51,7 +51,7 @@ namespace DeviceHandler.ViewModels
 			string query = "SELECT * FROM Win32_Printer";
 
             // Set a timeout for the operation
-            using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(3)))
+            using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(4)))
             {
                 try
                 {
@@ -78,6 +78,7 @@ namespace DeviceHandler.ViewModels
                                 {
                                     DeviceName = printerName;
                                     DeviceList.Add(printerName);
+									break;
                                 }
                             }
                         }

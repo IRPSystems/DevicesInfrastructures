@@ -265,7 +265,7 @@ namespace DeviceCommunicators.TSCPrinter
                     return;
 
                 //Connection Logic
-                sendcommand(tscPrinter_Param.DataContent);
+                SendStringToPrinter(tscPrinter_Param.DataContent);
 
                 if (tscPrinter_Param.DataContent == checkStatusString)
                 {
