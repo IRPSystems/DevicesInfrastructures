@@ -47,7 +47,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructCheckConnection()
 		{
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => ((PrinterTSC_ParamData)p).Name == "Comm Chcek");
+			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => ((PrinterTSC_ParamData)p).Name == "CommCheck");
 
 			CheckCommunication = new CheckCommunicationService(
 				this,
