@@ -307,6 +307,7 @@ namespace DeviceCommunicators.NI_6002
                 Timer_counterTryRead.Stop();
                 return;
             }
+            Thread.Sleep(1);
         }
 
         private void CalculateRevolutions(object sender, MicroTimerEventArgs e)
