@@ -169,22 +169,23 @@ namespace DeviceCommunicators.NI_6002
                 double sample;
                 double tempMinValueNumeric = 0;
                 double tempMaxValueNumeric = 0.020;
-                double tempSamplesToReadNumeric = 500;
+                double tempSamplesToReadNumeric = 1000;
                 double currentSensorMeasGain = 2000;
 
                 if (shuntResistor == 0)
                     shuntResistor = 17.8;
 
-                Thread.Sleep(50);
 
                 // Create a new task
                 myTask = new Task();
+
+                Thread.Sleep(200);
 
                 string commannd_to_device = "";
 
                 //_deviceName = "Dev2";
 
-                LoggerService.Error(this, "Analog input current: Port" + port.ToString() + " shuntresistor: " + shuntResistor.ToString());
+                //LoggerService.Error(this, "Analog input current: Port" + port.ToString() + " shuntresistor: " + shuntResistor.ToString());
 
                 commannd_to_device = _deviceName + "/" + "ai" + port;
 
@@ -195,7 +196,7 @@ namespace DeviceCommunicators.NI_6002
                     AICurrentUnits.Amps);
 
                 myTask.Timing.ConfigureSampleClock("", Convert.ToDouble(tempSamplesToReadNumeric),
-                    SampleClockActiveEdge.Rising, SampleQuantityMode.ContinuousSamples, 1000);
+                    SampleClockActiveEdge.Rising, SampleQuantityMode.FiniteSamples, 1000);
 
                 // Verify the Task
                 myTask.Control(TaskAction.Verify);
@@ -203,9 +204,9 @@ namespace DeviceCommunicators.NI_6002
                 AnalogMultiChannelReader reader = new AnalogMultiChannelReader(myTask.Stream);
                 double[] data = reader.ReadSingleSample();
                 sample = data[0];
-                LoggerService.Error(this, "Analog input current: Sample: " + sample.ToString());
+                //LoggerService.Error(this, "Analog input current: Sample: " + sample.ToString());
 
-                myTask.Dispose();
+
 
                 return sample.ToString();
 
@@ -214,10 +215,14 @@ namespace DeviceCommunicators.NI_6002
             {
                 // Display Errors
                 MessageBox.Show(exception.Message);
-                myTask.Dispose();
                 return "Error";
 
             }
+            finally
+            {
+               myTask?.Dispose();
+            };
+
         }
 
         public string Digital_Counter(int numofcounts)
@@ -307,6 +312,7 @@ namespace DeviceCommunicators.NI_6002
                 Timer_counterTryRead.Stop();
                 return;
             }
+            Thread.Sleep(1);
         }
 
         private void CalculateRevolutions(object sender, MicroTimerEventArgs e)
