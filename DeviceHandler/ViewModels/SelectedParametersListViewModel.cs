@@ -187,6 +187,9 @@ namespace DeviceHandler.ViewModels
 			ParametersList.Clear();
 			ParametersList_WithIndex.Clear();
 
+			if (parametersList == null)
+				return;
+
 			foreach (DeviceParameterData parameterData in parametersList)
 			{
 				if (_devicesContainer.TypeToDevicesFullData.ContainsKey(parameterData.DeviceType) == false)
