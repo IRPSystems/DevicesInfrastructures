@@ -193,7 +193,7 @@ namespace DeviceCommunicators.TSCPrinter
             if(printer)
             {
                 _isInitialized = true;
-                PrintTest();
+                //PrintTest();
             }
             InitBase();
 
@@ -265,21 +265,22 @@ namespace DeviceCommunicators.TSCPrinter
                     return;
 
                 //Connection Logic
-                SendStringToPrinter(tscPrinter_Param.DataContent);
 
-                if (tscPrinter_Param.DataContent == checkStatusString)
+                if (tscPrinter_Param.DataContent != checkStatusString)
                 {
-                    PrinterStatus status = (PrinterStatus)usbportqueryprinter();
-                    if (status != PrinterStatus.NoComm)
-                    {
-                        callback?.Invoke(param, CommunicatorResultEnum.OK, null);
-                        return;
-                    }
-                    else
-                    {
-                        callback?.Invoke(param, CommunicatorResultEnum.Error, null);
-                        return;
-                    }
+                    SendStringToPrinter(tscPrinter_Param.DataContent);
+                }
+
+                PrinterStatus status = (PrinterStatus)usbportqueryprinter();
+                if (status != PrinterStatus.NoComm)
+                {
+                    callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+                    return;
+                }
+                else
+                {
+                    callback?.Invoke(param, CommunicatorResultEnum.Error, null);
+                    return;
                 }
             }
             catch (Exception ex)
