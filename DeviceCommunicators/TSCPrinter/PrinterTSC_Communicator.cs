@@ -12,6 +12,7 @@ using System.Data;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Linq;
 
@@ -270,8 +271,24 @@ namespace DeviceCommunicators.TSCPrinter
                 {
                     SendStringToPrinter(tscPrinter_Param.DataContent);
                 }
-
-                PrinterStatus status = (PrinterStatus)usbportqueryprinter();
+                PrinterStatus status = PrinterStatus.NoComm;
+                using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
+                {
+                    try
+                    {
+                        Task.Run(() =>
+                        {
+                            Thread.Sleep(300);
+                            status = (PrinterStatus)usbportqueryprinter();
+                        }, cts.Token).Wait(cts.Token); // Wait for the task to complete or be canceled
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show("Printer operation timed out and was canceled:" + e.Message);
+                    }
+                }
+                
+                
                 if (status != PrinterStatus.NoComm)
                 {
                     callback?.Invoke(param, CommunicatorResultEnum.OK, null);
@@ -358,6 +375,8 @@ namespace DeviceCommunicators.TSCPrinter
         private bool CheckPrinterStatusPostCommand()
         {
             bool? result = true;
+
+            Thread.Sleep(50);
             sendcommand(checkStatusString);
             PrinterStatus status = (PrinterStatus)usbportqueryprinter();
 
