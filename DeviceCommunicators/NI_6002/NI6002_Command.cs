@@ -153,10 +153,12 @@ namespace DeviceCommunicators.NI_6002
                     double[] data = reader.ReadSingleSample();
                     sample = data[0];
                 }
-                catch(Exception ex)
+                catch (DaqException exception)
                 {
-				//LoggerService.Error(this, "Failed to get analog input", ex);
-					return "Error";
+                    // Display Errors
+                    MessageBox.Show("Failed to get analog input port: " + port.ToString() + "Due to:\r\n" + "Daq Exception:\r\n" + exception.Message);
+                    return "Error";
+
                 }
             }
 			
@@ -216,7 +218,7 @@ namespace DeviceCommunicators.NI_6002
             catch (DaqException exception)
             {
                 // Display Errors
-                MessageBox.Show(exception.Message);
+                MessageBox.Show("Failed to get analog input current: Daq Exception Due to:\r\n" + exception.Message);
                 return "Error";
 
             }
@@ -293,7 +295,7 @@ namespace DeviceCommunicators.NI_6002
             }
             catch (DaqException exception)
             {
-                MessageBox.Show(exception.Message);
+                MessageBox.Show("Failed to get Digital Counter: Daq Exception Due to:\r\n" + exception.Message);
                 myTask.Dispose();
                 return "Error"; // Return 0 or handle the exception as needed
             }
@@ -351,7 +353,7 @@ namespace DeviceCommunicators.NI_6002
             }
             catch (DaqException exception)
             {
-                MessageBox.Show(exception.Message);
+                MessageBox.Show("Failed to get Digital Counter: Daq Exception at CounterTryRead Due to:\r\n" + exception.Message);
                 rpmCounterAutoResetEvent.Set();
                 myTask.Dispose();
                 DigitalCounter_ClearParams();
