@@ -3,12 +3,9 @@ using Communication.Services;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceCommunicators.Models;
-using Entities.Models;
 using Services.Services;
 using System;
-using System.Collections.Concurrent;
 using System.Threading;
-using System.Xml.Linq;
 
 namespace DeviceCommunicators.PowerSupplayBK
 {
@@ -149,7 +146,7 @@ namespace DeviceCommunicators.PowerSupplayBK
                 if (!(param is PowerSupplayBK_ParamData supplay_Parameter))
                     return;
 
-                request_commad_from_supply(supplay_Parameter);
+				request_commad_from_supply(supplay_Parameter);
 
                 Thread.Sleep(100);
 
@@ -236,7 +233,6 @@ namespace DeviceCommunicators.PowerSupplayBK
 
 			string internal_buffer;
 
-			if (name == "Choose channel") { }
 			_serial_port.Read(out internal_buffer);
 
             if (string.IsNullOrEmpty(internal_buffer))
