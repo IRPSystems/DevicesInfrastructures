@@ -12,6 +12,7 @@ using System.Data;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Linq;
 
@@ -193,7 +194,7 @@ namespace DeviceCommunicators.TSCPrinter
             if(printer)
             {
                 _isInitialized = true;
-                PrintTest();
+                //PrintTest();
             }
             InitBase();
 
@@ -265,21 +266,38 @@ namespace DeviceCommunicators.TSCPrinter
                     return;
 
                 //Connection Logic
-                SendStringToPrinter(tscPrinter_Param.DataContent);
 
-                if (tscPrinter_Param.DataContent == checkStatusString)
+                if (tscPrinter_Param.DataContent != checkStatusString)
                 {
-                    PrinterStatus status = (PrinterStatus)usbportqueryprinter();
-                    if (status != PrinterStatus.NoComm)
+                    SendStringToPrinter(tscPrinter_Param.DataContent);
+                }
+                PrinterStatus status = PrinterStatus.NoComm;
+                using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
+                {
+                    try
                     {
-                        callback?.Invoke(param, CommunicatorResultEnum.OK, null);
-                        return;
+                        Task.Run(() =>
+                        {
+                            Thread.Sleep(300);
+                            status = (PrinterStatus)usbportqueryprinter();
+                        }, cts.Token).Wait(cts.Token); // Wait for the task to complete or be canceled
                     }
-                    else
+                    catch (Exception e)
                     {
-                        callback?.Invoke(param, CommunicatorResultEnum.Error, null);
-                        return;
+                        MessageBox.Show("Printer operation timed out and was canceled:" + e.Message);
                     }
+                }
+                
+                
+                if (status != PrinterStatus.NoComm)
+                {
+                    callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+                    return;
+                }
+                else
+                {
+                    callback?.Invoke(param, CommunicatorResultEnum.Error, null);
+                    return;
                 }
             }
             catch (Exception ex)
@@ -357,6 +375,8 @@ namespace DeviceCommunicators.TSCPrinter
         private bool CheckPrinterStatusPostCommand()
         {
             bool? result = true;
+
+            Thread.Sleep(50);
             sendcommand(checkStatusString);
             PrinterStatus status = (PrinterStatus)usbportqueryprinter();
 
