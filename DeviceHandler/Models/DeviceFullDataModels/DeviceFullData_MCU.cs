@@ -10,10 +10,14 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 {
 	public class DeviceFullData_MCU: DeviceFullData
 	{
-		public DeviceFullData_MCU(DeviceData deviceData) :
+		private bool _isAsync;
+
+		public DeviceFullData_MCU(
+			DeviceData deviceData,
+			bool isAsync = true) :
 			base(deviceData)
 		{
-
+			_isAsync = isAsync;
 		}
 
 		protected override string GetConnectionFileName()
@@ -67,7 +71,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID,
 				(ConnectionViewModel as CanConnectViewModel).AsyncNodeID,
-				true,
+				_isAsync,
 				(ConnectionViewModel as CanConnectViewModel).GetSelectedHWId((ConnectionViewModel as CanConnectViewModel).SelectedHwId));
 		}
 
@@ -78,7 +82,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				(ConnectionViewModel as CanConnectViewModel).SelectedBaudrate,
 				(ConnectionViewModel as CanConnectViewModel).SyncNodeID,
 				(ConnectionViewModel as CanConnectViewModel).AsyncNodeID,
-				true,
+				_isAsync,
 				0,
 				(ConnectionViewModel as CanConnectViewModel).RxPort,
 				(ConnectionViewModel as CanConnectViewModel).TxPort,
