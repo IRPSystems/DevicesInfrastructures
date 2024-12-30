@@ -241,7 +241,7 @@ namespace DeviceCommunicators.NI_6002
                 
 
                 numberOfCounts = numofcounts;
-                double calculatedMotorPeriodInterval = (1 / (expectedrpm / 60)) * 1000;
+                double calculatedMotorPeriodInterval = (1.0 / (expectedrpm / 60.0)) * 1000.0;
                 maxAllowedInrervalTolerance = calculatedMotorPeriodInterval + calculatedMotorPeriodInterval * 0.4;
                 minAllowedInrervalTolerance = calculatedMotorPeriodInterval -  calculatedMotorPeriodInterval * 0.4;
 
