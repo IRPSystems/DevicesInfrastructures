@@ -9,7 +9,7 @@
              xmlns:mcu_modles="clr-namespace:DeviceCommunicators.MCU;assembly=DeviceCommunicators"
              xmlns:dbc_modles="clr-namespace:DeviceCommunicators.DBC;assembly=DeviceCommunicators"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" 
-             xmlns:comtrols="clr-namespace:Controls.ViewModels;assembly=Controls"
+             xmlns:controls="clr-namespace:Controls.ViewModels;assembly=Controls"
              xmlns:converters="clr-namespace:DeviceHandler.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" MinWidth="200">
@@ -83,7 +83,8 @@
 
         </Grid>
 
-        <comtrols:MultiSelectTreeView Grid.Row="1" ItemsSource="{Binding DevicesList}"
+        <TreeView Grid.Row="1" ItemsSource="{Binding DevicesList}"
+                                      x:Name="tvParameters"
                   Background="Transparent"
                   BorderBrush="{DynamicResource MahApps.Brushes.Accent2}"
                   BorderThickness="1"
@@ -191,7 +192,7 @@
                 </DataTemplate>
 
             </TreeView.Resources>
-        </comtrols:MultiSelectTreeView>
+        </TreeView>
 
         
 
