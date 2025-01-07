@@ -31,7 +31,7 @@ namespace DeviceCommunicators.Interfaces
 
         string Anolog_input_current(int port, double shuntResistor);
 
-        string Digital_Counter(int numofcounts);
+        string Digital_Counter(int numofcounts , int expectedrpm);
 
     }
 }
