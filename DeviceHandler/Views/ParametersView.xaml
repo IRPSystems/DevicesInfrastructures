@@ -83,8 +83,7 @@
 
         </Grid>
 
-        <TreeView Grid.Row="1" ItemsSource="{Binding DevicesList}"
-                                      x:Name="tvParameters"
+        <controls:MultiSelectTreeView Grid.Row="1" ItemsSource="{Binding DevicesList}"
                   Background="Transparent"
                   BorderBrush="{DynamicResource MahApps.Brushes.Accent2}"
                   BorderThickness="1"
@@ -192,7 +191,7 @@
                 </DataTemplate>
 
             </TreeView.Resources>
-        </TreeView>
+        </controls:MultiSelectTreeView>
 
         
 
