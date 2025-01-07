@@ -154,6 +154,9 @@ namespace DeviceHandler.ViewModel
 
 				MultiSelectTreeView treeView =
 					FindAncestorService.FindAncestor<MultiSelectTreeView>((DependencyObject)e.OriginalSource);
+				if(treeView == null) 
+					return;
+
 
 				if(treeView.SelectedItems == null || treeView.SelectedItems.Count == 1)
 				{
