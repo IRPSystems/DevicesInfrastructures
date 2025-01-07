@@ -111,7 +111,7 @@ namespace DeviceCommunicators.NI_6002
             return Convert.ToString(Analog_port[(int)input]);
         }
 
-        public string Digital_Counter(int numofcounts)
+        public string Digital_Counter(int numofcounts, int expectedrpm)
         {
             return "";
         }

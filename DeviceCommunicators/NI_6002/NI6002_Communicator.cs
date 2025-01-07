@@ -213,7 +213,7 @@ namespace DeviceCommunicators.NI_6002
                     data = _commmand_to_device.Anolog_input_current(port, niParamData.shunt_resistor);
                     break;
                 case "digital counter":
-                    data = _commmand_to_device.Digital_Counter(numofcounts);
+                    data = _commmand_to_device.Digital_Counter(numofcounts , niParamData.ExpectedRPM);
                     break;
 
 

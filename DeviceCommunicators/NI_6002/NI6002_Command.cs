@@ -9,6 +9,8 @@ using System.Threading;
 using MicroLibrary;
 using System.Diagnostics;
 using NationalInstruments;
+using System.Windows.Documents;
+using System.Collections.Generic;
 
 
 namespace DeviceCommunicators.NI_6002
@@ -151,10 +153,12 @@ namespace DeviceCommunicators.NI_6002
                     double[] data = reader.ReadSingleSample();
                     sample = data[0];
                 }
-                catch(Exception ex)
+                catch (DaqException exception)
                 {
-				//LoggerService.Error(this, "Failed to get analog input", ex);
-					return "Error";
+                    // Display Errors
+                    MessageBox.Show("Failed to get analog input port: " + port.ToString() + "Due to:\r\n" + "Daq Exception:\r\n" + exception.Message);
+                    return "Error";
+
                 }
             }
 			
@@ -214,7 +218,7 @@ namespace DeviceCommunicators.NI_6002
             catch (DaqException exception)
             {
                 // Display Errors
-                MessageBox.Show(exception.Message);
+                MessageBox.Show("Failed to get analog input current: Daq Exception Due to:\r\n" + exception.Message);
                 return "Error";
 
             }
@@ -224,13 +228,23 @@ namespace DeviceCommunicators.NI_6002
             };
 
         }
-
-        public string Digital_Counter(int numofcounts)
+        int flag = 0;
+        Stopwatch SW_TimeBetweenCounts = new Stopwatch();
+        List<double> Rpm_500 = new ();
+        double maxAllowedInrervalTolerance;
+        double minAllowedInrervalTolerance;
+        public string Digital_Counter(int numofcounts , int expectedrpm)
         {
             //timer
             try
             {
+                
+
                 numberOfCounts = numofcounts;
+                double calculatedMotorPeriodInterval = (1.0 / (expectedrpm / 60.0)) * 1000.0;
+                maxAllowedInrervalTolerance = calculatedMotorPeriodInterval + calculatedMotorPeriodInterval * 0.4;
+                minAllowedInrervalTolerance = calculatedMotorPeriodInterval -  calculatedMotorPeriodInterval * 0.4;
+
                 isReachedCounts = false;
                 counterTimerElapsed = 0;
                 LoggerService.Error(this, "Digital_Counter");
@@ -244,17 +258,18 @@ namespace DeviceCommunicators.NI_6002
 
                 myCounterReader = new CounterSingleChannelReader(myTask.Stream);
 
-                
+
                 Timer_counterTryRead.Interval = 1000;
-                //Timer_revolutions.Interval = 20000000;
+
+
+
                 myTask.Start();
+                countReading = myCounterReader.ReadSingleSampleUInt32();
+                previousRead = countReading;
                 Timer_counterTryRead.Start();
-                //Timer_revolutions.Start();
                 
                 
                 stopwatch.Start();
-                
-                
 
                 rpmCounterAutoResetEvent.WaitOne();
 
@@ -271,11 +286,16 @@ namespace DeviceCommunicators.NI_6002
 
                 myTask.Dispose();
 
+                flag++;
+                if(flag == 3)
+                {
+                    flag = 0;
+                }
                 return rpm.ToString();
             }
             catch (DaqException exception)
             {
-                MessageBox.Show(exception.Message);
+                MessageBox.Show("Failed to get Digital Counter: Daq Exception Due to:\r\n" + exception.Message);
                 myTask.Dispose();
                 return "Error"; // Return 0 or handle the exception as needed
             }
@@ -288,32 +308,73 @@ namespace DeviceCommunicators.NI_6002
         }
 
         bool isReachedCounts = false;
+        uint validCount = 0;
+        uint previousRead = 0;
+        bool isTimeBetweenCountStarted = false;
+        double timeSpanBetweenCounts;
+
 
         private void CounterTryRead(object sender, MicroTimerEventArgs e)
         {
             try
             {
-                countReading = myCounterReader.ReadSingleSampleUInt32();
-                if(countReading >= numberOfCounts && !isReachedCounts)
+                if(!isTimeBetweenCountStarted)
                 {
+                    SW_TimeBetweenCounts.Start();
+
+                    isTimeBetweenCountStarted = true;
+                }
+                
+
+                countReading = myCounterReader.ReadSingleSampleUInt32();
+
+                if (countReading > previousRead)
+                {
+                    SW_TimeBetweenCounts.Stop();
+                    timeSpanBetweenCounts = SW_TimeBetweenCounts.Elapsed.TotalMilliseconds;
+                    Rpm_500.Add(timeSpanBetweenCounts);
+                    isTimeBetweenCountStarted = false;
+                    if (timeSpanBetweenCounts < maxAllowedInrervalTolerance && timeSpanBetweenCounts > minAllowedInrervalTolerance)
+                    {
+                        validCount++;
+                    }
+                    SW_TimeBetweenCounts.Reset();
+                }
+
+                previousRead = countReading;
+
+                if (validCount >= numberOfCounts && !isReachedCounts)
+                { 
                     double timeElapsed = stopwatch.Elapsed.TotalMilliseconds;
-                    Timer_counterTryRead.Stop();
-                    stopwatch.Reset();
-                    isReachedCounts = true;
                     rpm = (numberOfCounts * 60) / (timeElapsed / 1000);
+                    DigitalCounter_ClearParams();
                     rpmCounterAutoResetEvent.Set();
                 }
             }
             catch (DaqException exception)
             {
-                MessageBox.Show(exception.Message);
+                MessageBox.Show("Failed to get Digital Counter: Daq Exception at CounterTryRead Due to:\r\n" + exception.Message);
                 rpmCounterAutoResetEvent.Set();
                 myTask.Dispose();
-                Timer_counterTryRead.Stop();
+                DigitalCounter_ClearParams();
                 return;
             }
             Thread.Sleep(1);
         }
+
+        private void DigitalCounter_ClearParams()
+        {
+            Timer_counterTryRead.Stop();
+            SW_TimeBetweenCounts.Stop();
+            SW_TimeBetweenCounts.Reset();
+            stopwatch.Reset();
+            Timer_counterTryRead.Stop();
+            Rpm_500.Clear();
+            previousRead = 0;
+            validCount = 0;
+            isReachedCounts = true;
+        }
+
 
         private void CalculateRevolutions(object sender, MicroTimerEventArgs e)
         {
