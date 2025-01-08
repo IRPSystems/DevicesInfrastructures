@@ -12,7 +12,6 @@ using NationalInstruments;
 using System.Windows.Documents;
 using System.Collections.Generic;
 
-
 namespace DeviceCommunicators.NI_6002
 {
     public class NI6002_Command: INiCommands
@@ -34,6 +33,7 @@ namespace DeviceCommunicators.NI_6002
         public double[] Analog_port_output { get; set; } = new double[8];
 
         private Task myTask;
+        public bool IsTaskDisposed { get; private set; }
 
         //rpm counter
         static AutoResetEvent rpmCounterAutoResetEvent = new AutoResetEvent(false);
@@ -97,7 +97,7 @@ namespace DeviceCommunicators.NI_6002
             //LoggerService.Inforamtion(this, "command to device : " + commannd_to_device);
 
 
-            Task digReadTaskPort = new Task();         
+            Task digReadTaskPort = new Task();
             digReadTaskPort.DIChannels.CreateChannel(
                  commannd_to_device,
                  "",
@@ -139,9 +139,10 @@ namespace DeviceCommunicators.NI_6002
 			
 			using (Task task2 = new Task())
             {
-				
 
-				string commannd_to_device = "";
+
+
+                string commannd_to_device = "";
 
                 commannd_to_device = _deviceName + "/" + "ai" + port;
                 try
@@ -182,6 +183,7 @@ namespace DeviceCommunicators.NI_6002
 
                 // Create a new task
                 myTask = new Task();
+
 
                 Thread.Sleep(200);
 
@@ -238,8 +240,7 @@ namespace DeviceCommunicators.NI_6002
             //timer
             try
             {
-                
-
+            
                 numberOfCounts = numofcounts;
                 double calculatedMotorPeriodInterval = (1.0 / (expectedrpm / 60.0)) * 1000.0;
                 maxAllowedInrervalTolerance = calculatedMotorPeriodInterval + calculatedMotorPeriodInterval * 0.4;
@@ -283,6 +284,11 @@ namespace DeviceCommunicators.NI_6002
 
                 //This delay is to make sure that the Timer_counterTryRead stops before we dispose myTask object
                 Thread.Sleep(100);
+                if(IsTaskDisposed)
+                {
+                    IsTaskDisposed = false;
+                    return "Error";
+                }
 
                 myTask.Dispose();
 
@@ -295,17 +301,15 @@ namespace DeviceCommunicators.NI_6002
             }
             catch (DaqException exception)
             {
-                MessageBox.Show("Failed to get Digital Counter: Daq Exception Due to:\r\n" + exception.Message);
-                myTask.Dispose();
-                return "Error"; // Return 0 or handle the exception as needed
+                if (!IsTaskDisposed)
+                {
+                    MessageBox.Show("Failed to get Digital Counter: Daq Exception Due to:\r\n" + exception.Message);
+                    myTask.Dispose();
+                }
+                return "Error";// Return 0 or handle the exception as needed
             }
         }
 
-        private void StopTimers()
-        {
-            Timer_counterTryRead.Stop();
-            Timer_revolutions.Stop();
-        }
 
         bool isReachedCounts = false;
         uint validCount = 0;
@@ -324,8 +328,13 @@ namespace DeviceCommunicators.NI_6002
 
                     isTimeBetweenCountStarted = true;
                 }
-                
 
+                if (IsTaskDisposed)
+                {
+                    DigitalCounter_ClearParams();
+                    rpmCounterAutoResetEvent.Set();
+                    return;
+                }
                 countReading = myCounterReader.ReadSingleSampleUInt32();
 
                 if (countReading > previousRead)
@@ -353,9 +362,12 @@ namespace DeviceCommunicators.NI_6002
             }
             catch (DaqException exception)
             {
-                MessageBox.Show("Failed to get Digital Counter: Daq Exception at CounterTryRead Due to:\r\n" + exception.Message);
+                if (!IsTaskDisposed)
+                {
+                    MessageBox.Show("Failed to get Digital Counter: Daq Exception at CounterTryRead Due to:\r\n" + exception.Message);
+                    myTask.Dispose();
+                }
                 rpmCounterAutoResetEvent.Set();
-                myTask.Dispose();
                 DigitalCounter_ClearParams();
                 return;
             }
@@ -375,6 +387,17 @@ namespace DeviceCommunicators.NI_6002
             isReachedCounts = true;
         }
 
+        public void Dispose()
+        {
+            if (IsTaskDisposed || myTask == null) return;
+            try 
+            {
+                myTask.Dispose();
+                IsTaskDisposed = true;
+            }
+            catch(DaqException ex) { LoggerService.Debug(this, ex.Message); }
+
+        }
 
         private void CalculateRevolutions(object sender, MicroTimerEventArgs e)
         {
