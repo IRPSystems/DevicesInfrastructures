@@ -72,15 +72,23 @@ namespace DeviceCommunicators.NI_6002
 			_isInitialized = true;
 		}
 
-		public override void Dispose()
-		{
-			base.Dispose();
+        public void DisposeTask()
+        {
+            if (_commmand_to_device is NI6002_Command command)
+                command.Dispose();
+        }
 
-			_isInitialized = false;
-		}
+        public override void Dispose()
+        {
+            base.Dispose();
+            if (_commmand_to_device is NI6002_Command command)
+                command.Dispose();
+
+            _isInitialized = false;
+        }
 
 
-		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
+        protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
 		{
 
 			if (data.IsSet)
