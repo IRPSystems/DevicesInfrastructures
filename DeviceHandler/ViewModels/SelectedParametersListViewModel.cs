@@ -494,6 +494,10 @@ namespace DeviceHandler.ViewModels
 			DeviceParameterData param,
 			int droppedOnIndex)
 		{
+			param.Background = Brushes.Transparent;
+			param.Foreground = Application.Current.MainWindow.Foreground;
+			param.ToolTip = null;
+
 			bool isParamExist = IsParamExistInList(param);
 			if (isParamExist)
 			{
