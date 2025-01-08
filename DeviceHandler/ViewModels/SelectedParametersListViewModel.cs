@@ -21,6 +21,7 @@ using DeviceHandler.Services;
 using System.Text;
 using DeviceCommunicators.MCU;
 using Entities.Enums;
+using System.Windows.Media;
 
 namespace DeviceHandler.ViewModels
 {
@@ -203,8 +204,18 @@ namespace DeviceHandler.ViewModels
 				DeviceParameterData actualParameterData =
 					deviceFullData.Device.ParemetersList.ToList().Find((p) => p.Name == parameterData.Name);
 				if (actualParameterData == null)
+				{
+					parameterData.Background = Brushes.Red;
+					parameterData.Foreground = Brushes.White;
+					parameterData.ToolTip = $"The parameter \"{parameterData.Name}\" doesn't exist in the parameters JSON file";
+					ParametersList.Add(parameterData);
+					ParametersList_WithIndex.Add(new RecordData() { Data = parameterData });
 					continue;
+				}
 
+				actualParameterData.Background = Brushes.Transparent;
+				actualParameterData.Foreground = Application.Current.MainWindow.Foreground;
+				actualParameterData.ToolTip = null;
 				ParametersList.Add(actualParameterData);
 				ParametersList_WithIndex.Add(new RecordData() { Data = actualParameterData });
 			}
