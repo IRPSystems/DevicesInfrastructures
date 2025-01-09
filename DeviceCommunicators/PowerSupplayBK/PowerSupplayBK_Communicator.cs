@@ -155,7 +155,7 @@ namespace DeviceCommunicators.PowerSupplayBK
 
 
                 param.Value = receive_value_from_supply(supplay_Parameter.Name);
-				LoggerService.Inforamtion(this, $"{supplay_Parameter.Name} - {param.Value}");
+				//LoggerService.Inforamtion(this, $"{supplay_Parameter.Name} - {param.Value}");
 
 				if (param.Value == null)
                 	callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
@@ -222,7 +222,7 @@ namespace DeviceCommunicators.PowerSupplayBK
             if (_serial_port == null)
                 return;
 
-            LoggerService.Inforamtion(this, supplay_Parameter.Name);
+            //LoggerService.Inforamtion(this, supplay_Parameter.Name);
 
 			string cmd = $"{supplay_Parameter.Command}?";
 
