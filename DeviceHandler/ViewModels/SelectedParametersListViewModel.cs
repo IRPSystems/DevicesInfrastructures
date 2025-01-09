@@ -350,7 +350,7 @@ namespace DeviceHandler.ViewModels
 
 		private void DragObject(MouseEventArgs e)
 		{
-			LoggerService.Inforamtion(this, "Object is draged");
+			//LoggerService.Inforamtion(this, "Object is draged");
 
 			Point mousePos = e.GetPosition(null);
 			Vector diff = _designDragDropData.StartPoint - mousePos;
