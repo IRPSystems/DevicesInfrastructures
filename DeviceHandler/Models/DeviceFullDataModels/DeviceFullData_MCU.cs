@@ -5,6 +5,7 @@ using DeviceHandler.Services;
 using DeviceHandler.ViewModels;
 using Newtonsoft.Json;
 using Services.Services;
+using System.Linq;
 
 namespace DeviceHandler.Models.DeviceFullDataModels
 {
@@ -46,13 +47,10 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		protected override void ConstructCheckConnection()
 		{
 
+			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as MCU_ParamData).Cmd == "flthi");
 			CheckCommunication = new CheckCommunicationService(
 				this,
-				new MCU_ParamData()
-				{
-					Cmd = "flthi",
-					Name = "Highest Active Fault",
-				},
+				data,
 				"MCU");
 		}
 
