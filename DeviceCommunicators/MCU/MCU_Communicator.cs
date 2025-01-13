@@ -186,6 +186,7 @@ namespace DeviceCommunicators.MCU
 #if _SAVE_TIME
 		private DateTime _prevStart;
 #endif
+		DateTime _startTime;
 		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
 		{
 			if (data is CommunicatorIOData_SendMessage sendMessageData)
@@ -197,6 +198,8 @@ namespace DeviceCommunicators.MCU
 			if (!(data?.Parameter is MCU_ParamData mcuParam))
 				return CommunicatorResultEnum.None;
 
+			_startTime = DateTime.Now;
+
 #if _SAVE_TIME
 			//data.SendStartTime = DateTime.Now;
 			//if(_prevStart.Year != 1)
@@ -206,7 +209,7 @@ namespace DeviceCommunicators.MCU
 
 			//_prevStart = data.SendStartTime;
 #endif
-			
+
 			byte[] id = null;
 			byte[] buffer = null;
 			try
@@ -292,6 +295,7 @@ namespace DeviceCommunicators.MCU
 
 				//_prevStart = data.SendStartTime;
 #endif
+				LoggerService.Inforamtion(this, $"{(DateTime.Now - _startTime).TotalMilliseconds}");
 				uint idNum = (uint)(buffer[0] + (buffer[1] << 8) + (buffer[2] << 16));
 
 				if (_idArrayToData.ContainsKey(idNum) == false || _idArrayToData[idNum].Count == 0)
