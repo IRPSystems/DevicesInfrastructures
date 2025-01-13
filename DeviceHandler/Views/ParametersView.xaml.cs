@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Controls.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,12 @@ namespace DeviceHandler.Views
 		public ParametersView()
 		{
 			InitializeComponent();
+
+			foreach(FrameworkElement element in grdMain.Children)
+			{
+				if (element is MultiSelectTreeView)
+					element.Name = "tvParameters";
+			}
 		}
     }
 }
