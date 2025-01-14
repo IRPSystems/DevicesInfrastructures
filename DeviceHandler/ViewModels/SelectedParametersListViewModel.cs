@@ -671,6 +671,12 @@ namespace DeviceHandler.ViewModels
 			
 		}
 
+		public void Clear()
+		{
+			ParametersList.Clear();
+			ParametersList_WithIndex.Clear();
+		}
+
 		#endregion Methods
 
 
