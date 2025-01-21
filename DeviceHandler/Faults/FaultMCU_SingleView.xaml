@@ -44,16 +44,21 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" 
+                       Name="tbVectorName"
                        Text="{Binding FaultsParameter.Name}" 
                        FontWeight="DemiBold" 
                        FontSize="14" 
                        VerticalAlignment="Center"/>
 
             <DataGrid Grid.Row="2"
+                      Name="dgFaultsList"
                       ItemsSource="{Binding FaultsList}"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
-                      CanUserDeleteRows="False">
+                      CanUserDeleteRows="False"
+                      CanUserReorderColumns="False"
+                      CanUserResizeColumns="False"
+                      CanUserSortColumns="False">
 
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow}">
