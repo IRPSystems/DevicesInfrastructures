@@ -38,6 +38,7 @@ namespace DeviceCommunicators.NI_6002
 		public NI6002_Init(LogLineListService logLineList)
         {
             _logLineList = logLineList;
+            ConnectedNIDevices = new List<string>();
         }
 
 		#endregion Constructor

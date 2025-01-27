@@ -157,7 +157,7 @@ namespace DeviceCommunicators.NI_6002
                 catch (DaqException exception)
                 {
                     // Display Errors
-                    MessageBox.Show("Failed to get analog input port: " + port.ToString() + "Due to:\r\n" + "Daq Exception:\r\n" + exception.Message);
+                    //MessageBox.Show("Failed to get analog input port: " + port.ToString() + "Due to:\r\n" + "Daq Exception:\r\n" + exception.Message);
                     return "Error";
 
                 }
