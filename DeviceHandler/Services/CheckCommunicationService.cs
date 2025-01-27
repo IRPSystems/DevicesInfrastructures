@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using ControlzEx.Standard;
 using DeviceCommunicators.Enums;
+using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using DeviceHandler.Enums;
 using DeviceHandler.Models.DeviceFullDataModels;
@@ -110,73 +111,83 @@ namespace DeviceHandler.Services
 			if (!_isInitialized)
 				return;
 
-			if (result == CommunicatorResultEnum.OK)
+			try
 			{
-				NotifyStatus(CommunicationStateEnum.Connected, null);
-				_isFirstMessageReceived = true;
-				_noReplyCounter = 0;
-
-				uint uval = (uint)Convert.ToDouble(param.Value);
-				uint errorState = (uval >> 8) & 0xF;
-				FaultEvent?.Invoke((ActiveErrorLevelEnum)errorState);
-			}
-			else
-			{
-				if (result == CommunicatorResultEnum.Error)
+				if (result == CommunicatorResultEnum.OK)
 				{
-					NotifyStatus(CommunicationStateEnum.Disconnected, resultDescription);
+					NotifyStatus(CommunicationStateEnum.Connected, null);
 					_isFirstMessageReceived = true;
 					_noReplyCounter = 0;
-					return;
-				}
 
-				if (result == CommunicatorResultEnum.NoResponse)
-				{
-					_noReplyCounter++;
-				//	LoggerService.Inforamtion(this, "_noReplyCounter=" + _noReplyCounter);
-
-					//if (_noReplyCounter >= 10)
-					//{
-					//	Task.Factory.StartNew(() =>
-					//	{
-					//		_deviceFullData.Disconnect();
-					//		System.Threading.Thread.Sleep(1000);
-					//		_deviceFullData.Connect();							
-					//	});
-
-					//	_noReplyCounter = 0;
-					//	LoggerService.Inforamtion(this, "Disconnect/connect");
-					//}
-
-					if (_noReplyCounter % 2 != 0)
+					if (param is MCU_ParamData)
 					{
+						uint uval = (uint)Convert.ToDouble(param.Value);
+						uint errorState = (uval >> 8) & 0xF;
+						FaultEvent?.Invoke((ActiveErrorLevelEnum)errorState);
+					}
+				}
+				else
+				{
+					if (result == CommunicatorResultEnum.Error)
+					{
+						NotifyStatus(CommunicationStateEnum.Disconnected, resultDescription);
+						_isFirstMessageReceived = true;
+						_noReplyCounter = 0;
 						return;
 					}
-				}
-				else
-				{
-					LoggerService.Inforamtion(this, "_noReplyCounter=0");
-					_noReplyCounter = 0;
-				}
 
+					if (result == CommunicatorResultEnum.NoResponse)
+					{
+						_noReplyCounter++;
+						//	LoggerService.Inforamtion(this, "_noReplyCounter=" + _noReplyCounter);
 
+						//if (_noReplyCounter >= 10)
+						//{
+						//	Task.Factory.StartNew(() =>
+						//	{
+						//		_deviceFullData.Disconnect();
+						//		System.Threading.Thread.Sleep(1000);
+						//		_deviceFullData.Connect();							
+						//	});
 
-				if (_isFirstMessageReceived)
-				{
-					NotifyStatus(CommunicationStateEnum.Disconnected, null);
-				}
-				else
-				{
-					if (_parametersRepository.IsInitialized)
-						NotifyStatus(CommunicationStateEnum.Initiated, null);
+						//	_noReplyCounter = 0;
+						//	LoggerService.Inforamtion(this, "Disconnect/connect");
+						//}
+
+						if (_noReplyCounter % 2 != 0)
+						{
+							return;
+						}
+					}
 					else
 					{
-						if (_isCommunicatorInitiated)
-							NotifyStatus(CommunicationStateEnum.Disconnected, null);
+						LoggerService.Inforamtion(this, "_noReplyCounter=0");
+						_noReplyCounter = 0;
+					}
+
+
+
+					if (_isFirstMessageReceived)
+					{
+						NotifyStatus(CommunicationStateEnum.Disconnected, null);
+					}
+					else
+					{
+						if (_parametersRepository.IsInitialized)
+							NotifyStatus(CommunicationStateEnum.Initiated, null);
 						else
-							NotifyStatus(CommunicationStateEnum.None, null);
+						{
+							if (_isCommunicatorInitiated)
+								NotifyStatus(CommunicationStateEnum.Disconnected, null);
+							else
+								NotifyStatus(CommunicationStateEnum.None, null);
+						}
 					}
 				}
+			}
+			catch (Exception ex)
+			{
+				LoggerService.Error(this, $"Failed to handle the response. Parameter: {param}", ex);
 			}
 
 			if(_isFirstMessageReceived)

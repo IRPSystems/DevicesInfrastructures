@@ -20,6 +20,7 @@
                   IsChecked="{Binding IsShowFaultsOnly, Mode=TwoWay}"/>
 
         <ListView Grid.Row="2"
+                  Name="lvFaultVectors"
                   ItemsSource="{Binding FaultsMCUHalfList}"
                   VerticalContentAlignment="Top">
 
