@@ -9,5 +9,8 @@ namespace DeviceCommunicators.Enums
 		ValueNotSet,
 		Error,
 		InvalidUniqueId,
+		ReceiveParsingError,
+		SendParseError,
+		InvalidValue,
 	}
 }

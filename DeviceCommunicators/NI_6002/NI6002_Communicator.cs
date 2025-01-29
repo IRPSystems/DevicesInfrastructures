@@ -6,6 +6,7 @@ using System.Threading;
 using DeviceCommunicators.Interfaces;
 using DeviceCommunicators.Models;
 using System.Collections.Generic;
+using System.Windows.Shapes;
 
 namespace DeviceCommunicators.NI_6002
 {
@@ -127,12 +128,16 @@ namespace DeviceCommunicators.NI_6002
 				if (ret != null)
 					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 				else
-					callback?.Invoke(param, CommunicatorResultEnum.Error, null);
-			}
+				{
+                    niParamData.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Send, CommunicatorResultEnum.SendParseError.ToString());
+                    callback?.Invoke(param, CommunicatorResultEnum.Error, null);
+                }
+            }
 
 			catch (Exception ex)
 			{
-				LoggerService.Error(this, "Failed to set Command for Ni" + param.Name, ex);
+                param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Send, "Failed to set value for parameter: " + ex);
+                LoggerService.Error(this, "Failed to set Command for Ni" + param.Name, ex);
 			}
 		}
 
@@ -152,7 +157,6 @@ namespace DeviceCommunicators.NI_6002
 					return;
 				}
 
-
 				Thread.Sleep(10);
                 //LoggerService.Inforamtion(this, "message : " + message);
                 double value;
@@ -166,14 +170,17 @@ namespace DeviceCommunicators.NI_6002
 				{
 					param.Value = value;
 					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
-				}
+                }
 				else
-					callback?.Invoke(param, CommunicatorResultEnum.Error, $"The response is {message}");
-
-			}
+				{
+                    callback?.Invoke(param, CommunicatorResultEnum.Error, $"The response is {message}");
+                    niParamData.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.ReceiveParsingError.ToString());
+                }
+            }
 			catch (Exception ex)
 			{
-				LoggerService.Error(this, "Failed to receive value for parameter: " + param.Name, ex);
+                param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, "Failed to receive value for parameter: " + ex);
+                LoggerService.Error(this, "Failed to receive value for parameter: " + param.Name, ex);
 			}
 		}
 
@@ -195,8 +202,10 @@ namespace DeviceCommunicators.NI_6002
 
 			string cmd = niParamData.command_to_device.ToLower();
 
+			niParamData.UpdateSendResLog(cmd + " " + port + "" + line, DeviceParameterData.SendOrRecieve.Send);
 
-			double value = 0;
+
+            double value = 0;
 			switch (cmd)
             {
                 case "digital input":
