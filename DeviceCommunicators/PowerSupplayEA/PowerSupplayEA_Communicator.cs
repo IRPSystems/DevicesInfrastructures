@@ -114,7 +114,7 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 				LoggerService.Inforamtion(this, "Setting \"" + ea_ParamData.Name + "\" - cmd: " + cmd);
 
-				if (_onOffCommands.IndexOf(ea_ParamData.Cmd) >= 0)
+                if (_onOffCommands.IndexOf(ea_ParamData.Cmd) >= 0)
 				{
 					if (value == 1)
 					{
@@ -148,11 +148,15 @@ namespace DeviceCommunicators.PowerSupplayEA
 					_serial_port.Send(cmd);
 				}
 
-				callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+                ea_ParamData.UpdateSendResLog(cmd, DeviceParameterData.SendOrRecieve.Send);
+
+
+                callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 			}
 			catch (Exception ex)
 			{
-				LoggerService.Error(this, "Failed to set value for parameter: " + param.Name, ex);
+                param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Send, "Failed to set value for parameter: " + ex);
+                LoggerService.Error(this, "Failed to set value for parameter: " + param.Name, ex);
 			}
 		}
 
@@ -172,12 +176,15 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 				_serial_port.Send(cmd);
 
-				string buffer = Read();
+                ea_ParamData.UpdateSendResLog(cmd, DeviceParameterData.SendOrRecieve.Send);
+
+                string buffer = Read();
 
 				if (string.IsNullOrEmpty(buffer))
 				{
-					callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
-					return;
+                    callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
+                    ea_ParamData.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.NoResponse.ToString());
+                    return;
 				}
 
 				
@@ -191,7 +198,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 					else
 					{
 						callback?.Invoke(param, CommunicatorResultEnum.Error, "Invalid value");
-						return;
+                        ea_ParamData.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.InvalidValue.ToString());
+                        return;
 					}
 
 					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
@@ -210,7 +218,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 				}
 			}
             catch(Exception ex) 
-            { 
+            {
+                param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, "Failed to receive value for parameter: " + ex);
                 LoggerService.Error(this, "Failed to receive value for parameter: " + param.Name, ex);
             }
 		}

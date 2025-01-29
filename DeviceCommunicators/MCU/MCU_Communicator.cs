@@ -194,7 +194,11 @@ namespace DeviceCommunicators.MCU
 				return CommunicatorResultEnum.OK;
 			}
 
-			if (!(data?.Parameter is MCU_ParamData mcuParam))
+            
+
+
+            if (!(data?.Parameter is MCU_ParamData mcuParam))
+
 				return CommunicatorResultEnum.None;
 
 #if _SAVE_TIME
@@ -246,9 +250,10 @@ namespace DeviceCommunicators.MCU
 
 			data.SendTimoutTimer.Start();
 			//lock (CommService)
-				CommService.Send(buffer);
+				SendCANData(data);
 
-			return CommunicatorResultEnum.OK;
+
+            return CommunicatorResultEnum.OK;
 		}
 
 		private void Data_TimeoutEvent(CommunicatorIOData data)
@@ -336,14 +341,16 @@ namespace DeviceCommunicators.MCU
 				{
 					data.TimeoutEvent -= Data_TimeoutEvent;
 					data.Callback?.Invoke(data.Parameter, isSuccess, errorDescription);
-					return;
+                    string hexString = "0x" + BitConverter.ToString(buffer).Replace("-", "");
+                    data.Parameter.UpdateSendResLog(hexString, DeviceParameterData.SendOrRecieve.Recieve, errorDescription, amountOfRetries: data.SendCounter);
+                    return;
 				}
 
 				Retry(data);
 			}
 			catch (Exception ex) 
 			{
-				LoggerService.Error(this, "Failed to handle a received message", ex);
+                LoggerService.Error(this, "Failed to handle a received message", ex);
 			}
 		}
 
@@ -355,10 +362,17 @@ namespace DeviceCommunicators.MCU
 			data.SendCounter++;
 			_idArrayToData[data.SendId].Add(data);
 			data.SendTimoutTimer.Start();
-			CommService.Send(data.SendBuffer);
+			SendCANData(data);
 		}
 
-		private CommunicatorResultEnum HandleBuffer(
+		private void SendCANData(CommunicatorIOData data)
+        {
+            string hexString = "0x" + BitConverter.ToString(data.SendBuffer).Replace("-", "");
+            data.Parameter.UpdateSendResLog(hexString, DeviceParameterData.SendOrRecieve.Send);
+            CommService.Send(data.SendBuffer);
+        }
+
+        private CommunicatorResultEnum HandleBuffer(
 			byte[] readBuffer,
 			MCU_ParamData mcuParam,
 			bool isSet,
@@ -390,7 +404,10 @@ namespace DeviceCommunicators.MCU
 				{
 					errDescription = "Unknown error: " + err;
 					if (_mcuErrorToDescription.ContainsKey(err))
-						errDescription = _mcuErrorToDescription[err];
+					{
+                        errDescription = _mcuErrorToDescription[err];
+                        mcuParam.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, errDescription);
+                    }
 					return CommunicatorResultEnum.Error;
 				}
 			}
@@ -398,7 +415,8 @@ namespace DeviceCommunicators.MCU
 			{
 				LoggerService.Error(this, "Failed to handle received message", ex);
 				errDescription = "Internal error";
-				return CommunicatorResultEnum.Error;
+                mcuParam.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, "Failed to handle received message: " + ex);
+                return CommunicatorResultEnum.Error;
 			}
 
 			// Make sure the ack value is like the set value
@@ -411,6 +429,7 @@ namespace DeviceCommunicators.MCU
 						mcuParam.Name + ": ValueNotSet: Original=" + dsetValue + "; Ack=" + value);
 
 					mcuParam.Value = dvalue;
+                    mcuParam.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, mcuParam.Name + ": ValueNotSet: Original=" + dsetValue + "; Ack=" + value);
                     return CommunicatorResultEnum.ValueNotSet;
 				}
 			}

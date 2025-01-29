@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Linq;
+using static DeviceCommunicators.TSCPrinter.PrinterTSC_Communicator;
 
 namespace DeviceCommunicators.TSCPrinter
 {
@@ -239,8 +240,9 @@ namespace DeviceCommunicators.TSCPrinter
                     return;
 
                 SendStringToPrinter(tscPrinter_Param.DataContent);
-
-                if (CheckPrinterStatusPostCommand())
+                tscPrinter_Param.UpdateSendResLog(tscPrinter_Param.DataContent, DeviceParameterData.SendOrRecieve.Send);
+                PrinterStatus printerStatus;
+                if (CheckPrinterStatusPostCommand(out printerStatus))
                 {
                     callback?.Invoke(param, CommunicatorResultEnum.OK, null);
                     return;
@@ -248,12 +250,14 @@ namespace DeviceCommunicators.TSCPrinter
                 else
                 {
                     callback?.Invoke(param, CommunicatorResultEnum.Error, null);
+                    tscPrinter_Param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, printerStatus.ToString());
                     return;
                 }
 
             }
             catch (Exception ex)
             {
+                param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Send, "Failed to set value for parameter: " + ex);
                 LoggerService.Error(this, "Failed to set value for parameter: " + param.Name, ex);
             }
         }
@@ -270,6 +274,7 @@ namespace DeviceCommunicators.TSCPrinter
                 if (tscPrinter_Param.DataContent != checkStatusString)
                 {
                     SendStringToPrinter(tscPrinter_Param.DataContent);
+                    tscPrinter_Param.UpdateSendResLog(tscPrinter_Param.DataContent, DeviceParameterData.SendOrRecieve.Send);
                 }
                 PrinterStatus status = PrinterStatus.NoComm;
                 using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
@@ -284,6 +289,7 @@ namespace DeviceCommunicators.TSCPrinter
                     }
                     catch (Exception e)
                     {
+                        tscPrinter_Param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, "Printer operation timed out and was canceled:" + e.Message);
                         MessageBox.Show("Printer operation timed out and was canceled:" + e.Message);
                     }
                 }
@@ -297,11 +303,13 @@ namespace DeviceCommunicators.TSCPrinter
                 else
                 {
                     callback?.Invoke(param, CommunicatorResultEnum.Error, null);
+                    tscPrinter_Param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, status.ToString());
                     return;
                 }
             }
             catch (Exception ex)
             {
+                param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, "Failed to receive value for parameter: " + ex);
                 LoggerService.Error(this, "Failed to receive value for parameter: " + param.Name, ex);
             }
         }
@@ -372,21 +380,21 @@ namespace DeviceCommunicators.TSCPrinter
             return bSuccess;
         }
 
-        private bool CheckPrinterStatusPostCommand()
+        private bool CheckPrinterStatusPostCommand(out PrinterStatus printerStatus)
         {
             bool? result = true;
 
             Thread.Sleep(50);
             sendcommand(checkStatusString);
-            PrinterStatus status = (PrinterStatus)usbportqueryprinter();
+            printerStatus = (PrinterStatus)usbportqueryprinter();
 
-            while (status != PrinterStatus.OK && result == true)
+            while (printerStatus != PrinterStatus.OK && result == true)
             {
-                LoggerService.Error(this, "Printer Error: " + status.ToString());
+                LoggerService.Error(this, "Printer Error: " + printerStatus.ToString());
 
                 // WPF MessageBox equivalent
                 MessageBoxResult messageBoxResult = MessageBox.Show(
-                    "Label has failed due to printer status: " + status.ToString() + "\r\n" +
+                    "Label has failed due to printer status: " + printerStatus.ToString() + "\r\n" +
                     "Please perform relevant maintenance and press 'OK' when finished",
                     "Message Box",
                     MessageBoxButton.OKCancel);
@@ -396,8 +404,8 @@ namespace DeviceCommunicators.TSCPrinter
                     DisableError();
                     Thread.Sleep(2000);
                     sendcommand(checkStatusString);
-                    status = (PrinterStatus)usbportqueryprinter();
-                    LoggerService.Error(this, status.ToString());
+                    printerStatus = (PrinterStatus)usbportqueryprinter();
+                    LoggerService.Error(this, printerStatus.ToString());
                 }
                 else
                 {
@@ -405,7 +413,7 @@ namespace DeviceCommunicators.TSCPrinter
                 }
             }
 
-            if (status == PrinterStatus.OK)
+            if (printerStatus == PrinterStatus.OK)
             {
                 LoggerService.Error(this, "Label Printed");
                 return true;

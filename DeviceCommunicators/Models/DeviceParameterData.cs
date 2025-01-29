@@ -5,6 +5,7 @@ using Entities.Enums;
 using System.Windows;
 using System;
 using System.Windows.Media;
+using System.Runtime.CompilerServices;
 
 namespace DeviceCommunicators.Models
 {
@@ -73,10 +74,33 @@ namespace DeviceCommunicators.Models
 
 		public int CommunicationTimeout { get; set; }
 
+		public CommSendResLog CommSendResLog { get; set; } = new();
+
 		public DeviceParameterData()
 		{
-			
-		}
+            
+        }
+
+		public enum SendOrRecieve
+        {
+            Send,
+            Recieve
+        }
+
+		public virtual void UpdateSendResLog(string command, SendOrRecieve sendOrRecieve, string CommErrorMsg = "No Error", int amountOfRetries = 1)
+		{
+            if (sendOrRecieve == SendOrRecieve.Send)
+			{
+				CommSendResLog.SendCommand = command;
+				CommSendResLog.CommErrorMsg = CommErrorMsg;
+			}
+			else
+			{
+				CommSendResLog.ReceivedValue = command;
+				CommSendResLog.CommErrorMsg = CommErrorMsg;
+			}
+			CommSendResLog.NumberOfTries = amountOfRetries;
+        }
 
 		public virtual object Clone()
 		{

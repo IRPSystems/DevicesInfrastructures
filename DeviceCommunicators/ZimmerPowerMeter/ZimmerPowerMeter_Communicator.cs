@@ -9,6 +9,7 @@ using Services.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Windows.Shapes;
 using System.Xml.Linq;
 
 namespace DeviceCommunicators.ZimmerPowerMeter
@@ -125,16 +126,20 @@ namespace DeviceCommunicators.ZimmerPowerMeter
 					cmd += powerMeter.Channel;
 				cmd += "?\r\n";
 				SerialService.Send(cmd);
+                powerMeter.UpdateSendResLog(cmd, DeviceParameterData.SendOrRecieve.Send);
 
-				Thread.Sleep(500);
+
+                Thread.Sleep(500);
 
 
 				string received;
 				SerialService.Read(out received);
 				if (string.IsNullOrEmpty(received))
 				{
-					callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
-					return;
+                    
+                    callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
+                    powerMeter.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.NoResponse.ToString());
+                    return;
 				}
 
 				if (powerMeter.Command == "*IDN")
@@ -148,12 +153,16 @@ namespace DeviceCommunicators.ZimmerPowerMeter
 				param.Value = d;
 
 				if (!res)
-                	callback?.Invoke(param, CommunicatorResultEnum.Error, "Received: " + received);
-				else
+				{
+                    callback?.Invoke(param, CommunicatorResultEnum.Error, "Received: " + received);
+                    powerMeter.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.ReceiveParsingError.ToString());
+                }
+                else
                     callback?.Invoke(param, CommunicatorResultEnum.OK, null);
             }
-            catch(Exception ex) 
-            { 
+            catch(Exception ex)
+            {
+                param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, "Failed to receive value for parameter: " + ex);
                 LoggerService.Error(this, "Failed to receive value for parameter: " + param.Name, ex);
             }
 		}

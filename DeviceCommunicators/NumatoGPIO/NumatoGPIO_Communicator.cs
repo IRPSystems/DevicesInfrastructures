@@ -10,6 +10,7 @@ using System.Windows;
 using System.Runtime.ConstrainedExecution;
 using DeviceCommunicators.ZimmerPowerMeter;
 using System.Threading;
+using System.Windows.Shapes;
 
 namespace DeviceCommunicators.NumatoGPIO
 {
@@ -104,7 +105,8 @@ namespace DeviceCommunicators.NumatoGPIO
 
                 string cmd = paramData.Cmd + " " + paramData.Io_port;
                 SerialService.Send(cmd, true);
-            
+                paramData.UpdateSendResLog(cmd, DeviceParameterData.SendOrRecieve.Send);
+
 
                 callback?.Invoke(param, CommunicatorResultEnum.OK, null);
             }
@@ -134,6 +136,7 @@ namespace DeviceCommunicators.NumatoGPIO
                 }
 
                 SerialService.Send(cmd, true);
+                paramData.UpdateSendResLog(cmd, DeviceParameterData.SendOrRecieve.Send);
 
                 Thread.Sleep(500);
 
@@ -144,6 +147,7 @@ namespace DeviceCommunicators.NumatoGPIO
                 if (string.IsNullOrEmpty(received))
                 {
                     callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
+                    paramData.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.NoResponse.ToString());
                     return;
                 }
 
@@ -170,15 +174,23 @@ namespace DeviceCommunicators.NumatoGPIO
                 param.Value = response;
 
                 if (!isParseOk)
+                {
                     callback?.Invoke(param, CommunicatorResultEnum.Error, "Received: " + received);
+                    paramData.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.ReceiveParsingError.ToString());
+                }
+                    
                 else
+                {
                     callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+                }
+                    
             }
             catch (Exception ex)
             {
                 LoggerService.Error(this, "Failed to receive value for parameter: " + param.Name, ex);
             }
         }
+
         private double ConvertAdcToVoltage(int adcValue)
         {
             const double maxAdcValue = 1023.0;
