@@ -51,7 +51,6 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		protected override void ConstructCheckConnection()
 		{
 			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as MCU_ParamData).Cmd == "flthi");
-			DeviceParameterData data = Device.ParemetersList.ToList().Find((p) => (p as MCU_ParamData).Cmd == "flthi");
 			CheckCommunication = new CheckCommunicationService(
 				this,
 				data,

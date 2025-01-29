@@ -16,5 +16,6 @@ namespace DeviceCommunicators.Models
         public string Device { get; set; }
         public string Tool { get; set; }
         public string StepName { get; set; }
+        public DateTime timeStamp { get; set; }
     }
 }
