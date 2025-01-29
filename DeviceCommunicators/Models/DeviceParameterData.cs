@@ -6,6 +6,8 @@ using System.Windows;
 using System;
 using System.Windows.Media;
 using System.Runtime.CompilerServices;
+using System.Data;
+using Services.Services;
 
 namespace DeviceCommunicators.Models
 {
@@ -87,19 +89,27 @@ namespace DeviceCommunicators.Models
             Recieve
         }
 
-		public virtual void UpdateSendResLog(string command, SendOrRecieve sendOrRecieve, string CommErrorMsg = "No Error", int amountOfRetries = 1)
-		{
-            if (sendOrRecieve == SendOrRecieve.Send)
+        public virtual void UpdateSendResLog(string command, SendOrRecieve sendOrRecieve, string CommErrorMsg = "No Error", int amountOfRetries = 1)
+        {
+			try
 			{
-				CommSendResLog.SendCommand = command;
-				CommSendResLog.CommErrorMsg = CommErrorMsg;
-			}
-			else
+                if (sendOrRecieve == SendOrRecieve.Send)
+                {
+                    CommSendResLog.SendCommand = command;
+                    CommSendResLog.CommErrorMsg = CommErrorMsg;
+                }
+                else
+                {
+                    CommSendResLog.ReceivedValue = command;
+                    CommSendResLog.CommErrorMsg = CommErrorMsg;
+                }
+                CommSendResLog.NumberOfTries = amountOfRetries;
+                CommSendResLog.timeStamp = DateTime.UtcNow;
+            }
+            catch (Exception ex)
 			{
-				CommSendResLog.ReceivedValue = command;
-				CommSendResLog.CommErrorMsg = CommErrorMsg;
+				LoggerService.Error(this, "Error while updating send res log: " + ex.InnerException.Message);
 			}
-			CommSendResLog.NumberOfTries = amountOfRetries;
         }
 
 		public virtual object Clone()
