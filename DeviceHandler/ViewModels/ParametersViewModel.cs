@@ -158,13 +158,9 @@ namespace DeviceHandler.ViewModel
 					return;
 
 
-				if(treeView.SelectedItems == null || treeView.SelectedItems.Count == 1)
+				if (treeView.SelectedItems.Count > 0)
 				{
-					DragSingleItem(e, treeView);
-				}
-				else if(treeView.SelectedItems.Count > 0)
-				{
-					LoggerService.Inforamtion(this, "Multiple items dragging");
+					LoggerService.Inforamtion(this, $"Dragging {treeView.SelectedItems[0]}");
 
 					DependencyObject sourceObject = treeView;
 

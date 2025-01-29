@@ -74,6 +74,8 @@ namespace DeviceCommunicators.Models
 		[JsonIgnore]
 		public bool IsAbsolute { get; set; }
 
+		public string ToolTip { get; set; }
+
 		public int CommunicationTimeout { get; set; }
 
 		public CommSendResLog CommSendResLog { get; set; } = new();
