@@ -20,7 +20,6 @@ namespace DeviceHandler.Services
 		#region Fields
 
 		private DeviceFullData _deviceFullData;
-		private ParametersRepositoryService _parametersRepository;
 		private DeviceParameterData _parameter;
 
 		private bool _isFirstMessageReceived;
@@ -28,6 +27,7 @@ namespace DeviceHandler.Services
 
 		private int _noReplyCounter;
 
+		private System.Timers.Timer _timerMessageSending;
 		private System.Timers.Timer _timerTimeout;
 
 		private CommunicationStateEnum prevStatus;
@@ -44,13 +44,11 @@ namespace DeviceHandler.Services
 		#region Constructor
 
 		public CheckCommunicationService(
-			//ParametersRepositoryService parametersRepository,
 			DeviceFullData deviceFullData,
 			DeviceParameterData parameter,
 			string name) 
 		{
 			_deviceFullData = deviceFullData;
-			_parametersRepository = deviceFullData.ParametersRepository;
 			_parameter = parameter;
 			Name = name;
 
@@ -63,7 +61,10 @@ namespace DeviceHandler.Services
 
 			_isFirstMessageReceived = false;
 
-			_isCommunicatorInitiated = _parametersRepository.IsInitialized;
+			_isCommunicatorInitiated = _deviceFullData.DeviceCommunicator.IsInitialized;
+
+			_timerMessageSending = new System.Timers.Timer(1000);
+			_timerMessageSending.Elapsed += _timerMessageSending_Elapsed;
 
 			_timerTimeout = new System.Timers.Timer(3000);
 			_timerTimeout.Elapsed += TimoutElapsedEventHandler;
@@ -79,7 +80,7 @@ namespace DeviceHandler.Services
 		{
 			_noReplyCounter = 0;
 
-			if (_parametersRepository.IsInitialized)
+			if (_deviceFullData.DeviceCommunicator.IsInitialized)
 			{
 				if(!_isReconnect)
 					NotifyStatus(CommunicationStateEnum.Initiated, null);
@@ -89,16 +90,23 @@ namespace DeviceHandler.Services
 			else
 				NotifyStatus(CommunicationStateEnum.None, null);
 
-			_parametersRepository.Add(_parameter, RepositoryPriorityEnum.Medium, GetValueCallback);
+			_timerMessageSending.Start();
 
 			_isInitialized = true;
 			_isReconnect = true;
 		}
 
+
+
+		private void _timerMessageSending_Elapsed(object sender, ElapsedEventArgs e)
+		{
+			_deviceFullData.DeviceCommunicator.GetParamValue(_parameter, GetValueCallback);
+		}
+
 		public void Dispose()
 		{
 			_timerTimeout.Stop();
-			_parametersRepository.Remove(_parameter, GetValueCallback);
+			_timerMessageSending.Stop();
 			NotifyStatus(CommunicationStateEnum.Disconnected, null);
 
 			_isInitialized = false;
@@ -173,7 +181,7 @@ namespace DeviceHandler.Services
 					}
 					else
 					{
-						if (_parametersRepository.IsInitialized)
+						if (_deviceFullData.DeviceCommunicator.IsInitialized)
 							NotifyStatus(CommunicationStateEnum.Initiated, null);
 						else
 						{
