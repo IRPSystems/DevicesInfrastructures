@@ -300,7 +300,7 @@ namespace DeviceCommunicators.MCU
 
 				//_prevStart = data.SendStartTime;
 #endif
-				LoggerService.Inforamtion(this, $"{(DateTime.Now - _startTime).TotalMilliseconds}");
+				//LoggerService.Inforamtion(this, $"{(DateTime.Now - _startTime).TotalMilliseconds}");
 				uint idNum = (uint)(buffer[0] + (buffer[1] << 8) + (buffer[2] << 16));
 
 				if (_idArrayToData.ContainsKey(idNum) == false || _idArrayToData[idNum].Count == 0)
