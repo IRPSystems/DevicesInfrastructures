@@ -172,50 +172,51 @@ namespace DeviceCommunicators.NI_6002
             {
 
                 double sample;
-                double tempMinValueNumeric = 0;
-                double tempMaxValueNumeric = 0.020;
+                double tempMinValueNumeric = -300;
+                double tempMaxValueNumeric = 300;
                 double tempSamplesToReadNumeric = 1000;
                 double currentSensorMeasGain = 2000;
 
                 if (shuntResistor == 0)
                     shuntResistor = 17.8;
-
-
-                // Create a new task
-                myTask = new Task();
-
-
-                Thread.Sleep(200);
-
                 string commannd_to_device = "";
-
-                //_deviceName = "Dev2";
-
-                //LoggerService.Error(this, "Analog input current: Port" + port.ToString() + " shuntresistor: " + shuntResistor.ToString());
 
                 commannd_to_device = _deviceName + "/" + "ai" + port;
 
-                // Create a virtual channel // can be internal too
-                myTask.AIChannels.CreateCurrentChannel(commannd_to_device, "",
-                    AITerminalConfiguration.Differential, Convert.ToDouble(tempMinValueNumeric),
-                    Convert.ToDouble(tempMaxValueNumeric), Convert.ToDouble(shuntResistor / currentSensorMeasGain),
-                    AICurrentUnits.Amps);
+                // Create a new task
+                using (var myTask = new Task())
+                {
+                    Thread.Sleep(200);
 
-                myTask.Timing.ConfigureSampleClock("", Convert.ToDouble(tempSamplesToReadNumeric),
-                    SampleClockActiveEdge.Rising, SampleQuantityMode.FiniteSamples, 1000);
+                    //_deviceName = "Dev2";
 
-                // Verify the Task
-                myTask.Control(TaskAction.Verify);
-
-                AnalogMultiChannelReader reader = new AnalogMultiChannelReader(myTask.Stream);
-                double[] data = reader.ReadSingleSample();
-                sample = data[0];
-                //LoggerService.Error(this, "Analog input current: Sample: " + sample.ToString());
+                    LoggerService.Inforamtion(this, "Analog input current: Port" + port.ToString() + " shuntresistor: " + shuntResistor.ToString());
+                    LoggerService.Inforamtion(this, "Analog input command :" + commannd_to_device);
 
 
+                    // Create a virtual channel // can be internal too
+                    myTask.AIChannels.CreateCurrentChannel(commannd_to_device, "",
+                        AITerminalConfiguration.Differential, Convert.ToDouble(tempMinValueNumeric),
+                        Convert.ToDouble(tempMaxValueNumeric), Convert.ToDouble(shuntResistor / currentSensorMeasGain),
+                        AICurrentUnits.Amps);
 
-                return sample.ToString();
+                    myTask.Timing.ConfigureSampleClock("", Convert.ToDouble(tempSamplesToReadNumeric),
+                        SampleClockActiveEdge.Rising, SampleQuantityMode.FiniteSamples, 1000);
 
+                    // Verify the Task
+                    myTask.Control(TaskAction.Verify);
+
+
+                   // Continue execution after the delay
+                   AnalogMultiChannelReader reader = new AnalogMultiChannelReader(myTask.Stream);
+                   double[] data = reader.ReadSingleSample();
+                   sample = data[0];
+                   LoggerService.Inforamtion(this, "Analog input current: Sample: " + sample.ToString());
+
+
+
+                    return sample.ToString();
+                }
             }
             catch (DaqException exception)
             {
@@ -224,10 +225,6 @@ namespace DeviceCommunicators.NI_6002
                 return "Error";
 
             }
-            finally
-            {
-               myTask?.Dispose();
-            };
 
         }
         int flag = 0;
