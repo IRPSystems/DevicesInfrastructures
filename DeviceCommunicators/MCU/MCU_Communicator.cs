@@ -5,6 +5,7 @@ using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceCommunicators.Models;
 using Entities.Models;
+using NationalInstruments.DataInfrastructure;
 using Services.Services;
 using System;
 using System.Collections.Concurrent;
@@ -281,10 +282,12 @@ namespace DeviceCommunicators.MCU
 			{
 				data.TimeoutEvent -= Data_TimeoutEvent;
 				data.Callback?.Invoke(data.Parameter, CommunicatorResultEnum.NoResponse, "");
-				return;
+                data.Parameter.UpdateSendResLog(null, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.CommTimeOut.ToString(), amountOfRetries: data.SendCounter);
+                return;
 			}
+            data.Parameter.UpdateSendResLog(null, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.CommTimeOut.ToString(), amountOfRetries: data.SendCounter);
 
-			Retry(data);
+            Retry(data);
 		}
 
 		private void CanService_MessageReceivedEvent(byte[] buffer)
@@ -345,12 +348,13 @@ namespace DeviceCommunicators.MCU
 				{
 					data.TimeoutEvent -= Data_TimeoutEvent;
 					data.Callback?.Invoke(data.Parameter, isSuccess, errorDescription);
-                    string hexString = "0x" + BitConverter.ToString(buffer).Replace("-", "");
-                    data.Parameter.UpdateSendResLog(hexString, DeviceParameterData.SendOrRecieve.Recieve, errorDescription, amountOfRetries: data.SendCounter);
+                    string hexStringCmd = "0x" + BitConverter.ToString(buffer).Replace("-", "");
+                    data.Parameter.UpdateSendResLog(hexStringCmd, DeviceParameterData.SendOrRecieve.Recieve, errorDescription, amountOfRetries: data.SendCounter);
                     return;
 				}
+                data.Parameter.UpdateSendResLog(null, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.CommTimeOut.ToString(), amountOfRetries: data.SendCounter);
 
-				Retry(data);
+                Retry(data);
 			}
 			catch (Exception ex) 
 			{
@@ -371,8 +375,8 @@ namespace DeviceCommunicators.MCU
 
 		private void SendCANData(CommunicatorIOData data)
         {
-            string hexString = "0x" + BitConverter.ToString(data.SendBuffer).Replace("-", "");
-            data.Parameter.UpdateSendResLog(hexString, DeviceParameterData.SendOrRecieve.Send);
+            string hexStringCmd = "0x" + BitConverter.ToString(data.SendBuffer).Replace("-", "");
+            data.Parameter.UpdateSendResLog(hexStringCmd, DeviceParameterData.SendOrRecieve.Send);
             CommService.Send(data.SendBuffer);
         }
 
@@ -457,19 +461,21 @@ namespace DeviceCommunicators.MCU
 			else
 				mcuParam.Value = dvalue;
 
-			//if(mcuParam.Cmd != "")
-			//{
-			//	_logLineList.AddLine(
-			//		new LogLineData()
-			//		{
-			//			Time = new TimeSpan(),
-			//			Data = $"{mcuParam.Name} = {mcuParam.Value}",
-			//			Background = Brushes.Blue,
-			//			Foreground = Brushes.White,
-			//		});
-			//}
+            //if(mcuParam.Cmd != "")
+            //{
+            //	_logLineList.AddLine(
+            //		new LogLineData()
+            //		{
+            //			Time = new TimeSpan(),
+            //			Data = $"{mcuParam.Name} = {mcuParam.Value}",
+            //			Background = Brushes.Blue,
+            //			Foreground = Brushes.White,
+            //		});
+            //}
+            string hexStringCmd = "0x" + BitConverter.ToString(readBuffer).Replace("-", "");
+            mcuParam.UpdateSendResLog(hexStringCmd, DeviceParameterData.SendOrRecieve.Recieve, null);
 
-			return CommunicatorResultEnum.OK;
+            return CommunicatorResultEnum.OK;
 
 
 		}

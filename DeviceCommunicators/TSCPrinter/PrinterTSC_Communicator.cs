@@ -295,9 +295,10 @@ namespace DeviceCommunicators.TSCPrinter
                 }
                 
                 
-                if (status != PrinterStatus.NoComm)
+                if (status == PrinterStatus.OK)
                 {
                     callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+                    tscPrinter_Param.UpdateSendResLog("Status Ok", DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.OK.ToString());
                     return;
                 }
                 else

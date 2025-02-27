@@ -112,6 +112,7 @@ namespace DeviceCommunicators.NumatoGPIO
             }
             catch (Exception ex)
             {
+                param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Send, "Failed to set value for parameter: " + ex);
                 LoggerService.Error(this, "Failed to set value for parameter: " + param.Name, ex);
             }
         }
@@ -187,6 +188,7 @@ namespace DeviceCommunicators.NumatoGPIO
             }
             catch (Exception ex)
             {
+                param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, "Failed to get value for parameter: " + ex);
                 LoggerService.Error(this, "Failed to receive value for parameter: " + param.Name, ex);
             }
         }

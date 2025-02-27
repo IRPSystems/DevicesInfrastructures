@@ -12,5 +12,6 @@ namespace DeviceCommunicators.Enums
 		ReceiveParsingError,
 		SendParseError,
 		InvalidValue,
+		CommTimeOut
 	}
 }
