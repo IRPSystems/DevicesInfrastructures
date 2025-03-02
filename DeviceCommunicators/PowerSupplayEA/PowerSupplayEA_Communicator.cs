@@ -1,5 +1,6 @@
 ﻿using Communication.Interfaces;
 using Communication.Services;
+using DBCFileParser.Model;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceCommunicators.Models;
@@ -216,7 +217,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 					
 					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 				}
-			}
+                ea_ParamData.UpdateSendResLog(buffer, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.OK.ToString());
+            }
             catch(Exception ex) 
             {
                 param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, "Failed to receive value for parameter: " + ex);

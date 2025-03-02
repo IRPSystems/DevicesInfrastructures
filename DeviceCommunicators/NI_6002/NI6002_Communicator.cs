@@ -170,6 +170,7 @@ namespace DeviceCommunicators.NI_6002
 				{
 					param.Value = value;
 					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+                    niParamData.UpdateSendResLog(message, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.OK.ToString());
                 }
 				else
 				{
