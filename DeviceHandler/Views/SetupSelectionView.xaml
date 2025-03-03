@@ -148,7 +148,8 @@
 
             <DataGrid.InputBindings>
                 <KeyBinding Key="Delete" 
-                            Command="{Binding DeleteDeviceCommand}" />
+                            Command="{Binding DeleteDeviceCommand}" 
+                            CommandParameter="{Binding SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}"/>
             </DataGrid.InputBindings>
 
             <i:Interaction.Triggers>

@@ -17,6 +17,7 @@ using Entities.Enums;
 using System.IO;
 using DeviceCommunicators.Models;
 using DeviceHandler.Models;
+using System.Collections;
 
 namespace DeviceHandler.ViewModels
 {
@@ -68,7 +69,7 @@ namespace DeviceHandler.ViewModels
 			CloseOKCommand = new RelayCommand(CloseOK);
 			CloseCancelCommand = new RelayCommand(CloseCancel);
 
-			DeleteDeviceCommand = new RelayCommand(DeleteDevice);
+			DeleteDeviceCommand = new RelayCommand<IList>(DeleteDevice);
 
 			MoveDeviceToDestCommand = new RelayCommand(MoveDeviceToDest);
 			MoveDeviceToSourceCommand = new RelayCommand(MoveDeviceToSource);
@@ -142,15 +143,26 @@ namespace DeviceHandler.ViewModels
 			DevicesSourceList.Remove(device);
 		}
 
-		private void DeleteDevice()
+		private void DeleteDevice(IList list)
 		{
-			if (DestListSelectedItem == null)
+			if (list == null)
 				return;
 
-			LoggerService.Inforamtion(this, "Remove device " + DestListSelectedItem.DeviceType + "-" + DestListSelectedItem.Name + " from the setup list");
+			List<DeviceData> deviceList = new List<DeviceData>();
+			foreach (var item in list)
+			{
+				if (!(item is DeviceData deviceData))
+					continue;
+				deviceList.Add(deviceData);
+			}
 
-			DevicesSourceList.Add(DestListSelectedItem);
-			DevicesList.Remove(DestListSelectedItem);
+			foreach (var deviceData in deviceList)
+			{
+				LoggerService.Inforamtion(this, "Remove device " + deviceData.DeviceType + "-" + deviceData.Name + " from the setup list");
+
+				DevicesSourceList.Add(deviceData);
+				DevicesList.Remove(deviceData);
+			}
 		}
 
 
@@ -409,7 +421,7 @@ namespace DeviceHandler.ViewModels
 
 		private void MoveDeviceToSource()
 		{
-			DeleteDevice();
+			DeleteDevice(null);
 		}
 
 		#endregion Methods
@@ -505,7 +517,7 @@ namespace DeviceHandler.ViewModels
 		public RelayCommand CloseOKCommand { get; private set; }
 		public RelayCommand CloseCancelCommand { get; private set; }
 
-		public RelayCommand DeleteDeviceCommand { get; private set; }
+		public RelayCommand<IList> DeleteDeviceCommand { get; private set; }
 
 		public RelayCommand MoveDeviceToDestCommand { get; private set; }
 		public RelayCommand MoveDeviceToSourceCommand { get; private set; }
