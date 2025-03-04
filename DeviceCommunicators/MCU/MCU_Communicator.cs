@@ -5,7 +5,6 @@ using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
 using DeviceCommunicators.Models;
 using Entities.Models;
-using NationalInstruments.DataInfrastructure;
 using Services.Services;
 using System;
 using System.Collections.Concurrent;
@@ -13,10 +12,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 #endif
-using System.Linq;
 using System.Timers;
-using System.Windows.Markup;
-using System.Windows.Media;
 
 namespace DeviceCommunicators.MCU
 {
@@ -49,7 +45,7 @@ namespace DeviceCommunicators.MCU
 
 
 #if _SAVE_TIME
-		private List<(TimeSpan, string, CommunicatorResultEnum)> _commTimeList;
+		private List<(string, object, CommunicatorResultEnum)> _commTimeList;
 #endif
 
 		#endregion Fields
@@ -79,7 +75,7 @@ namespace DeviceCommunicators.MCU
 			_lockObj = new object();
 
 #if _SAVE_TIME
-			_commTimeList = new List<(TimeSpan, string, CommunicatorResultEnum)>();
+			_commTimeList = new List<(string, object, CommunicatorResultEnum)>();
 #endif
 		}
 
@@ -144,7 +140,7 @@ namespace DeviceCommunicators.MCU
 			InitBase();
 
 #if _SAVE_TIME
-			_commTimeList.Add((new TimeSpan(), "Connect", CommunicatorResultEnum.OK));
+			_commTimeList.Add((new TimeSpan().ToString(), "Connect", CommunicatorResultEnum.OK));
 #endif
 		}
 
@@ -167,19 +163,21 @@ namespace DeviceCommunicators.MCU
 				//LoggerService.Inforamtion(this, "MCU time");
 				using (StreamWriter sw = new StreamWriter("MCU Time.txt"))
 				{
-					foreach ((TimeSpan, string, CommunicatorResultEnum) time in _commTimeList)
+					foreach ((string, object, CommunicatorResultEnum) item in _commTimeList)
 					{
-						string name = string.Empty;
-						if (!string.IsNullOrEmpty(time.Item2))
-							name = time.Item2.Replace("\n", "-");
-						sw.WriteLine($"{time.Item1.TotalMilliseconds}\t\t\t{name}\t\t\t{time.Item3}");
+						string time = item.Item1;
+						object value = item.Item2;
+						if (value == null)
+							value = "XXX";
+
+						sw.WriteLine($"{time}\t\t\t{value}");
 						//LoggerService.Debug(this, time.TotalMilliseconds.ToString());
 					}
 				}
 			}
 			catch { }
 
-			_commTimeList.Add((new TimeSpan(), "Disconnect", CommunicatorResultEnum.OK));
+			_commTimeList.Add((new TimeSpan().ToString(), "Disconnect", CommunicatorResultEnum.OK));
 #endif
 		}
 
@@ -238,8 +236,6 @@ namespace DeviceCommunicators.MCU
 
 
             uint idNum = (uint)(id[0] + (id[1] << 8) + (id[2] << 16));
-
-			if (id[0] == 0xE9 && id[1] == 0x2B && id[1] == 0x8D) { }
 
 			if (_idArrayToData.ContainsKey(idNum) == false)
 				_idArrayToData[idNum] = new BlockingCollection<CommunicatorIOData>();
@@ -333,7 +329,8 @@ namespace DeviceCommunicators.MCU
 					out errorDescription);
 
 #if _SAVE_TIME
-			_commTimeList.Add((DateTime.Now - start, data.Parameter.Name, isSuccess));
+				if(data.Parameter.Name == "Runtime")
+					_commTimeList.Add((DateTime.Now.ToString("mm:ss.ffff"), data.Parameter.Value, isSuccess));
 #endif
 
 				if (isSuccess == CommunicatorResultEnum.OK)

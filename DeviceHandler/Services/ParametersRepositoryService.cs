@@ -1,4 +1,4 @@
-﻿
+﻿//#define _SAVE_TIME
 using CommunityToolkit.Mvvm.ComponentModel;
 using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
@@ -11,6 +11,9 @@ using Services.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+#if _SAVE_TIME
+using System.IO;
+#endif
 using System.Linq;
 using System.Timers;
 using System.Windows;
@@ -84,7 +87,11 @@ namespace DeviceHandler.Services
 
 		public string Name;
 
-		#endregion Fields
+#if _SAVE_TIME
+		private List<string> _timesList;
+#endif
+
+#endregion Fields
 
 		#region Constructor
 
@@ -94,7 +101,11 @@ namespace DeviceHandler.Services
 		{
 			_communicator = communicator;
 
-			_nameToRepositoryParamList = new ConcurrentDictionary<string, RepositoryParam>();
+#if _SAVE_TIME
+			_timesList = new List<string>();
+#endif
+
+		_nameToRepositoryParamList = new ConcurrentDictionary<string, RepositoryParam>();
 
 			AcquisitionRate = acquisitionRate;
 
@@ -122,7 +133,19 @@ namespace DeviceHandler.Services
 		{
 			_communicationTimer.Stop();
 
-			
+#if _SAVE_TIME
+			try
+			{
+				using (StreamWriter sw = new StreamWriter("Repository Time.txt"))
+				{
+					foreach (string item in _timesList)
+					{
+						sw.WriteLine(item);
+					}
+				}
+			}
+			catch { }
+#endif
 
 			_isDisposed = true;
 		}
@@ -229,6 +252,9 @@ namespace DeviceHandler.Services
 
 		private void CommunicationTimerElapsed(object sender, ElapsedEventArgs e)
 		{
+#if _SAVE_TIME
+			_timesList.Add(DateTime.Now.ToString("mm:ss.ffff"));
+#endif
 			try
 			{
 				if (_nameToRepositoryParamList == null || _nameToRepositoryParamList.Count == 0)
@@ -240,6 +266,8 @@ namespace DeviceHandler.Services
 				_communicationTimer.Stop();
 				_start = DateTime.Now;
 				//LoggerService.Inforamtion(this, "_communicationTimer stopped");
+
+
 
 
 				foreach (RepositoryParam param in _nameToRepositoryParamList.Values)
