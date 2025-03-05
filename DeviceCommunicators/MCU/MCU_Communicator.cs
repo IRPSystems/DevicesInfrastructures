@@ -45,7 +45,7 @@ namespace DeviceCommunicators.MCU
 
 
 #if _SAVE_TIME
-		private List<(string, object, CommunicatorResultEnum)> _commTimeList;
+		private List<object> _commTimeList;
 #endif
 
 		#endregion Fields
@@ -75,7 +75,7 @@ namespace DeviceCommunicators.MCU
 			_lockObj = new object();
 
 #if _SAVE_TIME
-			_commTimeList = new List<(string, object, CommunicatorResultEnum)>();
+			_commTimeList = new List<object>();
 #endif
 		}
 
@@ -163,14 +163,9 @@ namespace DeviceCommunicators.MCU
 				//LoggerService.Inforamtion(this, "MCU time");
 				using (StreamWriter sw = new StreamWriter("MCU Time.txt"))
 				{
-					foreach ((string, object, CommunicatorResultEnum) item in _commTimeList)
+					foreach (var item in _commTimeList)
 					{
-						string time = item.Item1;
-						object value = item.Item2;
-						if (value == null)
-							value = "XXX";
-
-						sw.WriteLine($"{time}\t\t\t{value}");
+						sw.WriteLine($"{item}");
 						//LoggerService.Debug(this, time.TotalMilliseconds.ToString());
 					}
 				}
@@ -181,11 +176,6 @@ namespace DeviceCommunicators.MCU
 #endif
 		}
 
-
-#if _SAVE_TIME
-		private DateTime _prevStart;
-#endif
-		DateTime _startTime;
 		protected override CommunicatorResultEnum HandleRequests(CommunicatorIOData data)
 		{
 			if (data is CommunicatorIOData_SendMessage sendMessageData)
@@ -201,16 +191,10 @@ namespace DeviceCommunicators.MCU
 
 				return CommunicatorResultEnum.None;
 
-			_startTime = DateTime.Now;
 
 #if _SAVE_TIME
-			//data.SendStartTime = DateTime.Now;
-			//if(_prevStart.Year != 1)
-			//{
-			//	_commTimeList.Add((data.SendStartTime - _prevStart, data.Parameter.Name, CommunicatorResultEnum.None));
-			//}
-
-			//_prevStart = data.SendStartTime;
+			if (data.Parameter.Name == "Runtime")
+				_commTimeList.Add((DateTime.Now.ToString("mm:ss.ffff"), _parameterQueue_Set.Count, _parameterQueue_Get.Count));
 #endif
 
 			byte[] id = null;
@@ -290,15 +274,6 @@ namespace DeviceCommunicators.MCU
 		{
 			try
 			{
-#if _SAVE_TIME
-				DateTime start = DateTime.Now;
-				//if(_prevStart.Year != 1)
-				//{
-				//	_commTimeList.Add((data.SendStartTime - _prevStart, data.Parameter.Name, CommunicatorResultEnum.None));
-				//}
-
-				//_prevStart = data.SendStartTime;
-#endif
 				//LoggerService.Inforamtion(this, $"{(DateTime.Now - _startTime).TotalMilliseconds}");
 				uint idNum = (uint)(buffer[0] + (buffer[1] << 8) + (buffer[2] << 16));
 
@@ -328,10 +303,6 @@ namespace DeviceCommunicators.MCU
 					data.Value,
 					out errorDescription);
 
-#if _SAVE_TIME
-				if(data.Parameter.Name == "Runtime")
-					_commTimeList.Add((DateTime.Now.ToString("mm:ss.ffff"), data.Parameter.Value, isSuccess));
-#endif
 
 				if (isSuccess == CommunicatorResultEnum.OK)
 				{
