@@ -58,6 +58,30 @@ namespace DeviceHandler.ViewModels
 			set
 			{
 				_syncNodeID = value;
+
+				if (_isSettingIDText)
+					return;
+
+				_isSettingID = true;
+				SyncNodeIDText = _syncNodeID.ToString("X");
+				_isSettingID = false;
+			}
+		}
+
+		[JsonIgnore]
+		public string SyncNodeIDText
+		{
+			get => _syncNodeIDText;
+			set
+			{
+				_syncNodeIDText = value;
+
+				if (_isSettingID)
+					return;
+
+				_isSettingIDText = true;
+				uint.TryParse(value, NumberStyles.HexNumber, null, out _syncNodeID);
+				_isSettingIDText = false;
 			}
 		}
 
@@ -76,7 +100,11 @@ namespace DeviceHandler.ViewModels
 
 		//private string _syncNodeID_Text;
 		private uint _syncNodeID;
-		
+		private string _syncNodeIDText;
+
+		private bool _isSettingID;
+		private bool _isSettingIDText;
+
 
 		#endregion Fields
 
