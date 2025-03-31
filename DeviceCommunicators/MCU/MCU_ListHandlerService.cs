@@ -52,6 +52,9 @@ namespace DeviceCommunicators.MCU
 				{
 					group.Name = group.GroupName;
 
+					if (group.ParamList == null)
+						continue;
+
 					foreach (DeviceParameterData data in group.ParamList)
 					{
 						if (data.Units == "�C")
