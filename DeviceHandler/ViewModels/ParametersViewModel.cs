@@ -102,7 +102,7 @@ namespace DeviceHandler.ViewModel
 
 		private void ListSourceParam_MouseEnter(MouseEventArgs e)
 		{
-			if (_designDragDropData.IsIgnor)
+			if (_designDragDropData == null || _designDragDropData.IsIgnor)
 				return;
 
 			if (e.MouseDevice.LeftButton == MouseButtonState.Pressed)
@@ -113,7 +113,7 @@ namespace DeviceHandler.ViewModel
 
 		private void ListSourceParam_PreviewMouseLeftButtonDown(MouseButtonEventArgs e)
 		{
-			if (_designDragDropData.IsIgnor)
+			if (_designDragDropData == null || _designDragDropData.IsIgnor)
 				return;
 
 			_designDragDropData.IsMouseDown = true;
@@ -129,12 +129,13 @@ namespace DeviceHandler.ViewModel
 
 		private void ListSourceParam_PreviewMouseLeftButtonUp(MouseButtonEventArgs e)
 		{
-			_designDragDropData.IsMouseDown = false;
+			if(_designDragDropData != null)
+				_designDragDropData.IsMouseDown = false;
 		}
 
 		private void ListSourceParam_MouseMove(MouseEventArgs e)
 		{
-			if (_designDragDropData.IsMouseDown == false)
+			if (_designDragDropData == null || _designDragDropData.IsMouseDown == false)
 				return;
 
 			DragObject(e);
