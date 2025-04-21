@@ -254,9 +254,12 @@ namespace DeviceCommunicators.PowerSupplayEA
 					else if (eaParam.Cmd == "SOUR:POW" || eaParam.Cmd == "SINK:POW") // Limit PS/EL Power
 					{
 						value = (ushort)((data.Value * (double)_actualValuesFactor) / _nominalPower);
-					}
-
-					byte[] bytes = BitConverter.GetBytes(value);
+                    }
+                    else if (eaParam.Cmd == "SOUR:POW:PROT" || eaParam.Cmd == "SINK:POW:PROT") // Limit PS/EL Power
+                    {
+                        value = (ushort)((data.Value * (double)_actualValuesFactor) / _nominalPower);
+                    }
+                    byte[] bytes = BitConverter.GetBytes(value);
 
 					if (eaParam.NumOfRegisters > 1)
 					{

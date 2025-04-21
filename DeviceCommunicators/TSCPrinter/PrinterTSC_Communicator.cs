@@ -290,7 +290,7 @@ namespace DeviceCommunicators.TSCPrinter
                     catch (Exception e)
                     {
                         tscPrinter_Param.UpdateSendResLog("", DeviceParameterData.SendOrRecieve.Recieve, "Printer operation timed out and was canceled:" + e.Message);
-                        MessageBox.Show("Printer operation timed out and was canceled:" + e.Message);
+                        //MessageBox.Show("Printer operation timed out and was canceled:" + e.Message);
                     }
                 }
                 
