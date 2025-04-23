@@ -7,6 +7,10 @@ using Services.Services;
 using System.Timers;
 using System;
 using DeviceCommunicators.Models;
+using System.Collections.Concurrent;
+using NationalInstruments.DataInfrastructure;
+using System.DirectoryServices.ActiveDirectory;
+using System.Windows.Media.Animation;
 
 namespace DeviceCommunicators.TorqueKistler
 {
@@ -21,6 +25,8 @@ namespace DeviceCommunicators.TorqueKistler
 
 		private bool _isTimeout;
 		private System.Timers.Timer _timeoutTimer;
+
+		public ConcurrentDictionary<string, string> _ErrorToDescription;
 
 		#endregion Fields
 
@@ -48,6 +54,19 @@ namespace DeviceCommunicators.TorqueKistler
 		#endregion Constructor
 
 		#region Methods
+
+		protected override void InitErrorsDictionary()
+		{
+			_ErrorToDescription = new ConcurrentDictionary<string, string>();
+			_ErrorToDescription["ERR-100"] = "Command not understood.";
+			_ErrorToDescription["ERR-101"] = "\" ? \" was not added for a query.";
+			_ErrorToDescription["ERR-104"] = "Calculation steps caused an overflow.";
+			_ErrorToDescription["ERR-105"] = "Error accessing non-volatile buffer memory.";
+			_ErrorToDescription["ERR-106"] = "Access to protected buffer memory.";
+			_ErrorToDescription["ERR-108"] = "Transmitted string too long.";
+			_ErrorToDescription["ERR-109"] = "Transmitted numerical value is invalid.";
+			_ErrorToDescription["ERR-121"] = "Invalid output format";
+		}
 
 		public void Init(
 			bool isUdpSimulation,
@@ -114,7 +133,6 @@ namespace DeviceCommunicators.TorqueKistler
 					buffer = WaitForResponse(tk_ParamData);
 					if (!string.IsNullOrEmpty(buffer) && !buffer.Contains("ERR-"))
 						break;
-
 				}
 
 				if (string.IsNullOrEmpty(buffer))
@@ -126,7 +144,9 @@ namespace DeviceCommunicators.TorqueKistler
 				buffer = buffer.Replace("\r", string.Empty);
 				if (buffer.ToUpper().Contains("ERR-"))
 				{
-					callback?.Invoke(param, CommunicatorResultEnum.Error, "Error: " + buffer);
+					string description =
+						$"Error {buffer}: {_ErrorToDescription[buffer]}";
+					callback?.Invoke(param, CommunicatorResultEnum.Error, description);
 					return;
 				}
 
@@ -174,7 +194,9 @@ namespace DeviceCommunicators.TorqueKistler
 				buffer = buffer.Replace("\r", string.Empty);
 				if (buffer.ToUpper().Contains("ERR-"))
 				{
-					callback?.Invoke(param, CommunicatorResultEnum.Error, "Error: " + buffer);
+					string description =
+						$"Error {buffer}: {_ErrorToDescription[buffer]}";
+					callback?.Invoke(param, CommunicatorResultEnum.Error, description);
 					return;
 				}
 
