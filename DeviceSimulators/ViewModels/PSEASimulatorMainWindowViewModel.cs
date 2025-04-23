@@ -46,7 +46,14 @@ namespace DeviceSimulators.ViewModels
 			base(deviceData)
 		{
 			
-			ConnectVM = new SerialConncetViewModel(115200, "COM1", 14320, 14323);
+			ConnectVM = new SerialConncetViewModel(
+				115200, 
+				string.Empty, 
+				14320, 
+				14323,
+				"",
+				"",
+				"");
 			ConnectVM.ConnectEvent += Connect;
 			ConnectVM.DisconnectEvent += Disconnect;
 

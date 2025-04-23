@@ -39,7 +39,14 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructConnectionViewModel(LogLineListService logLineList)
 		{
-			ConnectionViewModel = new SerialConncetViewModel(9600, "COM1", 15323, 15320);
+			ConnectionViewModel = new SerialConncetViewModel(
+				9600, 
+				string.Empty, 
+				15323, 
+				15320, 
+				"",
+				"",
+				"");
 		}
 
 		protected override void ConstructCheckConnection()

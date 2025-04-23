@@ -69,13 +69,24 @@ namespace DeviceHandler.ViewModels
 		public SerialAndTCPViewModel(
 			int baudRate, string com, int rxPort, int txPort,
 			int port, string address,
-			string selectedCommType)
+			string selectedCommType,
+			string comIdentifier,
+			string deviceIdentifier,
+			string idCommand)
 		{
 			IsEnabled = true;
 
 			ComType_SelectionChangedCommand = new RelayCommand<SelectionChangedEventArgs>(ComType_SelectionChanged);
 
-			SerialConncetVM = new SerialConncetViewModel(baudRate, com, rxPort, txPort);
+			SerialConncetVM = new SerialConncetViewModel(
+				baudRate, 
+				com, 
+				rxPort, 
+				txPort,
+				comIdentifier,
+				deviceIdentifier,
+				idCommand);
+
 			SerialConncetVM.ConnectEvent += Connect;
 			SerialConncetVM.DisconnectEvent += Disconnect;
 
