@@ -105,7 +105,7 @@ namespace DeviceCommunicators.TorqueKistler
 				if (!(param is TorqueKistler_ParamData tk_ParamData))
 					return;
 
-				string cmd = tk_ParamData.Command + value + "\r\n";
+				string cmd = tk_ParamData.Command + value + "\r";
 				string buffer = null;
 				for (int i = 0; i < 5; i++)
 				{
@@ -147,9 +147,9 @@ namespace DeviceCommunicators.TorqueKistler
 					return;
 
 				
-				string cmd = "MEAS:ALL?\r\n";
+				string cmd = "MEAS:ALL?\r";
 				if(param.Name != "Torque" && param.Name != "Speed")
-					cmd = tk_ParamData.Command + "\r\n";
+					cmd = tk_ParamData.Command + "\r";
 
 
 				string buffer = null;

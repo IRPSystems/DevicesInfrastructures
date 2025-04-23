@@ -69,7 +69,7 @@ namespace DeviceHandler.ViewModels
 
 			BaudratesList = new ObservableCollection<int>()
 			{
-				9600, 57600, 115200, 128000, 256000
+				9600, 57600, 115200, 128000, 256000, 921600
 			};
 
 			FindCOMs();
