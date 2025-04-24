@@ -39,7 +39,14 @@ namespace DeviceSimulators.ViewModels
 			_cancellationToken = _cancellationTokenSource.Token;
 
 
-			ConnectVM = new SerialConncetViewModel(9600, "COM1", 15320, 15323);
+			ConnectVM = new SerialConncetViewModel(
+				9600, 
+				string.Empty, 
+				15320, 
+				15323,
+				"", 
+				"", 
+				"");
 			ConnectVM.ConnectEvent += Connect;
 			ConnectVM.DisconnectEvent += Disconnect;
 

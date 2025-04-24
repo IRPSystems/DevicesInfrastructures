@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using Services.Services;
 using DeviceHandler.Interfaces;
 using Communication.Services;
+using DeviceHandler.Services;
 
 namespace DeviceHandler.ViewModels
 {
@@ -47,7 +48,14 @@ namespace DeviceHandler.ViewModels
 
 		#region Constructor
 
-		public SerialConncetViewModel(int baudRate, string com, int rxPort, int txPort)
+		public SerialConncetViewModel(
+			int baudRate, 
+			string com, 
+			int rxPort, 
+			int txPort,
+			string comIdentifier,
+			string deviceIdentifier,
+			string idCommand)
 		{
 			LoggerService.Inforamtion(this, "Starting SerialConnctViewModel");
 			ConnectCommand = new RelayCommand(Connect);
@@ -61,7 +69,7 @@ namespace DeviceHandler.ViewModels
 
 			BaudratesList = new ObservableCollection<int>()
 			{
-				9600, 57600, 115200, 128000, 256000
+				9600, 57600, 115200, 128000, 256000, 921600
 			};
 
 			FindCOMs();
@@ -75,7 +83,10 @@ namespace DeviceHandler.ViewModels
 			SelectedBaudrate = baudRate;
 			GetIpAddress();
 
-
+			SelectedCOM = GetComPortByIdentifier(
+				comIdentifier,
+				deviceIdentifier,
+				idCommand);
 
 			LoggerService.Inforamtion(this, "Ending Init of SerialConnctViewModel");
 		}
@@ -145,6 +156,27 @@ namespace DeviceHandler.ViewModels
 			RxPort = source.RxPort;
 			TxPort = source.TxPort;
 			IsUdpSimulation = source.IsUdpSimulation;
+		}
+
+		private string GetComPortByIdentifier(
+			string comIdentifier,
+			string deviceIdentifier,
+			string idCommand)
+		{
+			string comName = string.Empty;
+			if (!string.IsNullOrEmpty(comIdentifier))
+			{
+				comName = IdentifySerialComPortService.GetSerialPortNameByIdentifier(comIdentifier);
+				return comName;
+			}
+
+			comName = IdentifySerialComPortService.GetSerialPortNameFromDevice(
+				SelectedBaudrate,
+				idCommand,
+				deviceIdentifier);
+
+
+			return comName;
 		}
 
 		#endregion Methods

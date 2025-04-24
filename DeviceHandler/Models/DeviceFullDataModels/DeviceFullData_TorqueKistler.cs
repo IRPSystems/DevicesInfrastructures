@@ -40,7 +40,14 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 		protected override void ConstructConnectionViewModel(LogLineListService logLineList)
 		{
-			ConnectionViewModel = new SerialConncetViewModel(57600, "COM1", 17323, 17320);
+			ConnectionViewModel = new SerialConncetViewModel(
+				921600, 
+				string.Empty, 
+				17323, 
+				17320,
+				"",
+				"Kistler_4503B",
+				"*IDN?\r");
 		}
 
 		protected override void ConstructCheckConnection()

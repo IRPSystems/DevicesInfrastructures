@@ -80,8 +80,9 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 		protected override void ConstructConnectionViewModel(LogLineListService logLineList)
 		{
 			ConnectionViewModel = new SerialAndTCPViewModel(
-				115200, "COM1", 14323, 14320,
-				502, "", "Serial");
+				115200, "", 14323, 14320,
+				502, "", "Serial",
+				"", "EA Elektro-Automatik GmbH & Co. KG", "*IDN?");
 
 			_eapsCommunicator = new PowerSupplayEA_Communicator(logLineList);
 			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp(logLineList);
