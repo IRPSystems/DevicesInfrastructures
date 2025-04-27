@@ -78,6 +78,7 @@ namespace DeviceCommunicators.Models
 
 		public int CommunicationTimeout { get; set; }
 
+		[JsonIgnore]
 		public CommSendResLog CommSendResLog { get; set; } = new();
 
 		public DeviceParameterData()
