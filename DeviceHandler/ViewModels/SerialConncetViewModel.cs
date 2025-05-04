@@ -14,6 +14,7 @@ using Services.Services;
 using DeviceHandler.Interfaces;
 using Communication.Services;
 using DeviceHandler.Services;
+using System.Xml.Serialization;
 
 namespace DeviceHandler.ViewModels
 {
@@ -46,6 +47,15 @@ namespace DeviceHandler.ViewModels
 
 		#endregion Properties
 
+		#region Fields
+
+		public string ComIdentifier;
+		public string DeviceIdentifier;
+		public string IdCommand;
+
+		#endregion Fields
+
+
 		#region Constructor
 
 		public SerialConncetViewModel(
@@ -57,6 +67,10 @@ namespace DeviceHandler.ViewModels
 			string deviceIdentifier,
 			string idCommand)
 		{
+			ComIdentifier = comIdentifier;
+			DeviceIdentifier = deviceIdentifier;
+			IdCommand = idCommand;
+
 			LoggerService.Inforamtion(this, "Starting SerialConnctViewModel");
 			ConnectCommand = new RelayCommand(Connect);
 			DisconnectCommand = new RelayCommand(Disconnect);
@@ -156,6 +170,14 @@ namespace DeviceHandler.ViewModels
 			RxPort = source.RxPort;
 			TxPort = source.TxPort;
 			IsUdpSimulation = source.IsUdpSimulation;
+		}
+
+		public void TryFindCom()
+		{
+			SelectedCOM = GetComPortByIdentifier(
+				ComIdentifier,
+				DeviceIdentifier,
+				IdCommand);
 		}
 
 		private string GetComPortByIdentifier(
