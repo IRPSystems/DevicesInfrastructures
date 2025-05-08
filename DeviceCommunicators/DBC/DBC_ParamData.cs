@@ -12,6 +12,8 @@ namespace DeviceCommunicators.DBC
 		public Signal Signal { get; set; }
 		public Message ParentMessage { get; set; }
 
+		public int Interval { get; set; }
+
 		public double GetValue(byte[] buffer)
 		{
 			int byteLength = Signal.Length / 8;  // Signal.Length is in bits
