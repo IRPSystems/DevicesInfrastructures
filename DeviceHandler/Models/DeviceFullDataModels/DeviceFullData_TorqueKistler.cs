@@ -36,6 +36,9 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			LogLineListService logLineList)
 		{
 			ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as SerialConncetViewModel;
+			(ConnectionViewModel as SerialConncetViewModel).ComIdentifier = "";
+			(ConnectionViewModel as SerialConncetViewModel).DeviceIdentifier = "Kistler_4503B";
+			(ConnectionViewModel as SerialConncetViewModel).IdCommand = "*IDN?\r";
 		}
 
 		protected override void ConstructConnectionViewModel(LogLineListService logLineList)

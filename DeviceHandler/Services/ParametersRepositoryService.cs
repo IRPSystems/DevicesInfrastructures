@@ -240,7 +240,8 @@ namespace DeviceHandler.Services
 		
 		private void _timeoutTimer_Elapsed(object sender, ElapsedEventArgs e)
 		{
-			_timeoutTimer.Stop();
+			lock(_timeoutTimer)
+				_timeoutTimer.Stop();
 
 			LoggerService.Inforamtion(this, "_timeoutTimer_Elapsed");
 
@@ -292,11 +293,8 @@ namespace DeviceHandler.Services
 				}
 
 
-				try
-				{
+				lock (_timeoutTimer)
 					_timeoutTimer.Start();
-				}
-				catch (Exception) { }
 
 				//_communicationTimer.Start();
 			}
@@ -346,7 +344,8 @@ namespace DeviceHandler.Services
 				{
 					LastCallbackHandling();
 					_communicationTimer.Start();
-					_timeoutTimer.Stop();
+					lock (_timeoutTimer)
+						_timeoutTimer.Stop();
 					//LoggerService.Inforamtion(this, "_communicationTimer started");
 				}
 

@@ -72,7 +72,11 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			_eapsCommunicator = new PowerSupplayEA_Communicator(logLineList);
 			_eapsModbusTcp = new PowerSupplayEA_ModbusTcp(logLineList);
 
-			
+			(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.ComIdentifier = "";
+			(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.DeviceIdentifier = "EA Elektro-Automatik GmbH & Co. KG";
+			(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.IdCommand = "*IDN?";
+
+
 		}
 
 		

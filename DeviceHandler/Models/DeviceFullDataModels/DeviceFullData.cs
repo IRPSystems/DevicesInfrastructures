@@ -135,7 +135,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
 
 
-
+        private bool _isFirst = true;
         public void Connect()
         {
             if (ConnectionViewModel == null)
@@ -161,6 +161,14 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 						serialTcpConncet.TcpConncetVM.SearchNoticeVisibility = Visibility.Collapsed;
 					}
                 }
+
+                if(ConnectionViewModel is SerialConncetViewModel && _isFirst)
+                {
+					_isFirst = false;
+					(ConnectionViewModel as SerialConncetViewModel).TryFindCom();
+                    Connect();
+                    return;
+				}
 
                 Disconnect();
                 return;
@@ -198,8 +206,9 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
             ConnectionEvent?.Invoke();
 
+			_isFirst = true;
 
-        }
+		}
 
         public void Disconnect()
         {
@@ -227,7 +236,9 @@ namespace DeviceHandler.Models.DeviceFullDataModels
                 ParametersRepository.Dispose();
 
             ConnectionEvent?.Invoke();
-        }
+
+			_isFirst = true;
+		}
 
 
         private bool IsUDPSimulation()
