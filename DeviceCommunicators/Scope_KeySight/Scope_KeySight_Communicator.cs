@@ -203,6 +203,15 @@ namespace DeviceCommunicators.Scope_KeySight
                 if (!(param is Scope_KeySight_ParamData scopeKeySight))
                     return;
 
+                // The only parameter that requires response is the identification
+                // parameter used for keepalive
+                if(scopeKeySight.Command == null ||
+                    scopeKeySight.Command.StartsWith("*IDN") == false)
+                {
+					callback?.Invoke(param, CommunicatorResultEnum.OK, null);
+                    return;
+				}
+
                 
 				param.Value = Read_command(scopeKeySight);
 
@@ -246,105 +255,7 @@ namespace DeviceCommunicators.Scope_KeySight
 
 			TCPCommService.Send(cmd);
 
-			//double Value = 0;
-			//Value= Convert .ToDouble(parameter.Value);
-
-			//if (parameter.Command.ToLower() == ("Choose channel").ToLower())
-			//{
-			//    if (parameter.data.ToLower() == ("channel1").ToLower() || parameter.data.ToLower() == ("channel2").ToLower() || parameter.data.ToLower() == ("channel3").ToLower() || parameter.data.ToLower() == ("channel4").ToLower())
-			//        channel = Convert.ToInt32(parameter.data);
-			//}
-			//else if (parameter.Command.ToLower() == ("channel ON\\OFF").ToLower())// channel ON\OFF
-			//{
-
-			//    if (Value == 0)
-			//    {
-			//        send(":" + "channel" + channel + ":DISPlay " + "ON");
-			//    }
-			//    if (Value == 1)
-			//    {
-			//        send(":" + "channel" + channel + ":DISPlay " + "OFF");
-			//    }
-			//    //send(":" + "channel" + channel + ":DISPlay " + parameter.data);
-			//}
-			//else if (parameter.Command.ToLower() == ("Set signal").ToLower())
-			//{
-			//    send(Measurement[Convert.ToInt32(parameter.data) - 1][1] + "channel" + channel);
-
-			//    //send(":MEASure:" + data + " " + interval + "," + type + "," + channel);
-			//}
-			//else if (parameter.Command.ToLower() == ("Probe  Volte\\Ampere").ToLower())// volt\amp  <units> ::= {VOLT | AMPere}
-			//{
-			//    send(":CHANnel" + channel + ":UNITs " + parameter.data);
-			//}
-			//else if (parameter.Command.ToLower() == ("Clear all mesure").ToLower())
-			//{
-			//    send(":MEASure:CLEar");
-			//}
-			//else if (parameter.Command.ToLower() == ("Run Control").ToLower())
-			//{
-			//    if (parameter.data.ToLower() == ("Run").ToLower())
-			//    {
-			//        send(":RUN");
-			//    }
-			//    else if (parameter.data.ToLower() == ("Stop").ToLower())
-			//    {
-			//        send(":STOP ");
-			//    }
-			//    else if (parameter.data.ToLower() == ("SINGle").ToLower())
-			//    {
-			//        send(":SINGle ");
-			//    }
-			//}
-			//else if (parameter.Command.ToLower() == ("Acquire").ToLower())
-			//{
-			//    send(":ACQuire:TYPE HRESolution");
-			//}
-			//else if (parameter.Command.ToLower() == ("Time scaling").ToLower())
-			//{
-			//    send(":TIMebase:SCALe " + parameter.data);
-			//}
-			//else if (parameter.Command.ToLower() == ("Measurement Scaling").ToLower())
-			//{
-			//    send(":CHANnel" + channel + ":SCALe " + parameter.data);
-			//}
-			//else if (parameter.Command.ToLower() == ("Scaling prob").ToLower())
-			//{
-			//    send(":CHANnel" + channel + ":PROBe " + parameter.data);
-			//}
-			//else if (parameter.Command.ToLower() == ("Triger mode").ToLower())
-			//{
-			//    send(":TRIGger:MODE EDGE");
-			//}
-			//else if (parameter.Command.ToLower() == ("Triger slope").ToLower()) //(NEGative | POSitive | EITHer | ALTernate)
-			//{
-			//    send(":TRIGger:EDGE:SLOPe "+parameter.data);
-			//}
-			//else if (parameter.Command.ToLower() == ("Triger value").ToLower())
-			//{
-			//    send(":TRIGger:GLITch:LEVel "+parameter.data +",CHANnel"+channel);
-			//}          
-			//else if (parameter.Command.ToLower() == ("file_name").ToLower())
-			//{
-			//   file_name= parameter.data;
-			//}
-			//else if (parameter.Command.ToLower() == ("Save").ToLower())
-			//{
-
-			// if (parameter.data.ToLower() == ("PNG").ToLower())
-			//    {
-			//        send(":SAVE:IMAGe:FORMat PNG");
-			//        send(":SAVE:IMAGe:STARt \"" + file_name + "\"");
-			//        Thread.Sleep(500);
-			//    }
-			//    else if (parameter.data.ToLower() == ("CSV").ToLower())
-			//    {
-			//        send(":SAVE:WAVeform:FORMat CSV");
-			//        send(":SAVE:WAVeform:STAR \"" + file_name + "\"");
-			//        Thread.Sleep(500);
-			//    }
-			//}
-
+			
 
 		}
 
@@ -377,6 +288,9 @@ namespace DeviceCommunicators.Scope_KeySight
 
 			//////////////////////////////////////////////////////////////////////////////////////////
 			string cmd = parameter.Command;
+			if(string.IsNullOrEmpty(cmd))
+				return null;
+
 			// Add channel number
 			cmd = cmd.Replace("<channel>", parameter.Channel.ToString());
 
@@ -394,81 +308,7 @@ namespace DeviceCommunicators.Scope_KeySight
 
 			return response;
 
-			//////////////////////////////////////////////////////////////////////////////////////////
-
-			//if (parameter.Command.ToLower() == ("Read Measurement").ToLower())
-			//{
-			//    //send(":MEASure:" + data + "? " + interval + "," + type + "," + "CHANnel" + channel);
-			//    send(Measurement[Convert.ToInt32(parameter.data) - 1][2] + "channel" + channel);
-
-			//    return Read_data();
-
-			//}
-			//else if (parameter.Command.ToLower() == ("CYCLe,DC").ToLower())
-			//{
-			//    send(":MEASure:VRMS? CYCLe,DC," + "channel" + channel);
-
-			//    return Read_data();
-			//}
-			//else if (parameter.Command.ToLower() == ("DISPlay,DC").ToLower())
-			//{
-			//    send(":MEASure:VRMS? DISPlay,DC," + "channel" + channel);
-
-			//    return Read_data();
-			//}
-			//else if (parameter.Command.ToLower() == ("CYCLe,AC").ToLower())
-			//{
-			//    send(":MEASure:VRMS? CYCLe,AC," + "channel" + channel);
-
-			//    return Read_data();
-			//}
-			//else if (parameter.Command.ToLower() == ("DISPlay,AC").ToLower())
-			//{
-			//    send(":MEASure:VRMS? DISPlay,AC," + "channel" + channel);
-
-			//    return Read_data();
-			//}
-
-			//else if (parameter.Command.ToLower() == ("VPP").ToLower())
-			//{
-			//    send(":MEASure:VPP?" + "channel" + channel);
-
-			//    return Read_data();
-			//}
-			//else if (parameter.Command.ToLower() == ("VAMPlitude").ToLower())
-			//{
-			//    send(":MEASure:VAMPlitude?" + "channel" + channel);
-
-			//    return Read_data();
-			//}
-			//else if (parameter.Command.ToLower() == ("VTOP").ToLower())
-			//{
-			//    send(":MEASure:VTOP ?" + "channel" + channel);
-
-			//    return Read_data();
-			//}
-			//else if (parameter.Command.ToLower() == ("VAVerage CYCLe").ToLower())
-			//{
-			//    send(":MEASure:VAVerage? CYCLe," + "channel" + channel);
-
-			//    return Read_data();
-			//}
-			//else if (parameter.Command.ToLower() == ("VAVerage DISPlay").ToLower())
-			//{
-			//    send(":MEASure: VAVerage ? DISPlay," + "channel" + channel);
-
-			//    return Read_data();
-			//}
-
-
-			//else if (parameter.Command.ToLower() == ("Read signal").ToLower())
-			//{
-			//    return "";
-			//}
-			//else
-			//{
-			//    return "";
-			//}
+			
 		}
 
 		public override bool Equals(object obj)
