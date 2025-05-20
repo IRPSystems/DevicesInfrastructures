@@ -13,6 +13,7 @@ namespace DeviceCommunicators.DBC
 		public Message ParentMessage { get; set; }
 
 		public int Interval { get; set; }
+		public string IntervalUnite { get; set; }
 
 		public double GetValue(byte[] buffer)
 		{
