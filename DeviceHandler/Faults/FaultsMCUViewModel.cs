@@ -51,6 +51,7 @@ namespace DeviceHandler.Faults
 		public bool IsLoaded;
 
 
+		private bool _isWindowOpen;
 
 		private DevicesContainer _devicesContainer;
 
@@ -73,6 +74,7 @@ namespace DeviceHandler.Faults
 			//LoadedCommand = new RelayCommand(Loaded);
 			//ClosingCommand = new RelayCommand(Closing);
 
+			_isWindowOpen = false;
 
 			if (_devicesContainer.TypeToDevicesFullData.ContainsKey(DeviceTypesEnum.MCU))
 			{
