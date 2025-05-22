@@ -36,6 +36,8 @@
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
     <PackageReference Include="MahApps.Metro.IconPacks" Version="4.11.0" />
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="All" />
+    <PackageReference Include="Syncfusion.SfChart.WPF" Version="24.2.7" />
+    <PackageReference Include="Syncfusion.SfGauge.WPF" Version="24.2.7" />
     <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
 
