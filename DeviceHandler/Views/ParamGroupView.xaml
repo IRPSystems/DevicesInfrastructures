@@ -15,7 +15,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/TrueDriveManager;component/Styles/ToolsStyle.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/DeviceHandler;component/Resources/ToolsStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
 
