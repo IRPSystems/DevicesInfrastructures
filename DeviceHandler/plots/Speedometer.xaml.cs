@@ -1,4 +1,5 @@
 ﻿using DeviceCommunicators.MCU;
+using DeviceHandler.Views;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -36,9 +37,21 @@ namespace DeviceHandler.Plots
 		public double Min { get; set; }
         //private bool _take_abs;
 
-        public MCU_ParamData ParamData { get; set; }
 
-        public string Title 
+		#region ParamData
+
+		public static readonly DependencyProperty ParamDataProperty = DependencyProperty.Register(
+			"ParamData", typeof(MCU_ParamData), typeof(Speedometer));
+
+		public MCU_ParamData ParamData
+		{
+			get => (MCU_ParamData)GetValue(ParamDataProperty);
+			set => SetValue(ParamDataProperty, value);
+		}
+
+		#endregion ParamData
+
+		public string Title 
         { 
             get
             {
@@ -62,7 +75,15 @@ namespace DeviceHandler.Plots
 
 		}
 
-        public void Init(MCU_ParamData paramData)
+		public Speedometer()
+		{
+			InitializeComponent();
+
+            DataContext = this;
+
+		}
+
+		public void Init(MCU_ParamData paramData)
         {
             if (paramData.Value is string)
             {
