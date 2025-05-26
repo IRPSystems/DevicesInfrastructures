@@ -79,7 +79,7 @@ namespace DeviceHandler.Plots
 		{
 			InitializeComponent();
 
-            DataContext = this;
+          //  DataContext = this;
 
 		}
 
