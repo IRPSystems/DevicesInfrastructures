@@ -39,12 +39,10 @@
 
         <Grid Grid.Row="1">
             <syncfusion:SfCircularGauge Name="gauge1"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
                                         GaugeHeaderPosition="0.5,0.55"
                                         HeaderAlignment="Custom">
                 <syncfusion:SfCircularGauge.Resources>
-                    <Style TargetType="syncfusion:CircularScaleLabel">
+                    <!--<Style TargetType="syncfusion:CircularScaleLabel">
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="syncfusion:CircularScaleLabel">
@@ -52,12 +50,12 @@
                                         <TextBlock FontSize="{Binding LabelFontSize}"
                                                     Foreground="{Binding Foreground}"
                                                     Text="{Binding Content}" />
-                                        <!--  Customized Label Position  -->
+                                        --><!--  Customized Label Position  --><!--
                                     </Grid>
                                 </ControlTemplate>
                             </Setter.Value>
                         </Setter>
-                    </Style>
+                    </Style>-->
                 </syncfusion:SfCircularGauge.Resources>
 
                 <syncfusion:SfCircularGauge.Scales>
@@ -66,8 +64,7 @@
                                               BindRangeStrokeToTicks="False"
                                               EndValue="{Binding Max}"
                                               FontSize="15"
-                                              FontWeight="SemiBold"                                              
-                                              LabelOffset="0.75"
+                                              FontWeight="SemiBold"  
                                               LabelPosition="Custom"
                                               MinorTicksPerInterval="0"
                                               RangePointerPosition="Cross"

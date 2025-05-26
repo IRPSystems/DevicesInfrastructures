@@ -117,40 +117,46 @@ namespace DeviceHandler.Plots
 		}
 
 		public void Init(MCU_ParamData paramData)
-        {
-            if (paramData.Value is string strVal && !string.IsNullOrEmpty(strVal))
-            {
-                ParamData = null;
+		{
+			if (paramData.Value is string strVal && !string.IsNullOrEmpty(strVal))
+			{
+				ParamData = null;
 				Max = 100;
 				Min = 0;
 				return;
-            }
+			}
 
 
 			ParamData = paramData;
 
 			if (ParamData.Range != null)
-            {
-                Max = (int)ParamData.Range[1];
-                Min = (int)ParamData.Range[0];
+			{
+				Max = (int)ParamData.Range[1];
+				Min = (int)ParamData.Range[0];
 			}
-            else if(ParamData.Value != null) 
-            {
-                double d = 0;
+			else if (ParamData.Value != null)
+			{
+				double d = 0;
 
 				if (ParamData.Value is string str)
-                {
-                    if (string.IsNullOrEmpty(str))
-                        return;
-
-                    double.TryParse(str, out d);
-					ParamData.Value = d;
-
+				{
+					if (string.IsNullOrEmpty(str))
+					{
+						ParamData.Value = 0;
+						Max = 0;
+						Min = 100;
+						return;
+					}
+					else
+					{
+						double.TryParse(str, out d);
+						ParamData.Value = d;
+					}
 				}
 
-                d = Convert.ToDouble(ParamData.Value);
+				d = Convert.ToDouble(ParamData.Value);
 
-                Max = Math.Round(d + (d * 0.5));
+				Max = Math.Round(d + (d * 0.5));
 				Min = Math.Round(d - (d * 0.5));
 			}
 			else
@@ -162,8 +168,8 @@ namespace DeviceHandler.Plots
 
 			this.Visibility = Visibility.Visible;
 
-            DataContext = this;
-        }
+			DataContext = this;
+		}
 
         
         public void Kill()
