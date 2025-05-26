@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,8 +23,8 @@ namespace DeviceHandler.Plots
     /// <summary>
     /// Interaction logic for Speedometer.xaml
     /// </summary>
-    public partial class Speedometer : UserControl, IPlotControl
-    {
+    public partial class Speedometer : UserControl, IPlotControl, INotifyPropertyChanged
+	{
         
 
 
@@ -31,11 +32,42 @@ namespace DeviceHandler.Plots
 
         //public event PropertyChangedEventHandler PropertyChanged;
 
-        public double ArcEndAngle { get; set; }
+        private double _arcEndAngle;
+		public double ArcEndAngle 
+        {
+            get => _arcEndAngle;
 
-        public double Max { get; set; }
-		public double Min { get; set; }
-        //private bool _take_abs;
+            set 
+            {
+				_arcEndAngle = value;
+				OnPropertyChanged(nameof(ArcEndAngle));
+			}
+        }
+
+        private double _max;
+		public double Max
+		{
+			get => _max;
+
+			set
+			{
+				_max = value;
+				OnPropertyChanged(nameof(Max));
+			}
+		}
+
+		private double _min;
+		public double Min
+		{
+			get => _min;
+
+			set
+			{
+				_min = value;
+				OnPropertyChanged(nameof(Min));
+			}
+		}
+		//private bool _take_abs;
 
 
 		#region ParamData
@@ -46,7 +78,14 @@ namespace DeviceHandler.Plots
 		public MCU_ParamData ParamData
 		{
 			get => (MCU_ParamData)GetValue(ParamDataProperty);
-			set => SetValue(ParamDataProperty, value);
+			set
+			{
+				SetValue(ParamDataProperty, value);
+				OnPropertyChanged(nameof(ParamData));
+
+				OnPropertyChanged(nameof(Title));
+				OnPropertyChanged(nameof(Units));
+			}
 		}
 
 		#endregion ParamData
@@ -71,21 +110,15 @@ namespace DeviceHandler.Plots
         {
             InitializeComponent();
 
-            Init(paramData);
+			DataContext = this;
 
-		}
-
-		public Speedometer()
-		{
-			InitializeComponent();
-
-          //  DataContext = this;
+			Init(paramData);
 
 		}
 
 		public void Init(MCU_ParamData paramData)
         {
-            if (paramData.Value is string)
+            if (paramData.Value is string strVal && !string.IsNullOrEmpty(strVal))
             {
                 ParamData = null;
 				Max = 100;
@@ -96,7 +129,7 @@ namespace DeviceHandler.Plots
 
 			ParamData = paramData;
 
-			if(ParamData.Range != null)
+			if (ParamData.Range != null)
             {
                 Max = (int)ParamData.Range[1];
                 Min = (int)ParamData.Range[0];
@@ -137,5 +170,11 @@ namespace DeviceHandler.Plots
         {
            
         }
-    }
+
+		public event PropertyChangedEventHandler PropertyChanged;
+		protected void OnPropertyChanged([CallerMemberName] string name = null)
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+		}
+	}
 }
