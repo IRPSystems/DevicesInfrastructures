@@ -127,6 +127,9 @@ namespace DeviceHandler.Services
 			ConcurrentDictionary<string, RepositoryParam> dictionary = 
 				_msgIdToNameToRepositoryParamList[dbcParam.ParentMessage.ID];
 
+			if(dictionary.ContainsKey(parameter.Name) == false) 
+				return;
+
 			RepositoryParam repositoryParam =
 					dictionary[parameter.Name];
 			if (repositoryParam == null)
