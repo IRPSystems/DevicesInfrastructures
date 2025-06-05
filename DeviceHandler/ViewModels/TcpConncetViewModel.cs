@@ -29,7 +29,21 @@ namespace DeviceHandler.ViewModels
 		public int RxPort { get; set; }
 		public int TxPort { get; set; }
 
-		public bool IsUdpSimulation { get; set; }
+        private Visibility _udpCheckboxVisibility = Visibility.Visible;
+        public Visibility UdpCheckboxVisibility
+        {
+            get => _udpCheckboxVisibility;
+            set
+            {
+                if (_udpCheckboxVisibility != value)
+                {
+                    _udpCheckboxVisibility = value;
+                    OnPropertyChanged(nameof(UdpCheckboxVisibility));
+                }
+            }
+        }
+
+        public bool IsUdpSimulation { get; set; }
 
 		[JsonIgnore]
 		public GridLength UdpRowHeight { get; set; }

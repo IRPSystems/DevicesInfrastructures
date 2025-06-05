@@ -19,7 +19,8 @@ namespace DeviceHandler.ViewModels
 		public TcpConncetViewModel TcpConncetVM { get; set; }
 
 
-		public GridLength SerialHeight { get; set; }
+
+        public GridLength SerialHeight { get; set; }
 		public GridLength TCPHeight { get; set; }
 
 		public List<string> CommTypesList { get; set; }
