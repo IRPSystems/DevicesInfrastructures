@@ -15,8 +15,8 @@ namespace DeviceCommunicators.RigolM300
         public string Cmd { get; set; }                       
         public int Max { get; set; }                          
 
-        public ushort? Slot { get; set; }                      
-        public ushort? Channel { get; set; }                   
+        public int? Slot { get; set; }                      
+        public int? Channel { get; set; }                   
         public string ValueType { get; set; }                 
 
         public bool Queryable { get; set; }                   // Whether command supports `?` for querying
