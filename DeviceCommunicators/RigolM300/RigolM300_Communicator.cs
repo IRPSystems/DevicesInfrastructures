@@ -6,6 +6,7 @@ using DeviceCommunicators.Enums;
 using DeviceCommunicators.Models;
 using Communication.Interfaces;
 using DeviceCommunicators.RigolM300;
+using NationalInstruments.DataInfrastructure;
 
 namespace DeviceCommunicators.RigolM300
 {
@@ -92,7 +93,7 @@ namespace DeviceCommunicators.RigolM300
         }
 
 
-        public void SetParamValue_Do(DeviceParameterData param, double value, Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
+        public void SetParamValue_Do(DeviceParameterData param, double? value, Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
         {
             try
             {
@@ -113,13 +114,18 @@ namespace DeviceCommunicators.RigolM300
                 else
                     fullCommand = $"{cmd} {value.ToString()}";
 
-                if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue)
+                if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue )
                 {
                     int channelRef = rigolparam.Slot.Value * 100 + rigolparam.Channel.Value;
-                    fullCommand += $",DEF,(@{channelRef})";
+                    fullCommand += $"{value},DEF,(@{channelRef})";
                 }
-
+                else
+                {
+                    callback?.Invoke(param, CommunicatorResultEnum.Error, null);
+                }
                 TCPCommService.Send(cmd + "\n");
+
+                rigolparam.UpdateSendResLog(cmd, DeviceParameterData.SendOrRecieve.Send);
 
                 callback?.Invoke(param, CommunicatorResultEnum.OK, null);
             }
@@ -181,9 +187,22 @@ namespace DeviceCommunicators.RigolM300
 
                 response = response.Trim(new char[] { '\0', '\n' });
 
+                param.Value = response;
+                if (cmd == "*IDN?")
+                {
+                    if (response.Contains("RIGOL"))
+                    {
+                        param.Value = response;
+                    }
+                    else
+                    {
+                        callback?.Invoke(param, CommunicatorResultEnum.Error, "Device is not Rigol M300");
+                        return;
+                    }
+                }
 
-                if (rigolparam.Cmd == "VOLT" ||
-                    rigolparam.Cmd == "CURR")
+                if (queryCmd.Contains("VOLT") ||
+                    queryCmd.Contains("CURR"))
                 {
                     double d;
                     bool res = double.TryParse(response, out d);
@@ -198,6 +217,7 @@ namespace DeviceCommunicators.RigolM300
                 else
                     param.Value = response;
 
+                rigolparam.UpdateSendResLog(queryCmd, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.OK.ToString());
 
                 callback?.Invoke(param, CommunicatorResultEnum.OK, null);
 

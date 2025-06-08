@@ -4,6 +4,7 @@ using DeviceCommunicators.General;
 using DeviceCommunicators.MCU;
 using DeviceCommunicators.Models;
 using DeviceCommunicators.PowerSupplayEA;
+using DeviceCommunicators.PowerSupplayKeysight;
 using DeviceCommunicators.RigolM300;
 using DeviceHandler.Interfaces;
 using DeviceHandler.Services;
@@ -23,18 +24,6 @@ namespace DeviceHandler.Models.DeviceFullDataModels
     {
         private RigolM300_Communicator _rigolm300Communicator;
 
-        public override DeviceCommunicator DeviceCommunicator
-        {
-            get
-            {
-                if (ConnectionViewModel == null)
-                    return null;
-
-                return _rigolm300Communicator;
-
-            }
-
-        }
 
         public DeviceFullData_RigolM300(DeviceData deviceData) :
             base(deviceData)
@@ -53,27 +42,28 @@ namespace DeviceHandler.Models.DeviceFullDataModels
             JsonSerializerSettings settings,
             LogLineListService logLineList)
         {
-            //ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as RigolM300ConncetViewModel;
+            ConnectionViewModel = JsonConvert.DeserializeObject(jsonString, settings) as TcpConncetViewModel;
         }
         protected override void ConstructConnectionViewModel(LogLineListService logLineList)
         {
-            ConnectionViewModel = new SerialAndTCPViewModel(
-                115200, "", 14323, 14320,
-                5555, "", "Tcp",
-                "", "RIGOL TECHNOLOGIES,M300", "*IDN?");
-            (ConnectionViewModel as SerialAndTCPViewModel).CommTypesList = new List<string>()
-            {
-               "TCP"
-            };
-            (ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.UdpCheckboxVisibility = Visibility.Hidden;
-            _rigolm300Communicator = new RigolM300_Communicator(logLineList);
 
-            (ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.EASearchIPEvent +=
+            ConnectionViewModel = new TcpConncetViewModel(5555, 14323, 14320, "");
+            (ConnectionViewModel as TcpConncetViewModel).UdpCheckboxVisibility = Visibility.Hidden;
+            (ConnectionViewModel as TcpConncetViewModel).EASearchIPEvent +=
                 TcpConncetVM_RigolM300SearchIPEvent;
         }
         protected override void ConstructCheckConnection()
         {
-            // Implement check connection logic if needed
+            DeviceParameterData data = new RigolM300_ParamData()
+            {
+                Name = "Identify",
+                Cmd = "*IDN"
+            };
+
+            CheckCommunication = new CheckCommunicationService(
+                this,
+                data,
+                "Rigol M300");
         }
 
         private void TcpConncetVM_RigolM300SearchIPEvent()
@@ -88,14 +78,11 @@ namespace DeviceHandler.Models.DeviceFullDataModels
         protected override void InitRealCommunicator()
         {
 
-            if ((ConnectionViewModel as SerialAndTCPViewModel).SelectedCommType == "Tcp")
-            {
-                _rigolm300Communicator.Init(
-                    (ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.Address,
-                    (ConnectionViewModel as SerialAndTCPViewModel).TcpConncetVM.Port,
-                    (ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.RxPort,
-                    (ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.TxPort);
-            }
+           (DeviceCommunicator as RigolM300_Communicator).Init(
+                (ConnectionViewModel as TcpConncetViewModel).Address,
+                (ConnectionViewModel as TcpConncetViewModel).Port,
+                (ConnectionViewModel as TcpConncetViewModel).RxPort,
+                (ConnectionViewModel as TcpConncetViewModel).TxPort);
 
         }
 
@@ -105,7 +92,6 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
         protected override bool IsSumulation()
         {
-
             return false;
         }
 
