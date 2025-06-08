@@ -93,7 +93,7 @@ namespace DeviceCommunicators.RigolM300
         }
 
 
-        public void SetParamValue_Do(DeviceParameterData param, double? value, Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
+        public void SetParamValue_Do(DeviceParameterData param, double value, Action<DeviceParameterData, CommunicatorResultEnum, string> callback)
         {
             try
             {
@@ -102,30 +102,32 @@ namespace DeviceCommunicators.RigolM300
 
 
                 string cmd = rigolparam.Cmd;
-                string fullCommand = string.Empty;
+                string fullCommand = $"{cmd}";
 
-                if (cmd == "SYSTem:COMMunicate:RLSTate")
-                {
-                    if (value == 0)
-                        fullCommand = $"{cmd} LOCal";
-                    else if (value == 1)
-                        fullCommand = $"{cmd} REMote";
-                }
-                else
-                    fullCommand = $"{cmd} {value.ToString()}";
+                if (rigolparam.HasValue)
+                    fullCommand += " " + value.ToString();
 
-                if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue )
+                if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue)
                 {
                     int channelRef = rigolparam.Slot.Value * 100 + rigolparam.Channel.Value;
-                    fullCommand += $"{value},DEF,(@{channelRef})";
+                    if(cmd.Contains("CONF"))
+                        fullCommand += ",DEF,";
+                    fullCommand += $"(@{channelRef})";
                 }
-                else
-                {
-                    callback?.Invoke(param, CommunicatorResultEnum.Error, null);
-                }
-                TCPCommService.Send(cmd + "\n");
+                TCPCommService.Send(fullCommand + "\n");
+                rigolparam.UpdateSendResLog(fullCommand, DeviceParameterData.SendOrRecieve.Send);
 
-                rigolparam.UpdateSendResLog(cmd, DeviceParameterData.SendOrRecieve.Send);
+
+                TCPCommService.Send("SYST:ERR?\n");
+                TCPCommService.Read(out string errResponse);
+
+                if (!string.IsNullOrEmpty(errResponse) && !errResponse.Trim().StartsWith("+0"))
+                {
+                    rigolparam.UpdateSendResLog(fullCommand, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.Error.ToString());
+                    callback?.Invoke(param, CommunicatorResultEnum.Error, null);
+                    return;
+                }
+
 
                 callback?.Invoke(param, CommunicatorResultEnum.OK, null);
             }
@@ -144,18 +146,21 @@ namespace DeviceCommunicators.RigolM300
                 if (!(param is RigolM300_ParamData rigolparam))
                     return;
 
-                string cmd = $"{rigolparam.Cmd}?";
+                string cmd = rigolparam.Cmd.Trim();
+                if (!cmd.EndsWith("?"))
+                    cmd += "?";
 
                 string queryCmd;
                 if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue)
                 {
                     int channelRef = rigolparam.Slot.Value * 100 + rigolparam.Channel.Value;
-                    queryCmd = $"{cmd}? (@{channelRef})";
+                    queryCmd = $"{cmd} (@{channelRef})";
                 }
                 else
                 {
-                    queryCmd = $"{cmd}?";
+                    queryCmd = $"{cmd}";
                 }
+
 
                 string response = null;
                 DateTime startTime = DateTime.Now;
@@ -181,6 +186,7 @@ namespace DeviceCommunicators.RigolM300
 
                 if (string.IsNullOrEmpty(response))
                 {
+                    rigolparam.UpdateSendResLog(queryCmd, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.NoResponse.ToString());
                     callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
                     return;
                 }
@@ -196,18 +202,22 @@ namespace DeviceCommunicators.RigolM300
                     }
                     else
                     {
+                        rigolparam.UpdateSendResLog(queryCmd, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.Error.ToString());
                         callback?.Invoke(param, CommunicatorResultEnum.Error, "Device is not Rigol M300");
                         return;
                     }
                 }
 
                 if (queryCmd.Contains("VOLT") ||
-                    queryCmd.Contains("CURR"))
+                    queryCmd.Contains("CURR") ||
+                    queryCmd.Contains("RES")  ||
+                    queryCmd.Contains("FREQ") )
                 {
                     double d;
                     bool res = double.TryParse(response, out d);
                     if (res == false)
                     {
+                        rigolparam.UpdateSendResLog(queryCmd, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.NoResponse.ToString());
                         callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
                         return;
                     }
