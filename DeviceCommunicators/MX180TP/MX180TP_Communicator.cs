@@ -194,14 +194,14 @@ namespace DeviceCommunicators.MX180TP
                 param.Value = response;
                 if (cmd == "*IDN?")
                 {
-                    if (response.Contains("RIGOL"))
+                    if (response.Contains("TTI"))
                     {
                         param.Value = response;
                     }
                     else
                     {
                         mxparam.UpdateSendResLog(cmd, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.Error.ToString());
-                        callback?.Invoke(param, CommunicatorResultEnum.Error, "Device is not Rigol M300");
+                        callback?.Invoke(param, CommunicatorResultEnum.Error, null);
                         return;
                     }
                 }
