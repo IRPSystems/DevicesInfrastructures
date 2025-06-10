@@ -16,6 +16,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/DeviceHandler;component/Resources/ToolsStyle.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Controls;component/Resources/ToggleButtonWithIcon.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
 
@@ -117,7 +118,10 @@
                                     </Border.ToolTip>
                                 </Border>
 
-                                <Grid Grid.Column="2" ToolTip="{Binding ErrorDescription}" ToolTipService.InitialShowDelay="1">
+                                <Grid Grid.Column="2" 
+                                      ToolTip="{Binding ErrorDescription}" 
+                                      ToolTipService.InitialShowDelay="1"
+                                      Name="grdValue">
 
                                     <controls_view:HexTextBoxView Background="{Binding Background}"
                                                                   Foreground="{Binding Foreground}"
@@ -199,14 +203,6 @@
                                                                    PassEventArgsToCommand="False"/>
                                                 </i:EventTrigger>
 
-                                                <!--<i:EventTrigger EventName="DropDownOpen">
-                                                <i:InvokeCommandAction Command="{Binding Path=DataContext.ComboBox_DropDownOpenCommand, 
-                                                                                     Mode=OneWay, 
-                                                                                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
-                                                                   CommandParameter="{Binding ElementName=cb}"
-                                                                   PassEventArgsToCommand="False"/>
-                                            </i:EventTrigger>-->
-
                                                 <i:EventTrigger EventName="KeyUp">
                                                     <i:InvokeCommandAction Command="{Binding Path=DataContext.TextBox_KeyUpCommand, 
                                                                                      Mode=OneWay, 
@@ -281,7 +277,180 @@
 
                                 </Grid>
 
+                                <Grid Grid.Column="2" 
+                                      ToolTip="{Binding ErrorDescription}" 
+                                      ToolTipService.InitialShowDelay="1"
+                                      Name="grdEditValue">
+
+                                    <controls_view:HexTextBoxView Background="{Binding Background}"
+                                                                  Foreground="{Binding Foreground}"
+                                                                  Visibility="{Binding Format, Converter={StaticResource ShowHexPerfixConverter}}"
+                                                                  Text="{Binding EditValue, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                                  TextBoxKeyUpCommand="{Binding DataContext.TextBox_KeyUpCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                                                                  AutomationProperties.AutomationId="{Binding RelativeSource={RelativeSource Mode=Self},
+                                                                                                              Converter={StaticResource AutomationIdBuilderConverte}}"
+                                                                  Name="htbValue1">
+
+                                        <i:Interaction.Triggers>
+
+                                            <i:EventTrigger EventName="EnterEvent">
+                                                <i:InvokeCommandAction Command="{Binding Path=DataContext.HexTextBox_EnterEventCommand, 
+                                                                                        Mode=OneWay, 
+                                                                                        RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
+                                                                        CommandParameter="{Binding}"
+                                                                    PassEventArgsToCommand="False"/>     
+                                            </i:EventTrigger>
+
+                                            <i:EventTrigger EventName="HexKeyDownEvent">
+                                                <i:InvokeCommandAction Command="{Binding Path=DataContext.HexTextBox_HexKeyDownEventCommand, 
+                                                                                         Mode=OneWay, 
+                                                                                         RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
+                                                                       PassEventArgsToCommand="True"/>
+                                            </i:EventTrigger>
+
+                                        </i:Interaction.Triggers>
+
+
+                                    </controls_view:HexTextBoxView>
+
+                                    <TextBox Name="tbValue1" 
+                                             Text="{Binding EditValue, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="{Binding Background}"
+                                             Foreground="{Binding Foreground}"
+                                             Visibility="{Binding Converter={StaticResource ShowRegularTextBoxConverter}}"
+                                             IsReadOnly="{Binding DataContext.IsShowButtons, 
+                                                                 Converter={StaticResource InverseBoolConverter},
+                                                                 RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                                             AutomationProperties.AutomationId="{Binding RelativeSource={RelativeSource Mode=Self},
+                                                                                         Converter={StaticResource AutomationIdBuilderConverte}}">
+
+                                        <i:Interaction.Triggers>
+
+                                            <i:EventTrigger EventName="KeyUp">
+                                                <i:InvokeCommandAction Command="{Binding Path=DataContext.TextBox_KeyUpCommand, 
+                                                                                         Mode=OneWay, 
+                                                                                         RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
+                                                                       PassEventArgsToCommand="True"/>
+                                            </i:EventTrigger>
+
+                                        </i:Interaction.Triggers>
+
+                                    </TextBox>
+
+                                    <Grid Visibility="{Binding Converter={StaticResource ShowComboBoxConverter}}">
+                                        <ComboBox Name="cbValue1"
+                                                  ItemsSource="{Binding DropDown}"
+                                                  SelectedItem="{Binding EditSelectedDropDown, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  Background="{Binding Background}"
+                                                  Foreground="{Binding Foreground}"
+                                                  AutomationProperties.AutomationId="{Binding RelativeSource={RelativeSource Mode=Self},
+                                                                                              Converter={StaticResource AutomationIdBuilderConverte}}">
+
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+
+                                            <i:Interaction.Triggers>
+
+                                                <i:EventTrigger EventName="DropDownClosed">
+                                                    <i:InvokeCommandAction Command="{Binding Path=DataContext.ComboBox_DropDownClosedCommand, 
+                                                                                             Mode=OneWay, 
+                                                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
+                                                                           CommandParameter="{Binding ElementName=cbValue}"
+                                                                           PassEventArgsToCommand="False"/>
+                                                </i:EventTrigger>
+
+                                                <i:EventTrigger EventName="KeyUp">
+                                                    <i:InvokeCommandAction Command="{Binding Path=DataContext.TextBox_KeyUpCommand, 
+                                                                                             Mode=OneWay, 
+                                                                                             RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
+                                                                           PassEventArgsToCommand="True"/>
+                                                </i:EventTrigger>
+
+                                            </i:Interaction.Triggers>
+
+                                            <ComboBox.Resources>
+                                                <Style TargetType="ComboBox" BasedOn="{StaticResource MahApps.Styles.ComboBox}">
+                                                    <Style.Triggers>
+
+                                                        <DataTrigger Binding="{Binding DataContext.IsShowButtons, 
+                                                                                       RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                                                                     Value="True">
+
+                                                            <Setter Property="Visibility" Value="Visible"/>
+
+                                                        </DataTrigger>
+
+                                                        <DataTrigger Binding="{Binding DataContext.IsShowButtons, 
+                                                                                       RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                                                                     Value="False">     
+
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+
+                                                        </DataTrigger>
+
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ComboBox.Resources>
+
+                                        </ComboBox>
+
+                                        <TextBox Name="tbCombo1" 
+                                                 IsReadOnly="True"
+                                                 Text="{Binding SelectedItem.Name, ElementName=cbValue}"
+                                                 AutomationProperties.AutomationId="{Binding RelativeSource={RelativeSource Mode=Self},
+                                                                                             Converter={StaticResource AutomationIdBuilderConverte}}">
+
+                                            <TextBox.Resources>
+                                                <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox}">
+                                                    <Style.Triggers>
+
+                                                        <DataTrigger Binding="{Binding DataContext.IsShowButtons, 
+                                                                                       RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                                                                     Value="True">          
+
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+
+                                                        </DataTrigger>
+
+                                                        <DataTrigger Binding="{Binding DataContext.IsShowButtons, 
+                                                                                       RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                                                                     Value="False">     
+
+                                                            <Setter Property="Visibility" Value="Visible"/>
+
+                                                        </DataTrigger>
+
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBox.Resources>
+
+                                        </TextBox>
+
+
+
+
+                                    </Grid>
+
+                                </Grid>
+
                             </Grid>
+
+                            <DataTemplate.Triggers>
+
+                                <DataTrigger Binding="{Binding IsEditing}" Value="False">
+                                    <Setter TargetName="grdValue" Property="Visibility" Value="Visible"/>
+                                    <Setter TargetName="grdEditValue" Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                    <Setter TargetName="grdValue" Property="Visibility" Value="Collapsed"/>
+                                    <Setter TargetName="grdEditValue" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+
+                            </DataTemplate.Triggers>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
 
@@ -296,6 +465,8 @@
                                                        Converter={StaticResource BooleanToVisibilityConverter}}"
                                   IsEnabled="{Binding IsEnabled}">
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="2" />
                                     <ColumnDefinition Width="40" />
                                     <ColumnDefinition Width="2" />
                                     <ColumnDefinition Width="40" />
@@ -303,8 +474,19 @@
                                     <ColumnDefinition Width="40" />
                                 </Grid.ColumnDefinitions>
 
+                                <ToggleButton Grid.Column="0"
+                                              Style="{StaticResource ToggleButtonWithIconStyle}"
+                                              ToolTip="Edit. Click if the parameter is monitoring"
+                                              Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                                              CommandParameter="{Binding}"
+                                              Visibility="{Binding GetSetVisibility}"
+                                              IsChecked="{Binding IsEditing}">
+                                    <iconPacks:PackIconMaterial Kind="LeadPencil" Width="15" Height="15"/>
+                                </ToggleButton>
+
+
                                 <Button Content="Get" 
-                                        Grid.Column="0"
+                                        Grid.Column="2"
                                         Command="{Binding DataContext.GetCommand, 
                                                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
                                         CommandParameter="{Binding}"
@@ -312,7 +494,7 @@
                                                                                     Converter={StaticResource AutomationIdBuilderConverte}}"
                                         Name="btnGet"/>
                                 <Button Content="Set" 
-                                        Grid.Column="2"
+                                        Grid.Column="4"
                                         Command="{Binding DataContext.SetCommand, 
                                                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
                                         CommandParameter="{Binding}"
@@ -321,7 +503,7 @@
                                         Name="btnSet"/>
                                 <Button Content="Save" 
                                         Name="save"
-                                        Grid.Column="4"
+                                        Grid.Column="6"
                                         Command="{Binding DataContext.SaveCommand, 
                                                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}" 
                                         CommandParameter="{Binding}"
