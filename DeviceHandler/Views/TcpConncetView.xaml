@@ -89,7 +89,8 @@
             </Border>
 
             <CheckBox Content="Is UDP simulation" IsChecked="{Binding IsUdpSimulation,Mode=TwoWay}" Margin="0,0,50,0"
-                      Command="{Binding IsUdpSimulationClickCommand}"/>
+                      Command="{Binding IsUdpSimulationClickCommand}"
+                      Visibility="{Binding UdpCheckboxVisibility}" />
 
             
 

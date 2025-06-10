@@ -152,7 +152,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 
             if (!DeviceCommunicator.IsInitialized)
             {
-                if(Device.DeviceType == DeviceTypesEnum.PowerSupplyEA) 
+                if(Device.DeviceType == DeviceTypesEnum.PowerSupplyEA ) 
                 { 
                     if(ConnectionViewModel is SerialAndTCPViewModel serialTcpConncet)
                     {
@@ -286,6 +286,8 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				case DeviceTypesEnum.MCU_2: return new DeviceFullData_MCU_2(deviceData);
                 case DeviceTypesEnum.NumatoGPIO: return new DeviceFullData_NumatoGPIO(deviceData);
                 case DeviceTypesEnum.Printer_TSC: return new DeviceFullData_Printer_TSC(deviceData);
+                case DeviceTypesEnum.RigolM300: return new DeviceFullData_RigolM300(deviceData);
+                case DeviceTypesEnum.MX180TP: return new DeviceFullData_MX180TP(deviceData);
                 default: return null;
             }
         }
