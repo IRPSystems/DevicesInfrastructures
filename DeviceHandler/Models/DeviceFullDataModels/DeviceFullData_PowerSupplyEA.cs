@@ -113,7 +113,8 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				_eapsCommunicator.Init(
 					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.IsUdpSimulation,
 					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedCOM,
-					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedBaudrate);
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedBaudrate,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.DeviceIdentifier);
 			}
 			else
 			{
@@ -132,6 +133,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.IsUdpSimulation,
 					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedCOM,
 					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.SelectedBaudrate,
+					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.DeviceIdentifier,
 					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.RxPort,
 					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.TxPort,
 					(ConnectionViewModel as SerialAndTCPViewModel).SerialConncetVM.Address);

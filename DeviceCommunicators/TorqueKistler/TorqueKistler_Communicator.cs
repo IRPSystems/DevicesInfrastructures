@@ -28,6 +28,8 @@ namespace DeviceCommunicators.TorqueKistler
 
 		public ConcurrentDictionary<string, string> _ErrorToDescription;
 
+		private string _idenText;
+
 		#endregion Fields
 
 
@@ -72,12 +74,14 @@ namespace DeviceCommunicators.TorqueKistler
 			bool isUdpSimulation,
 			string comName,
 			int baudtate,
+			string idenText,
 			int rxPort = 0,
 			int txPort = 0,
 			string address = "")
 		{
 			_name_comport = comName;
 			_boud_rate = baudtate;
+			_idenText = idenText;
 
 			if (isUdpSimulation)
 				CommService = new SerialUdpSimulationService(rxPort, txPort, address);
@@ -188,6 +192,15 @@ namespace DeviceCommunicators.TorqueKistler
 				if (string.IsNullOrEmpty(buffer))
 				{
 					callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
+					return;
+				}
+
+				if (tk_ParamData.Command == "*IDN" && buffer.Contains(_idenText) == false)
+				{
+					callback?.Invoke(
+						param,
+						CommunicatorResultEnum.InvalidValue,
+						"The device is not Torque Kistler\r\n" + buffer);
 					return;
 				}
 
