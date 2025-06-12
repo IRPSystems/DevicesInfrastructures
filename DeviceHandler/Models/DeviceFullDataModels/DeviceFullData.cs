@@ -288,6 +288,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
                 case DeviceTypesEnum.Printer_TSC: return new DeviceFullData_Printer_TSC(deviceData);
                 case DeviceTypesEnum.RigolM300: return new DeviceFullData_RigolM300(deviceData);
                 case DeviceTypesEnum.MX180TP: return new DeviceFullData_MX180TP(deviceData);
+                case DeviceTypesEnum.ITM3100: return new DeviceFullData_IT_M3100(deviceData);
                 default: return null;
             }
         }
