@@ -13,9 +13,8 @@ namespace DeviceCommunicators.PowerSupplayBK
 	{
 		#region Fields
 
-		
-		//private string _name_comport;
-		//private int _boud_rate;
+
+		private string _idnText;
 
 		#endregion Fields
 
@@ -46,12 +45,12 @@ namespace DeviceCommunicators.PowerSupplayBK
 			bool isUdpSimulation,
 			string comName,
 			int baudtate,
+			string idnText,
 			int rxPort = 0,
 			int txPort = 0,
 			string address = "")
         {
-			//_name_comport = comName;
-			//_boud_rate = baudtate;
+			_idnText = idnText;
 
 			try
 			{
@@ -153,6 +152,18 @@ namespace DeviceCommunicators.PowerSupplayBK
 
                 param.Value = receive_value_from_supply(supplay_Parameter.Name);
 				//LoggerService.Inforamtion(this, $"{supplay_Parameter.Name} - {param.Value}");
+
+				if(param.Value is string strVal)
+				{
+					if(supplay_Parameter.Command == "*IDN" && strVal.Contains(_idnText) == false)
+					{
+						callback?.Invoke(
+							param, 
+							CommunicatorResultEnum.InvalidValue, 
+							"The device is not BK PS\r\n" + strVal);
+						return;
+					}
+				}
 
 				if (param.Value == null)
                 	callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);

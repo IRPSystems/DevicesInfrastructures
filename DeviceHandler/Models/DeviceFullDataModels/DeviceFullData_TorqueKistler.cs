@@ -69,7 +69,8 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 			(DeviceCommunicator as TorqueKistler_Communicator).Init(
 				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
-				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate);
+				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate,
+				(ConnectionViewModel as SerialConncetViewModel).DeviceIdentifier);
 		}
 
 		protected override void InitSimulationCommunicator()
@@ -78,6 +79,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 				(ConnectionViewModel as SerialConncetViewModel).IsUdpSimulation,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedCOM,
 				(ConnectionViewModel as SerialConncetViewModel).SelectedBaudrate,
+				(ConnectionViewModel as SerialConncetViewModel).DeviceIdentifier,
 				(ConnectionViewModel as SerialConncetViewModel).RxPort,
 				(ConnectionViewModel as SerialConncetViewModel).TxPort,
 				(ConnectionViewModel as SerialConncetViewModel).Address);

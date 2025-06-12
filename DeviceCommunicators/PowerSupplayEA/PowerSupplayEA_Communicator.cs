@@ -27,6 +27,8 @@ namespace DeviceCommunicators.PowerSupplayEA
 
 		private bool _isUseRampForOnOff;
 
+		private string _idnText;
+
 		#endregion Fields
 
 
@@ -59,12 +61,14 @@ namespace DeviceCommunicators.PowerSupplayEA
 			bool isUdpSimulation,
 			string comName,
 			int baudtate,
+			string idnText,
 			int rxPort = 0,
 			int txPort = 0,
 			string address = "")
         {
             _name_comport = comName;
             _boud_rate = baudtate;
+			_idnText = idnText;
 
             if(isUdpSimulation)
 				CommService = new SerialUdpSimulationService(rxPort, txPort, address);
@@ -180,6 +184,15 @@ namespace DeviceCommunicators.PowerSupplayEA
                 ea_ParamData.UpdateSendResLog(cmd, DeviceParameterData.SendOrRecieve.Send);
 
                 string buffer = Read();
+
+				if (ea_ParamData.Cmd == "*IDN" && buffer.Contains(_idnText) == false)
+				{
+					callback?.Invoke(
+						param,
+						CommunicatorResultEnum.InvalidValue,
+						"The device is not EA PS\r\n" + buffer);
+					return;
+				}
 
 				if (string.IsNullOrEmpty(buffer))
 				{
