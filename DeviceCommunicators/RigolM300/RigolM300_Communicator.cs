@@ -1,12 +1,13 @@
-﻿using Communication.Services;
-using DeviceCommunicators.General;
-using Services.Services;
-using System;
+﻿using Communication.Interfaces;
+using Communication.Services;
 using DeviceCommunicators.Enums;
+using DeviceCommunicators.General;
 using DeviceCommunicators.Models;
-using Communication.Interfaces;
 using DeviceCommunicators.RigolM300;
 using NationalInstruments.DataInfrastructure;
+using Services.Services;
+using System;
+using System.Linq;
 
 namespace DeviceCommunicators.RigolM300
 {
@@ -169,7 +170,7 @@ namespace DeviceCommunicators.RigolM300
                     
                     TCPCommService.Send(queryCmd + "\n");
 
-                    while ((DateTime.Now - startTime) < TimeSpan.FromMilliseconds(50))
+                    while ((DateTime.Now - startTime) < TimeSpan.FromMilliseconds(100))
                     {
                         TCPCommService.Read(out response);
                         if (!string.IsNullOrEmpty(response))
@@ -191,9 +192,10 @@ namespace DeviceCommunicators.RigolM300
                     return;
                 }
 
-                response = response.Trim(new char[] { '\0', '\n' });
+                response = response.Trim(new char[] { '\0' });
+                string[] parts = response.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                string value = parts.Last();
 
-                param.Value = response;
                 if (cmd == "*IDN?")
                 {
                     if (response.Contains("RIGOL"))
@@ -214,7 +216,7 @@ namespace DeviceCommunicators.RigolM300
                     queryCmd.Contains("FREQ") )
                 {
                     double d;
-                    bool res = double.TryParse(response, out d);
+                    bool res = double.TryParse(value, out d);
                     if (res == false)
                     {
                         rigolparam.UpdateSendResLog(queryCmd, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.NoResponse.ToString());

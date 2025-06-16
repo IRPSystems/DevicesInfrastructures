@@ -56,7 +56,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
             DeviceParameterData data = new MX180TP_ParamData()
             {
                 Name = "Identify",
-                Cmd = "*IDN"
+                Cmd = "*IDN?"
             };
 
             CheckCommunication = new CheckCommunicationService(
