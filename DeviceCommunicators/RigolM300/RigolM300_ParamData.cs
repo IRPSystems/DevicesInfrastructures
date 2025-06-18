@@ -18,6 +18,7 @@ namespace DeviceCommunicators.RigolM300
         public int? Slot { get; set; }                      
         public int? Channel { get; set; }                   
         public bool HasValue { get; set; }
+        public int? Range { get; set; }                      
 
         public bool Queryable { get; set; }                   // Whether command supports `?` for querying
 
