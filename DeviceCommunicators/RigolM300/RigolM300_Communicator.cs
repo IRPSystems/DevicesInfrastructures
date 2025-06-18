@@ -108,7 +108,12 @@ namespace DeviceCommunicators.RigolM300
                 string cmd = rigolparam.Cmd;
                 string fullCommand = $"{cmd}";
 
-                if (rigolparam.HasValue)
+                if (rigolparam.Cmd == "ROUT:")
+                    if (value == 1)
+                        fullCommand += "OPEN ";
+                    else
+                        fullCommand += "CLOS ";
+                else
                     fullCommand += " " + value.ToString();
 
                 if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue)

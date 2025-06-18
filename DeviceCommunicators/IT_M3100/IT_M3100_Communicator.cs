@@ -1,11 +1,12 @@
-﻿using Communication.Services;
+﻿using Communication.Interfaces;
+using Communication.Services;
+using DeviceCommunicators.Enums;
 using DeviceCommunicators.General;
+using DeviceCommunicators.Models;
+using NationalInstruments.DataInfrastructure;
 using Services.Services;
 using System;
-using DeviceCommunicators.Enums;
-using DeviceCommunicators.Models;
-using Communication.Interfaces;
-using NationalInstruments.DataInfrastructure;
+using System.Linq;
 
 namespace DeviceCommunicators.IT_M3100
 {
@@ -104,17 +105,37 @@ namespace DeviceCommunicators.IT_M3100
                 string fullCommand = $"{cmd}";
 
 
-                if (m3100param.HasValue)
-                    fullCommand += " " + value.ToString();
 
                 TCPCommService.Send(fullCommand + "\n");
                 m3100param.UpdateSendResLog(fullCommand, DeviceParameterData.SendOrRecieve.Send);
 
 
                 TCPCommService.Send("SYST:ERR?\n");
-                TCPCommService.Read(out string errResponse);
+                DateTime startTime = DateTime.Now;
+                string errResponse = null;
+                while (DateTime.Now - startTime < TimeSpan.FromMilliseconds(200))
+                {
+                    TCPCommService.Read(out errResponse);
+                    if (!string.IsNullOrEmpty(errResponse))
+                        break;
 
-                if (!string.IsNullOrEmpty(errResponse) && !errResponse.Trim().StartsWith("+0"))
+                    System.Threading.Thread.Sleep(1);
+                }
+
+                if (string.IsNullOrEmpty(errResponse))
+                {
+                    m3100param.UpdateSendResLog(cmd, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.NoResponse.ToString());
+                    callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
+                    return;
+                }
+
+                errResponse = errResponse.Trim(new char[] { '\0' });
+                string[] parts = errResponse.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                string errValue = parts.Last();
+                parts = errValue.Split(',');
+                
+
+                if (!string.IsNullOrEmpty(errValue) && (int.TryParse(parts[0], out int errCode) && errCode !=0))
                 {
                     m3100param.UpdateSendResLog(fullCommand, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.Error.ToString());
                     callback?.Invoke(param, CommunicatorResultEnum.Error, null);
@@ -153,7 +174,7 @@ namespace DeviceCommunicators.IT_M3100
 
                     TCPCommService.Send(cmd + "\n");
 
-                    while (DateTime.Now - startTime < TimeSpan.FromMilliseconds(50))
+                    while (DateTime.Now - startTime < TimeSpan.FromMilliseconds(100))
                     {
                         TCPCommService.Read(out response);
                         if (!string.IsNullOrEmpty(response))
