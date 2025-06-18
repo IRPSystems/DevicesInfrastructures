@@ -63,7 +63,7 @@ namespace DeviceCommunicators.MX180TP
             }
             catch (Exception ex)
             {
-                LoggerService.Error(this, "Failed to init the ScopeKeySight", ex);
+                LoggerService.Error(this, "Failed to init the MX180TP", ex);
             }
 
 
@@ -100,15 +100,24 @@ namespace DeviceCommunicators.MX180TP
                     return;
 
 
-                string cmd = mxparam.Cmd;
-                string fullCommand = $"{cmd}";
-
+                string fullCommand = $"{mxparam.Cmd}";
 
                 if (mxparam.Channel.HasValue)
                 {
-                    int channelRef = mxparam.Channel.Value;
-                    fullCommand += $"{channelRef}";
+                    string replaced = fullCommand.Replace("<N>", mxparam.Channel.ToString());
+
+                    if (replaced != fullCommand)
+                    {
+                        fullCommand = replaced;
+                    }
+                    else
+                    {
+                        fullCommand += $"{mxparam.Channel.ToString()}";
+                    }
                 }
+
+
+
 
                 if (mxparam.HasValue)
                     fullCommand += " " + value.ToString();
@@ -151,7 +160,7 @@ namespace DeviceCommunicators.MX180TP
 
                 if (mxparam.Channel.HasValue)
                 {
-                    cmd.Replace("<N>", mxparam.Channel.ToString());
+                    cmd.Replace("<N>", cmd.ToString());
                 }
 
                 if (!cmd.EndsWith("?"))
@@ -167,7 +176,7 @@ namespace DeviceCommunicators.MX180TP
 
                     TCPCommService.Send(cmd + "\n");
 
-                    while (DateTime.Now - startTime < TimeSpan.FromMilliseconds(50))
+                    while (DateTime.Now - startTime < TimeSpan.FromMilliseconds(100))
                     {
                         TCPCommService.Read(out response);
                         if (!string.IsNullOrEmpty(response))
@@ -194,7 +203,7 @@ namespace DeviceCommunicators.MX180TP
                 param.Value = response;
                 if (cmd == "*IDN?")
                 {
-                    if (response.Contains("TTI"))
+                    if (response.Contains("MX180TP"))
                     {
                         param.Value = response;
                     }

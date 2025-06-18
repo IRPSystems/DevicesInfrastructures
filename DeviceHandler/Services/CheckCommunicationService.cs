@@ -27,7 +27,7 @@ namespace DeviceHandler.Services
 
 		private int _noReplyCounter;
 
-		private System.Timers.Timer _timerMessageSending;
+        private System.Timers.Timer _timerMessageSending;
 		private System.Timers.Timer _timerTimeout;
 
 		private CommunicationStateEnum prevStatus;
@@ -63,7 +63,10 @@ namespace DeviceHandler.Services
 
 			_isCommunicatorInitiated = _deviceFullData.DeviceCommunicator.IsInitialized;
 
-			_timerMessageSending = new System.Timers.Timer(1000);
+			if(deviceFullData is DeviceFullData_RigolM300)
+                _timerMessageSending = new System.Timers.Timer(3000);
+			else
+				_timerMessageSending = new System.Timers.Timer(1000);
 			_timerMessageSending.Elapsed += _timerMessageSending_Elapsed;
 
 			_timerTimeout = new System.Timers.Timer(3000);
