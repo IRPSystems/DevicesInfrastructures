@@ -57,7 +57,7 @@ namespace DeviceHandler.ViewModels
 			GetCommand = new RelayCommand<DeviceParameterData>(Get);
 			SetCommand = new RelayCommand<DeviceParameterData>(Set);
 			SaveCommand = new RelayCommand<DeviceParameterData>(Save);
-			EditCommand = new RelayCommand<DeviceParameterData>(Edit);
+			//EditCommand = new RelayCommand<DeviceParameterData>(Edit);
 
 			SetAllBackForeGround();
 		}
@@ -87,10 +87,10 @@ namespace DeviceHandler.ViewModels
 			if (!(param is MCU_ParamData mcuParam))
 				return;
 
-			if (param.IsEditing == true)
-			{
-				param.Value = param.EditValue;
-			}
+			//if (param.IsEditing == true)
+			//{
+			//	param.Value = param.EditValue;
+			//}
 
 			double dVal = 0;
 			if (param.Value == null)
@@ -413,24 +413,24 @@ namespace DeviceHandler.ViewModels
 			}
 		}
 
-		private void Edit(DeviceParameterData param)
-		{
-			param.IsEditing = !param.IsEditing;
-			if (param.IsEditing == true)
-			{
-				param.EditValue = param.Value;
+		//private void Edit(DeviceParameterData param)
+		//{
+		//	param.IsEditing = !param.IsEditing;
+		//	if (param.IsEditing == true)
+		//	{
+		//		param.EditValue = param.Value;
 
-				if(param is MCU_ParamData mcuParam)
-					mcuParam.EditSelectedDropDown = mcuParam.SelectedDropDown;
-			}
-			else 
-			{
-				param.Value = param.EditValue;
+		//		if(param is MCU_ParamData mcuParam)
+		//			mcuParam.EditSelectedDropDown = mcuParam.SelectedDropDown;
+		//	}
+		//	else 
+		//	{
+		//		param.Value = param.EditValue;
 
-				if (param is MCU_ParamData mcuParam)
-					mcuParam.SelectedDropDown = mcuParam.EditSelectedDropDown;
-			}
-		}
+		//		if (param is MCU_ParamData mcuParam)
+		//			mcuParam.SelectedDropDown = mcuParam.EditSelectedDropDown;
+		//	}
+		//}
 
 		#endregion Methods
 
@@ -440,7 +440,7 @@ namespace DeviceHandler.ViewModels
 		public RelayCommand<DeviceParameterData> SetCommand { get; private set; }
 		public RelayCommand<DeviceParameterData> SaveCommand { get; private set; }
 
-		public RelayCommand<DeviceParameterData> EditCommand { get; private set; }
+		//public RelayCommand<DeviceParameterData> EditCommand { get; private set; }
 
 
 		private RelayCommand<ComboBox> _ComboBox_DropDownClosedCommand;
