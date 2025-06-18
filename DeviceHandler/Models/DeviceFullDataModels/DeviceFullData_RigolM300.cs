@@ -57,13 +57,14 @@ namespace DeviceHandler.Models.DeviceFullDataModels
             DeviceParameterData data = new RigolM300_ParamData()
             {
                 Name = "Identify",
-                Cmd = "*IDN"
+                Cmd = "*OPC?"
             };
 
             CheckCommunication = new CheckCommunicationService(
                 this,
                 data,
                 "Rigol M300");
+
         }
 
         private void TcpConncetVM_RigolM300SearchIPEvent()

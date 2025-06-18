@@ -8,6 +8,9 @@ using NationalInstruments.DataInfrastructure;
 using Services.Services;
 using System;
 using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Windows;
 
 namespace DeviceCommunicators.RigolM300
 {
@@ -65,7 +68,7 @@ namespace DeviceCommunicators.RigolM300
             }
             catch (Exception ex)
             {
-                LoggerService.Error(this, "Failed to init the ScopeKeySight", ex);
+                LoggerService.Error(this, "Failed to init the RigolM300", ex);
             }
 
 
@@ -135,7 +138,7 @@ namespace DeviceCommunicators.RigolM300
 
             catch (Exception ex)
             {
-                LoggerService.Error(this, "Failed to set Command for Switch relay" + param.Name, ex);
+                LoggerService.Error(this, "Failed to set Command for RigolM300" + param.Name, ex);
             }
         }
 
@@ -151,33 +154,35 @@ namespace DeviceCommunicators.RigolM300
                 if (!cmd.EndsWith("?"))
                     cmd += "?";
 
-                string queryCmd;
+                string queryCmd = $"{cmd}";
+
+                if (rigolparam.Cmd.Contains("MEAS"))
+                    queryCmd += " 20,DEF,";
+
                 if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue)
                 {
                     int channelRef = rigolparam.Slot.Value * 100 + rigolparam.Channel.Value;
-                    queryCmd = $"{cmd} (@{channelRef})";
-                }
-                else
-                {
-                    queryCmd = $"{cmd}";
+                    queryCmd += $"(@{channelRef})";
                 }
 
-
+                FlushRemaining();
                 string response = null;
                 DateTime startTime = DateTime.Now;
                 for (int i = 0; i < 5; i++)
                 {
-                    
+
                     TCPCommService.Send(queryCmd + "\n");
 
-                    while ((DateTime.Now - startTime) < TimeSpan.FromMilliseconds(100))
-                    {
-                        TCPCommService.Read(out response);
-                        if (!string.IsNullOrEmpty(response))
-                            break;
+                    response = ReadUntilComplete(500);
 
-                        System.Threading.Thread.Sleep(1);
-                    }
+                    //while ((DateTime.Now - startTime) < TimeSpan.FromMilliseconds(1000))
+                    //{
+                    //    TCPCommService.Read(out response);
+                    //    if (!string.IsNullOrEmpty(response))
+                    //        break;
+
+                    //    System.Threading.Thread.Sleep(1);
+                    //}
 
                     if (!string.IsNullOrEmpty(response))
                         break;
@@ -185,6 +190,7 @@ namespace DeviceCommunicators.RigolM300
                     System.Threading.Thread.Sleep(1);
                 }
 
+                
                 if (string.IsNullOrEmpty(response))
                 {
                     rigolparam.UpdateSendResLog(queryCmd, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.NoResponse.ToString());
@@ -240,6 +246,43 @@ namespace DeviceCommunicators.RigolM300
             }
         }
 
+        string ReadUntilComplete(int timeoutMs = 1000)
+        {
+            StringBuilder sb = new StringBuilder();
+            DateTime start = DateTime.Now;
+            string chunk;
+
+            while ((DateTime.Now - start).TotalMilliseconds < timeoutMs)
+            {
+                TCPCommService.Read(out chunk);
+
+                if (!string.IsNullOrEmpty(chunk))
+                {
+                    sb.Append(chunk);
+
+                    //// If the device ends with newline, this tells us it's done
+                    //if (chunk.Contains("\n"))
+                    //    break;
+                }
+
+                Thread.Sleep(1); // Don’t hog CPU
+            }
+
+            return sb.ToString();
+        }
+
+        void FlushRemaining()
+        {
+            //DateTime start = DateTime.Now;
+
+            //while ((DateTime.Now - start).TotalMilliseconds < 100)
+            //{
+            //    TCPCommService.Read(out string chunk);
+            //    if (string.IsNullOrEmpty(chunk))
+            //        break;
+            //}
+            TCPCommService.Read(out _);
+        }
 
         #endregion Methods
     }
