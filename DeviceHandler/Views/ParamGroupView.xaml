@@ -277,7 +277,7 @@
 
                                 </Grid>
 
-                                <Grid Grid.Column="2" 
+                                <!--<Grid Grid.Column="2" 
                                       ToolTip="{Binding ErrorDescription}" 
                                       ToolTipService.InitialShowDelay="1"
                                       Name="grdEditValue">
@@ -434,11 +434,11 @@
 
                                     </Grid>
 
-                                </Grid>
+                                </Grid>-->
 
                             </Grid>
 
-                            <DataTemplate.Triggers>
+                            <!--<DataTemplate.Triggers>
 
                                 <DataTrigger Binding="{Binding IsEditing}" Value="False">
                                     <Setter TargetName="grdValue" Property="Visibility" Value="Visible"/>
@@ -450,7 +450,7 @@
                                     <Setter TargetName="grdEditValue" Property="Visibility" Value="Visible"/>
                                 </DataTrigger>
 
-                            </DataTemplate.Triggers>
+                            </DataTemplate.Triggers>-->
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
 
@@ -465,7 +465,7 @@
                                                        Converter={StaticResource BooleanToVisibilityConverter}}"
                                   IsEnabled="{Binding IsEnabled}">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="0" />
                                     <ColumnDefinition Width="2" />
                                     <ColumnDefinition Width="40" />
                                     <ColumnDefinition Width="2" />
@@ -474,7 +474,7 @@
                                     <ColumnDefinition Width="40" />
                                 </Grid.ColumnDefinitions>
 
-                                <ToggleButton Grid.Column="0"
+                                <!--<ToggleButton Grid.Column="0"
                                               Style="{StaticResource ToggleButtonWithIconStyle}"
                                               ToolTip="Edit. Click if the parameter is monitoring"
                                               Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
@@ -482,7 +482,7 @@
                                               Visibility="{Binding GetSetVisibility}"
                                               IsChecked="{Binding IsEditing}">
                                     <iconPacks:PackIconMaterial Kind="LeadPencil" Width="15" Height="15"/>
-                                </ToggleButton>
+                                </ToggleButton>-->
 
 
                                 <Button Content="Get" 
