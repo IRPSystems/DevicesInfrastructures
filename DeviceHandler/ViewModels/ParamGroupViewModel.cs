@@ -51,7 +51,12 @@ namespace DeviceHandler.ViewModels
 			bool isShowButtons)
 		{
 			_devicesContainer = devicesContainer;
-			ParamGroup = groupData;
+
+			if(groupData != null) 
+				ParamGroup = groupData.Clone() as ParamGroup;
+			else
+				ParamGroup = null;
+
 			IsShowButtons = isShowButtons;
 
 			GetCommand = new RelayCommand<DeviceParameterData>(Get);
@@ -65,6 +70,7 @@ namespace DeviceHandler.ViewModels
 		#endregion Constructor
 
 		#region Methods
+
 
 		private void Get(DeviceParameterData param)
 		{

@@ -201,7 +201,21 @@ namespace DeviceCommunicators.MCU
 		[JsonIgnore]
 		public object Data { get; set; }
 
-		
+		public override object Clone()
+		{
+			MCU_ParamData param = MemberwiseClone() as MCU_ParamData;
+
+			if (DropDown != null)
+			{
+				param.DropDown = new List<DropDownParamData>();
+				foreach (var item in DropDown)
+					param.DropDown.Add(item.Clone() as DropDownParamData);
+			}
+
+			return param;
+		}
+
+
 	}
 
 	public class ParamGroup: DeviceParameterData
