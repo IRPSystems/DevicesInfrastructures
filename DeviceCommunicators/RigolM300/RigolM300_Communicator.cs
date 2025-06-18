@@ -156,8 +156,8 @@ namespace DeviceCommunicators.RigolM300
 
                 string queryCmd = $"{cmd}";
 
-                if (rigolparam.Cmd.Contains("MEAS"))
-                    queryCmd += " 20,DEF,";
+                if (rigolparam.Range.HasValue)
+                    queryCmd += $" {rigolparam.Range},DEF,";
 
                 if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue)
                 {
