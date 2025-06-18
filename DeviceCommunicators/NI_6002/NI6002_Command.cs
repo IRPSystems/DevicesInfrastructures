@@ -45,8 +45,8 @@ namespace DeviceCommunicators.NI_6002
         MicroTimer Timer_counterTryRead = new MicroTimer();
         MicroTimer Timer_revolutions = new MicroTimer();
         private Stopwatch stopwatch = new Stopwatch();
-        private static double revoultionsTimerElapsed = 0; // Track elapsed seconds
-        double counterTimerElapsed = 0;
+       // private static double revoultionsTimerElapsed = 0; // Track elapsed seconds
+       // double counterTimerElapsed = 0;
 
         #endregion Fields
 
@@ -154,7 +154,7 @@ namespace DeviceCommunicators.NI_6002
                     double[] data = reader.ReadSingleSample();
                     sample = data[0];
                 }
-                catch (DaqException exception)
+                catch (DaqException)
                 {
                     // Display Errors
                     //MessageBox.Show("Failed to get analog input port: " + port.ToString() + "Due to:\r\n" + "Daq Exception:\r\n" + exception.Message);
@@ -244,7 +244,7 @@ namespace DeviceCommunicators.NI_6002
                 minAllowedInrervalTolerance = calculatedMotorPeriodInterval -  calculatedMotorPeriodInterval * 0.4;
 
                 isReachedCounts = false;
-                counterTimerElapsed = 0;
+                //counterTimerElapsed = 0;
                 LoggerService.Error(this, "Digital_Counter");
                 rpmCounterAutoResetEvent.Reset();
                 myTask = new Task();
