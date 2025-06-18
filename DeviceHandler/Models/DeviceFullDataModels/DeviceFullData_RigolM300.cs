@@ -22,7 +22,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
 {
     public class DeviceFullData_RigolM300 : DeviceFullData
     {
-        private RigolM300_Communicator _rigolm300Communicator;
+       // private RigolM300_Communicator _rigolm300Communicator;
 
 
         public DeviceFullData_RigolM300(DeviceData deviceData) :
