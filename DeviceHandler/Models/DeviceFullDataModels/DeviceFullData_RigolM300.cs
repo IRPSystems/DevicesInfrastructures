@@ -57,7 +57,7 @@ namespace DeviceHandler.Models.DeviceFullDataModels
             DeviceParameterData data = new RigolM300_ParamData()
             {
                 Name = "Identify",
-                Cmd = "*OPC?"
+                Cmd = "*IDN?"
             };
 
             CheckCommunication = new CheckCommunicationService(

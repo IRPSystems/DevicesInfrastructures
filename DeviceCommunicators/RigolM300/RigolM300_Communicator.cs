@@ -127,15 +127,24 @@ namespace DeviceCommunicators.RigolM300
                 rigolparam.UpdateSendResLog(fullCommand, DeviceParameterData.SendOrRecieve.Send);
 
 
-                TCPCommService.Send("SYST:ERR?\n");
-                TCPCommService.Read(out string errResponse);
+                //TCPCommService.Send("SYST:ERR?\n");
+                //DateTime startTime = DateTime.Now;
+                //string errResponse = null;
+                //while (DateTime.Now - startTime < TimeSpan.FromMilliseconds(200))
+                //{
+                //    TCPCommService.Read(out errResponse);
+                //    if (!string.IsNullOrEmpty(errResponse))
+                //        break;
 
-                if (!string.IsNullOrEmpty(errResponse) && !errResponse.Trim().StartsWith("+0"))
-                {
-                    rigolparam.UpdateSendResLog(fullCommand, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.Error.ToString());
-                    callback?.Invoke(param, CommunicatorResultEnum.Error, null);
-                    return;
-                }
+                //    System.Threading.Thread.Sleep(1);
+                //}
+
+                //if (!string.IsNullOrEmpty(errResponse) && !errResponse.Trim().StartsWith("+0"))
+                //{
+                //    rigolparam.UpdateSendResLog(fullCommand, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.Error.ToString());
+                //    callback?.Invoke(param, CommunicatorResultEnum.Error, null);
+                //    return;
+                //}
 
 
                 callback?.Invoke(param, CommunicatorResultEnum.OK, null);
@@ -161,7 +170,7 @@ namespace DeviceCommunicators.RigolM300
 
                 string queryCmd = $"{cmd}";
 
-                if (rigolparam.Range.HasValue)
+                if (rigolparam.Range.HasValue && rigolparam.Range != 0)
                     queryCmd += $" {rigolparam.Range},DEF,";
 
                 if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue)
@@ -178,7 +187,10 @@ namespace DeviceCommunicators.RigolM300
 
                     TCPCommService.Send(queryCmd + "\n");
 
-                    response = ReadUntilComplete(500);
+                    if(queryCmd.Contains("FREQ"))
+                        response = ReadUntilComplete(10000);
+                    else
+                        response = ReadUntilComplete(1000);
 
                     //while ((DateTime.Now - startTime) < TimeSpan.FromMilliseconds(1000))
                     //{
@@ -273,6 +285,7 @@ namespace DeviceCommunicators.RigolM300
                 Thread.Sleep(1); // Don’t hog CPU
             }
 
+            TimeSpan end = DateTime.Now - start;
             return sb.ToString();
         }
 

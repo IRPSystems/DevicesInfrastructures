@@ -103,6 +103,7 @@ namespace DeviceCommunicators.IT_M3100
 
                 string cmd = m3100param.Cmd;
                 string fullCommand = $"{cmd}";
+                fullCommand += " " + value.ToString();
 
 
 
@@ -124,8 +125,7 @@ namespace DeviceCommunicators.IT_M3100
 
                 if (string.IsNullOrEmpty(errResponse))
                 {
-                    m3100param.UpdateSendResLog(cmd, DeviceParameterData.SendOrRecieve.Recieve, CommunicatorResultEnum.NoResponse.ToString());
-                    callback?.Invoke(param, CommunicatorResultEnum.NoResponse, null);
+                    callback?.Invoke(param, CommunicatorResultEnum.OK, null);
                     return;
                 }
 

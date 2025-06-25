@@ -69,7 +69,10 @@ namespace DeviceHandler.Services
 				_timerMessageSending = new System.Timers.Timer(1000);
 			_timerMessageSending.Elapsed += _timerMessageSending_Elapsed;
 
-			_timerTimeout = new System.Timers.Timer(3000);
+			if(deviceFullData is DeviceFullData_RigolM300)
+                _timerTimeout = new System.Timers.Timer(5000);
+			else
+				_timerTimeout = new System.Timers.Timer(3000);
 			_timerTimeout.Elapsed += TimoutElapsedEventHandler;
 
 			_isReconnect = false;
