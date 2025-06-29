@@ -6,6 +6,7 @@ using DeviceCommunicators.Enums;
 using DeviceCommunicators.Models;
 using Communication.Interfaces;
 using NationalInstruments.DataInfrastructure;
+using System.Linq;
 
 namespace DeviceCommunicators.MX180TP
 {
@@ -160,7 +161,7 @@ namespace DeviceCommunicators.MX180TP
 
                 if (mxparam.Channel.HasValue)
                 {
-                    cmd.Replace("<N>", cmd.ToString());
+                    cmd = cmd.Replace("<N>", mxparam.Channel.ToString());
                 }
 
                 if (!cmd.EndsWith("?"))
@@ -176,7 +177,7 @@ namespace DeviceCommunicators.MX180TP
 
                     TCPCommService.Send(cmd + "\n");
 
-                    while (DateTime.Now - startTime < TimeSpan.FromMilliseconds(100))
+                    while (DateTime.Now - startTime < TimeSpan.FromMilliseconds(500))
                     {
                         TCPCommService.Read(out response);
                         if (!string.IsNullOrEmpty(response))
@@ -198,9 +199,9 @@ namespace DeviceCommunicators.MX180TP
                     return;
                 }
 
-                response = response.Trim(new char[] { '\0', '\n' });
+                response = response.Trim(new char[] { '\0', '\n', '\r','A','V' });
+                var parts = response.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-                param.Value = response;
                 if (cmd == "*IDN?")
                 {
                     if (response.Contains("MX180TP"))
@@ -214,9 +215,12 @@ namespace DeviceCommunicators.MX180TP
                         return;
                     }
                 }
+                else
+                    response = parts.Length > 0 ? parts.Last() : string.Empty;
 
-                if( mxparam.Cmd == "V" ||
-                    mxparam.Cmd == "I"  ||
+
+                if (mxparam.Cmd == "VO<N>O?" ||
+                    mxparam.Cmd == "I<N>O?" ||
                     mxparam.Cmd == "OCP")
                 {
                     double d;

@@ -113,14 +113,19 @@ namespace DeviceCommunicators.RigolM300
                         fullCommand += "OPEN ";
                     else
                         fullCommand += "CLOS ";
-                else
+                else if (rigolparam.Cmd.Contains("CONF") && value == 0)
+                {
+                    fullCommand += " " + rigolparam.Range.ToString();
+                    fullCommand += ",DEF,";
+                }
+                else if (!rigolparam.Cmd.Contains("SCAN"))
                     fullCommand += " " + value.ToString();
 
                 if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue)
                 {
                     int channelRef = rigolparam.Slot.Value * 100 + rigolparam.Channel.Value;
-                    if(cmd.Contains("CONF"))
-                        fullCommand += ",DEF,";
+                    //if (cmd.Contains("CONF"))
+                        //fullCommand += ",DEF,";
                     fullCommand += $"(@{channelRef})";
                 }
                 TCPCommService.Send(fullCommand + "\n");
@@ -170,14 +175,18 @@ namespace DeviceCommunicators.RigolM300
 
                 string queryCmd = $"{cmd}";
 
-                if (rigolparam.Range.HasValue && rigolparam.Range != 0)
-                    queryCmd += $" {rigolparam.Range},DEF,";
-
-                if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue)
+                if (queryCmd != "READ?")
                 {
-                    int channelRef = rigolparam.Slot.Value * 100 + rigolparam.Channel.Value;
-                    queryCmd += $"(@{channelRef})";
+                    if (rigolparam.Range.HasValue && rigolparam.Range != 0)
+                        queryCmd += $" {rigolparam.Range},DEF,";
+
+                    if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue)
+                    {
+                        int channelRef = rigolparam.Slot.Value * 100 + rigolparam.Channel.Value;
+                        queryCmd += $"(@{channelRef})";
+                    }
                 }
+                
 
                 FlushRemaining();
                 string response = null;
@@ -236,7 +245,8 @@ namespace DeviceCommunicators.RigolM300
                 if (queryCmd.Contains("VOLT") ||
                     queryCmd.Contains("CURR") ||
                     queryCmd.Contains("RES")  ||
-                    queryCmd.Contains("FREQ") )
+                    queryCmd.Contains("FREQ") ||
+                    queryCmd.Equals("READ?"))
                 {
                     double d;
                     bool res = double.TryParse(value, out d);
