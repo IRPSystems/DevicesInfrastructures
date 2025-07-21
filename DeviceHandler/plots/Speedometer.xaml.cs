@@ -118,6 +118,9 @@ namespace DeviceHandler.Plots
 
 		public void Init(MCU_ParamData paramData)
 		{
+			if (paramData == null)
+				return;
+
 			if (paramData.Value is string strVal && !string.IsNullOrEmpty(strVal))
 			{
 				ParamData = null;
