@@ -198,6 +198,8 @@ namespace DeviceCommunicators.RigolM300
 
                     if(queryCmd.Contains("FREQ"))
                         response = ReadUntilComplete(10000);
+                    else if(queryCmd.Contains("RES"))
+                        response = ReadUntilComplete(2000);
                     else
                         response = ReadUntilComplete(1000);
 
@@ -288,8 +290,8 @@ namespace DeviceCommunicators.RigolM300
                     sb.Append(chunk);
 
                     //// If the device ends with newline, this tells us it's done
-                    //if (chunk.Contains("\n"))
-                    //    break;
+                    if (chunk.Contains("\n"))
+                        break;
                 }
 
                 Thread.Sleep(1); // Don’t hog CPU
