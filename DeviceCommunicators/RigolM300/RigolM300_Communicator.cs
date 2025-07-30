@@ -183,6 +183,8 @@ namespace DeviceCommunicators.RigolM300
                     if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue)
                     {
                         int channelRef = rigolparam.Slot.Value * 100 + rigolparam.Channel.Value;
+                        if (cmd.Contains("FREQ"))
+                            queryCmd += " ";
                         queryCmd += $"(@{channelRef})";
                     }
                 }
@@ -199,6 +201,8 @@ namespace DeviceCommunicators.RigolM300
                     if(queryCmd.Contains("FREQ"))
                         response = ReadUntilComplete(10000);
                     else if(queryCmd.Contains("RES"))
+                        response = ReadUntilComplete(2000);
+                    else if(queryCmd.Contains("AC"))
                         response = ReadUntilComplete(2000);
                     else
                         response = ReadUntilComplete(1000);
