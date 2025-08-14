@@ -185,6 +185,9 @@ namespace DeviceHandler.ViewModels
 
 		public void GetAll()
 		{
+			if (ParamGroup.ParamList == null || ParamGroup.ParamList.Count == 0)
+				return;
+
 			_isInGetAll = true;
 			_getAllIndex = 0;
 

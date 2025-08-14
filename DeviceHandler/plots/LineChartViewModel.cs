@@ -198,17 +198,21 @@ namespace DeviceHandler.Plots
 						ObservableCollection<SeriesData> itemsSource =
 							series.ItemsSource as ObservableCollection<SeriesData>;
 
-						SeriesData seriesData = new SeriesData
+						if (dVal.ToString() != "NaN")
 						{
-							Time = now,
-							Value = dVal
-						};
 
-						try
-						{
-							itemsSource.Add(seriesData);
+							SeriesData seriesData = new SeriesData
+							{
+								Time = now,
+								Value = dVal
+							};
+
+							try
+							{
+								itemsSource.Add(seriesData);
+							}
+							catch { }
 						}
-						catch { }
 
 						while (itemsSource.Count > _maxNumOfPoints)
 							itemsSource.RemoveAt(0);
