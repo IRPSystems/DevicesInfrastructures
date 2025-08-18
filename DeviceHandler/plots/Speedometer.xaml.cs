@@ -51,6 +51,9 @@ namespace DeviceHandler.Plots
 
 			set
 			{
+				if(value.ToString() == "NaN")
+					value = 0;
+
 				_max = value;
 				OnPropertyChanged(nameof(Max));
 			}
@@ -63,6 +66,9 @@ namespace DeviceHandler.Plots
 
 			set
 			{
+				if (value.ToString() == "NaN")
+					value = 0;
+
 				_min = value;
 				OnPropertyChanged(nameof(Min));
 			}

@@ -52,6 +52,10 @@ namespace DeviceCommunicators.MCU
 					ValueChanged?.Invoke();
 
 				_value = value;
+
+				if (_value.ToString() != "NaN")
+					NoNanValue = _value;
+
 				if (_isSettingSelectedDropDown)
 					return;
 
@@ -67,6 +71,8 @@ namespace DeviceCommunicators.MCU
 
 			}
 		}
+
+		public object NoNanValue { get; set; }
 
 		private object _editValue;
 		[JsonIgnore]
