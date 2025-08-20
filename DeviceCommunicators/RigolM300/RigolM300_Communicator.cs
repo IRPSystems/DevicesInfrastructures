@@ -150,7 +150,20 @@ namespace DeviceCommunicators.RigolM300
                 //    callback?.Invoke(param, CommunicatorResultEnum.Error, null);
                 //    return;
                 //}
+                if (rigolparam.Cmd == "ROUT:")
+                {
+                    var started = DateTime.UtcNow;
+                    string resp;
+                    TCPCommService.Send("ROUT:DONE?");  // returns "1" when done
 
+                    resp = ReadUntilComplete(800);
+
+                    if (resp?.Trim(new char[] { '\0','\n' }) != "1")
+                    {
+                        callback?.Invoke(param, CommunicatorResultEnum.Error, null);
+                        return;
+                    }
+                }
 
                 callback?.Invoke(param, CommunicatorResultEnum.OK, null);
             }
@@ -198,14 +211,14 @@ namespace DeviceCommunicators.RigolM300
 
                     TCPCommService.Send(queryCmd + "\n");
 
-                    if(queryCmd.Contains("FREQ"))
+                    if (queryCmd.Contains("FREQ"))
                         response = ReadUntilComplete(10000);
                     else if(queryCmd.Contains("RES"))
                         response = ReadUntilComplete(2000);
                     else if(queryCmd.Contains("AC"))
                         response = ReadUntilComplete(2000);
                     else
-                        response = ReadUntilComplete(1000);
+                        response = ReadUntilComplete(3000);
 
                     //while ((DateTime.Now - startTime) < TimeSpan.FromMilliseconds(1000))
                     //{
