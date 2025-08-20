@@ -28,6 +28,8 @@ namespace DeviceHandler.ViewModels
 		public ParamGroup ParamGroup { get; set; }
 		public bool IsShowButtons { get; set; }
 
+		public DevicesContainer DevicesContainer { get; set; }
+
 		#endregion Properties
 
 		#region Fields
@@ -39,7 +41,7 @@ namespace DeviceHandler.ViewModels
 		private bool _isInSetAll;
 		private int _setAllIndex;
 
-		private DevicesContainer _devicesContainer;
+		
 
 		#endregion Fields
 
@@ -50,7 +52,7 @@ namespace DeviceHandler.ViewModels
 			ParamGroup groupData,
 			bool isShowButtons)
 		{
-			_devicesContainer = devicesContainer;
+			DevicesContainer = devicesContainer;
 
 			if(groupData != null) 
 				ParamGroup = groupData.Clone() as ParamGroup;
@@ -80,11 +82,11 @@ namespace DeviceHandler.ViewModels
 			if (!(param is MCU_ParamData mcuParam))
 				return;
 
-			if(_devicesContainer.TypeToDevicesFullData.ContainsKey(DeviceTypesEnum.MCU) == false)
+			if(DevicesContainer.TypeToDevicesFullData.ContainsKey(DeviceTypesEnum.MCU) == false)
 				return;
 
 			DeviceFullData mcuFullData = 
-				_devicesContainer.TypeToDevicesFullData[DeviceTypesEnum.MCU];
+				DevicesContainer.TypeToDevicesFullData[DeviceTypesEnum.MCU];
 			mcuFullData.DeviceCommunicator.GetParamValue(mcuParam, ResponseCallback);
 		}
 
@@ -138,11 +140,11 @@ namespace DeviceHandler.ViewModels
 			else
 				dVal = Convert.ToDouble(param.Value);
 
-			if (_devicesContainer.TypeToDevicesFullData.ContainsKey(DeviceTypesEnum.MCU) == false)
+			if (DevicesContainer.TypeToDevicesFullData.ContainsKey(DeviceTypesEnum.MCU) == false)
 				return;
 
 			DeviceFullData mcuFullData =
-				_devicesContainer.TypeToDevicesFullData[DeviceTypesEnum.MCU];
+				DevicesContainer.TypeToDevicesFullData[DeviceTypesEnum.MCU];
 
 			mcuFullData.DeviceCommunicator.SetParamValue(mcuParam, dVal, ResponseCallback);
 		}
@@ -170,11 +172,11 @@ namespace DeviceHandler.ViewModels
 
 			var msg = Convert.ToInt32(hex_id, 16); 
 			
-			if (_devicesContainer.TypeToDevicesFullData.ContainsKey(DeviceTypesEnum.MCU) == false)
+			if (DevicesContainer.TypeToDevicesFullData.ContainsKey(DeviceTypesEnum.MCU) == false)
 				return;
 
 			DeviceFullData mcuFullData =
-				_devicesContainer.TypeToDevicesFullData[DeviceTypesEnum.MCU];
+				DevicesContainer.TypeToDevicesFullData[DeviceTypesEnum.MCU];
 
 			mcuFullData.DeviceCommunicator.SetParamValue(
 				new MCU_ParamData() { Cmd = "save_param" },

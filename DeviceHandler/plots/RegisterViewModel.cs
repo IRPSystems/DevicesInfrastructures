@@ -15,6 +15,8 @@ namespace DeviceHandler.Plots
 {
 	public class RegisterViewModel: ObservableObject
 	{
+		public enum BitNumEnum { Bit8, Bit16, Bit32 };
+
 		#region Properties
 		public MCU_ParamData ParamData { get; set; }
 
@@ -38,13 +40,21 @@ namespace DeviceHandler.Plots
 
 		#region Constructor
 
-		public RegisterViewModel(MCU_ParamData paramData)
+		public RegisterViewModel(
+			MCU_ParamData paramData,
+			BitNumEnum numOfBits = BitNumEnum.Bit16)
 		{
 			BitSizeChangedCommand = new RelayCommand(BitSizeChanged);
 
 			ParamData = paramData;
 			GroupName = "BitSize_" + paramData.Name;
-			Is16Bit = true;
+
+			switch(numOfBits)
+			{
+				case BitNumEnum.Bit8: Is8Bit = true; break;
+				case BitNumEnum.Bit16: Is16Bit = true; break;
+				case BitNumEnum.Bit32: Is32Bit = true; break;
+			}
 
 			_cancellationTokenSource = new CancellationTokenSource();
 			_cancellationToken = _cancellationTokenSource.Token;

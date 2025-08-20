@@ -85,14 +85,14 @@
 
                         <syncfusion:CircularScale.Ranges>
                             <syncfusion:CircularRange x:Name="gauge1Range"
-                                                      EndValue="{Binding ParamData.Value}"
+                                                      EndValue="{Binding ParamData.NoNanValue}"
                                                       StartValue="{Binding Min}" />
                         </syncfusion:CircularScale.Ranges>
 
                         <syncfusion:CircularScale.Pointers>
                             <syncfusion:CircularPointer NeedlePointerVisibility="Collapsed" 
                                                         PointerType="NeedlePointer" 
-                                                        Value="{Binding ParamData.Value}"/>
+                                                        Value="{Binding ParamData.NoNanValue}"/>
                         </syncfusion:CircularScale.Pointers>
                     </syncfusion:CircularScale>
                 </syncfusion:SfCircularGauge.Scales>
@@ -104,7 +104,7 @@
                                    FontWeight="Bold"
                                    Margin="0,35,0,0">
                             <Run Text=" " />
-                            <Run Text="{Binding ParamData.Value}" />
+                            <Run Text="{Binding ParamData.NoNanValue}" />
                             <Run Text="{Binding ParamData.Units}" />
                         </TextBlock>
                     </StackPanel>

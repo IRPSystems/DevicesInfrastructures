@@ -51,6 +51,9 @@ namespace DeviceHandler.Plots
 
 			set
 			{
+				if(value.ToString() == "NaN")
+					value = 0;
+
 				_max = value;
 				OnPropertyChanged(nameof(Max));
 			}
@@ -63,6 +66,9 @@ namespace DeviceHandler.Plots
 
 			set
 			{
+				if (value.ToString() == "NaN")
+					value = 0;
+
 				_min = value;
 				OnPropertyChanged(nameof(Min));
 			}
@@ -118,6 +124,9 @@ namespace DeviceHandler.Plots
 
 		public void Init(MCU_ParamData paramData)
 		{
+			if (paramData == null)
+				return;
+
 			if (paramData.Value is string strVal && !string.IsNullOrEmpty(strVal))
 			{
 				ParamData = null;

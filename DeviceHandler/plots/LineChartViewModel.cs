@@ -113,6 +113,9 @@ namespace DeviceHandler.Plots
 
 		public void AddSeries(MCU_ParamData paramData)
 		{
+			if (paramData == null) 
+				return;
+
 			FastLineSeries newSeries = new FastLineSeries();
 			newSeries.StrokeThickness = 2;
 			newSeries.Label = paramData.Name;
@@ -121,6 +124,7 @@ namespace DeviceHandler.Plots
 			newSeries.YBindingPath = "Value";
 
 			LineSeriesList.Add(newSeries);
+
 			_nameToSeriesesDict.Add(paramData.Name, newSeries);
 			_nameToParamDataDict.Add(paramData.Name, paramData);
 		}
@@ -194,17 +198,21 @@ namespace DeviceHandler.Plots
 						ObservableCollection<SeriesData> itemsSource =
 							series.ItemsSource as ObservableCollection<SeriesData>;
 
-						SeriesData seriesData = new SeriesData
+						if (dVal.ToString() != "NaN")
 						{
-							Time = now,
-							Value = dVal
-						};
 
-						try
-						{
-							itemsSource.Add(seriesData);
+							SeriesData seriesData = new SeriesData
+							{
+								Time = now,
+								Value = dVal
+							};
+
+							try
+							{
+								itemsSource.Add(seriesData);
+							}
+							catch { }
 						}
-						catch { }
 
 						while (itemsSource.Count > _maxNumOfPoints)
 							itemsSource.RemoveAt(0);
@@ -215,7 +223,7 @@ namespace DeviceHandler.Plots
 					System.Threading.Thread.Sleep(1);
 				}
 
-				if (_nameToSeriesesDict.Count > 0)
+				if (_nameToSeriesesDict.Count > 0 && Application.Current != null)
 				{
 					Application.Current.Dispatcher.Invoke(() =>
 					{
