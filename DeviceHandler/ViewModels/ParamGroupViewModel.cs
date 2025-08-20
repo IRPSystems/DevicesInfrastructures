@@ -28,8 +28,6 @@ namespace DeviceHandler.ViewModels
 		public ParamGroup ParamGroup { get; set; }
 		public bool IsShowButtons { get; set; }
 
-		public DevicesContainer DevicesContainer { get; set; }
-
 		#endregion Properties
 
 		#region Fields
