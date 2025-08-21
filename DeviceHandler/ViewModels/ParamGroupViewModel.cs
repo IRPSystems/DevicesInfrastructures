@@ -41,8 +41,6 @@ namespace DeviceHandler.ViewModels
 		private bool _isInSetAll;
 		private int _setAllIndex;
 
-		public DevicesContainer DevicesContainer;
-
 		#endregion Fields
 
 		#region Constructor
