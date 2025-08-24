@@ -9,5 +9,7 @@ namespace DeviceCommunicators.EvvaDevice
 	public class Evva_ParamData:DeviceParameterData, IParamWithDropDown
 	{
 		public List<DropDownParamData> DropDown { get; set; }
+
+		public string Command { get; set; }
 	}
 }

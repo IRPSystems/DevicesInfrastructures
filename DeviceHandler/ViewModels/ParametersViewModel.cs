@@ -426,6 +426,20 @@ namespace DeviceHandler.ViewModel
 				new Evva_ParamData()
 				{
 					Name = "Safety officer on/off",
+					Command = "Safety Officer",
+					Device = deviceData,
+					DeviceType = DeviceTypesEnum.EVVA,
+					DropDown = new List<DropDownParamData>()
+					{
+						new DropDownParamData() { Name = "OFF", Value = "0" },
+						new DropDownParamData() { Name = "ON", Value = "1" },
+					},
+				},
+
+				new Evva_ParamData()
+				{
+					Name = "Recording/Monitoring on/off",
+					Command = "Recording/Monitoring",
 					Device = deviceData,
 					DeviceType = DeviceTypesEnum.EVVA,
 					DropDown = new List<DropDownParamData>()
