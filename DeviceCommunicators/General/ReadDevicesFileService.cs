@@ -51,6 +51,8 @@ namespace DeviceCommunicators.Services
 					{
 						if(mcuFilePath == null)
 							mcuFilePath = path;
+						if (mcuB2BFilePath == null)
+							mcuB2BFilePath = path;
 						continue;
 					}
 					if (Path.GetFileName(file) == "ATE.json")

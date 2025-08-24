@@ -150,7 +150,20 @@ namespace DeviceCommunicators.RigolM300
                 //    callback?.Invoke(param, CommunicatorResultEnum.Error, null);
                 //    return;
                 //}
+                if (rigolparam.Cmd == "ROUT:")
+                {
+                    var started = DateTime.UtcNow;
+                    string resp;
+                    TCPCommService.Send("ROUT:DONE?");  // returns "1" when done
 
+                    resp = ReadUntilComplete(800);
+
+                    if (resp?.Trim(new char[] { '\0','\n' }) != "1")
+                    {
+                        callback?.Invoke(param, CommunicatorResultEnum.Error, null);
+                        return;
+                    }
+                }
 
                 callback?.Invoke(param, CommunicatorResultEnum.OK, null);
             }
@@ -183,6 +196,8 @@ namespace DeviceCommunicators.RigolM300
                     if (rigolparam.Slot.HasValue && rigolparam.Channel.HasValue)
                     {
                         int channelRef = rigolparam.Slot.Value * 100 + rigolparam.Channel.Value;
+                        if (cmd.Contains("FREQ"))
+                            queryCmd += " ";
                         queryCmd += $"(@{channelRef})";
                     }
                 }
@@ -196,10 +211,14 @@ namespace DeviceCommunicators.RigolM300
 
                     TCPCommService.Send(queryCmd + "\n");
 
-                    if(queryCmd.Contains("FREQ"))
+                    if (queryCmd.Contains("FREQ"))
                         response = ReadUntilComplete(10000);
+                    else if(queryCmd.Contains("RES"))
+                        response = ReadUntilComplete(2000);
+                    else if(queryCmd.Contains("AC"))
+                        response = ReadUntilComplete(2000);
                     else
-                        response = ReadUntilComplete(1000);
+                        response = ReadUntilComplete(3000);
 
                     //while ((DateTime.Now - startTime) < TimeSpan.FromMilliseconds(1000))
                     //{
@@ -288,8 +307,8 @@ namespace DeviceCommunicators.RigolM300
                     sb.Append(chunk);
 
                     //// If the device ends with newline, this tells us it's done
-                    //if (chunk.Contains("\n"))
-                    //    break;
+                    if (chunk.Contains("\n"))
+                        break;
                 }
 
                 Thread.Sleep(1); // Don’t hog CPU
