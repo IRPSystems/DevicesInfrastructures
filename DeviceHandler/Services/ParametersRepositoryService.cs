@@ -87,6 +87,8 @@ namespace DeviceHandler.Services
 
 		public string Name;
 
+		private bool _isPause;
+
 #if _SAVE_TIME
 		private List<string> _timesList;
 #endif
@@ -115,6 +117,8 @@ namespace DeviceHandler.Services
 
 			_timeoutTimer = new System.Timers.Timer(1000);
 			_timeoutTimer.Elapsed += _timeoutTimer_Elapsed;
+
+			_isPause = false;
 
 		}
 
@@ -256,6 +260,9 @@ namespace DeviceHandler.Services
 #if _SAVE_TIME
 			_timesList.Add(DateTime.Now.ToString("mm:ss.ffff"));
 #endif
+			if (_isPause)
+				return;
+
 			try
 			{
 				if (_nameToRepositoryParamList == null || _nameToRepositoryParamList.Count == 0)
@@ -394,6 +401,11 @@ namespace DeviceHandler.Services
 			//{
 			//	LoggerService.Inforamtion(this, $"ActualAcquisitionRate={ActualAcquisitionRate}");
 			//}
+		}
+
+		public void Pause(bool isPause)
+		{
+			_isPause = isPause;
 		}
 
 		#endregion Methods
